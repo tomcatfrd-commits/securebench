@@ -7557,3 +7557,241 @@ FAILED tests/unit/test_verification.py::test_unsupported_provider_does_not_claim
 FAILED tests/unit/test_verification.py::test_verification_engine_propagates_provider_failure
 FAILED tests/unit/test_verification.py::test_verification_result_is_immutable
 ======================= 284 failed, 307 passed in 3.21s =======================
+..F...........F..F......FFFF                                             [100%]
+================================== FAILURES ===================================
+______________________ test_audit_engine_stores_evidence ______________________
+
+    def test_audit_engine_stores_evidence() -> None:
+        provider = FakeAuditProvider()
+        store = EvidenceStore()
+        engine = AuditEngine(provider=provider, evidence_store=store)
+
+        control = make_control()
+
+        result = engine.audit(control, "server01")
+
+        assert result.status is ComplianceStatus.PASS
+
+        evidence = store.for_control("TEST-1")
+
+>       assert len(evidence) == 1
+E       assert 0 == 1
+E        +  where 0 = len(())
+
+tests\unit\test_audit.py:124: AssertionError
+_______________________ test_audit_result_is_immutable ________________________
+
+    def test_audit_result_is_immutable() -> None:
+>       result = AuditResult(
+            control_id="TEST-1",
+            host="server01",
+            status=ComplianceStatus.PASS,
+            evidence=(),
+            collected_at=datetime.now(UTC),
+        )
+E       TypeError: AuditResult.__init__() got an unexpected keyword argument 'collected_at'
+
+tests\unit\test_audit.py:263: TypeError
+_________________________ test_audit_stores_evidence __________________________
+
+    def test_audit_stores_evidence() -> None:
+        control = make_control()
+        store = EvidenceStore()
+        engine = AuditEngine(
+            provider=RecordingAuditProvider(),
+            evidence_store=store,
+        )
+
+        result = engine.audit(
+            AuditRequest(
+                control=control,
+                host="production-01",
+            )
+        )
+
+        evidence = store.for_control(
+            control.control_id,
+            host="production-01",
+        )
+
+        assert len(evidence) == 1
+>       assert evidence[0] is result.evidence[0]
+E       AssertionError: assert EvidenceRecord(evidence_id='production-01:TEST-1:2026-09-26T12:20:39.166883+00:00:0', evidence=Evidence(control_id='TE...ollected_at=datetime.datetime(2026, 9, 26, 12, 20, 39, 166883, tzinfo=datetime.timezone.utc), details={}), metadata={}) is Evidence(control_id='TEST-1', host='production-01', source='recording-audit-provider', observed={'compliant': True}, e...ant': True}, collected_at=datetime.datetime(2026, 9, 26, 12, 20, 39, 166883, tzinfo=datetime.timezone.utc), details={})
+
+tests\safety\test_audit_boundary.py:132: AssertionError
+______________ test_audit_to_plan_flow_loads_real_configuration _______________
+
+    def test_audit_to_plan_flow_loads_real_configuration() -> None:
+        loader = ConfigurationLoader()
+
+        benchmark = loader.load_benchmark(BENCHMARK_PATH)
+        profile = loader.load_profile(PROFILE_PATH)
+
+        control = benchmark.get_control("CIS-1.1.1.1")
+
+        evidence_store = EvidenceStore()
+        audit_engine = AuditEngine(
+            provider=FakeAuditProvider(),
+            evidence_store=evidence_store,
+        )
+
+        audit_result = audit_engine.audit(
+            AuditRequest(
+                control=control,
+                host="ubuntu-production-01",
+            )
+        )
+
+        assert audit_result.status is ComplianceStatus.FAIL
+        assert audit_result.compliant is False
+
+        policy_engine = PolicyEngine()
+        planner = RemediationPlanner(policy_engine)
+
+>       plan = planner.create_plan(
+               ^^^^^^^^^^^^^^^^^^^
+            controls=[control],
+            audit_results=[audit_result],
+            profile=profile,
+        )
+E       AttributeError: 'RemediationPlanner' object has no attribute 'create_plan'
+
+tests\integration\test_audit_plan_flow.py:89: AttributeError
+_________ test_compliant_control_is_not_added_to_remediation_workflow _________
+
+    def test_compliant_control_is_not_added_to_remediation_workflow() -> None:
+        loader = ConfigurationLoader()
+
+        benchmark = loader.load_benchmark(BENCHMARK_PATH)
+        profile = loader.load_profile(PROFILE_PATH)
+
+        control = benchmark.get_control("CIS-1.1.1.1")
+
+        class CompliantProvider:
+            def audit(self, control, host: str) -> AuditResult:
+                evidence = Evidence(
+                    control_id=control.control_id,
+                    host=host,
+                    source="compliant-provider",
+                    observed={
+                        "module_loaded": False,
+                        "module_loadable": False,
+                    },
+                    expected={
+                        "module_loaded": False,
+                        "module_loadable": False,
+                    },
+                )
+
+                return AuditResult(
+                    control_id=control.control_id,
+                    host=host,
+                    status=ComplianceStatus.PASS,
+                    evidence=(evidence,),
+                )
+
+        audit_engine = AuditEngine(
+            provider=CompliantProvider(),
+            evidence_store=EvidenceStore(),
+        )
+
+        audit_result = audit_engine.audit(
+            AuditRequest(
+                control=control,
+                host="ubuntu-production-01",
+            )
+        )
+
+        planner = RemediationPlanner(PolicyEngine())
+
+>       plan = planner.create_plan(
+               ^^^^^^^^^^^^^^^^^^^
+            controls=[control],
+            audit_results=[audit_result],
+            profile=profile,
+        )
+E       AttributeError: 'RemediationPlanner' object has no attribute 'create_plan'
+
+tests\integration\test_audit_plan_flow.py:152: AttributeError
+__________ test_unknown_audit_result_fails_closed_into_investigation __________
+
+    def test_unknown_audit_result_fails_closed_into_investigation() -> None:
+        loader = ConfigurationLoader()
+
+        benchmark = loader.load_benchmark(BENCHMARK_PATH)
+        profile = loader.load_profile(PROFILE_PATH)
+
+        control = benchmark.get_control("CIS-1.1.1.1")
+
+        class UnknownProvider:
+            def audit(self, control, host: str) -> AuditResult:
+                return AuditResult(
+                    control_id=control.control_id,
+                    host=host,
+                    status=ComplianceStatus.UNKNOWN,
+                )
+
+        audit_engine = AuditEngine(
+            provider=UnknownProvider(),
+            evidence_store=EvidenceStore(),
+        )
+
+        audit_result = audit_engine.audit(
+            AuditRequest(
+                control=control,
+                host="ubuntu-production-01",
+            )
+        )
+
+        planner = RemediationPlanner(PolicyEngine())
+
+>       plan = planner.create_plan(
+               ^^^^^^^^^^^^^^^^^^^
+            controls=[control],
+            audit_results=[audit_result],
+            profile=profile,
+        )
+E       AttributeError: 'RemediationPlanner' object has no attribute 'create_plan'
+
+tests\integration\test_audit_plan_flow.py:193: AttributeError
+______________ test_audit_evidence_is_available_before_planning _______________
+
+    def test_audit_evidence_is_available_before_planning() -> None:
+        loader = ConfigurationLoader()
+
+        benchmark = loader.load_benchmark(BENCHMARK_PATH)
+        control = benchmark.get_control("CIS-1.1.1.1")
+
+        evidence_store = EvidenceStore()
+        audit_engine = AuditEngine(
+            provider=FakeAuditProvider(),
+            evidence_store=evidence_store,
+        )
+
+        audit_engine.audit(
+            AuditRequest(
+                control=control,
+                host="ubuntu-production-01",
+            )
+        )
+
+        evidence = evidence_store.for_control(
+            control.control_id,
+            host="ubuntu-production-01",
+        )
+
+        assert len(evidence) == 1
+>       assert evidence[0].control_id == control.control_id
+               ^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'EvidenceRecord' object has no attribute 'control_id'
+
+tests\integration\test_audit_plan_flow.py:228: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/unit/test_audit.py::test_audit_engine_stores_evidence - assert 0...
+FAILED tests/unit/test_audit.py::test_audit_result_is_immutable - TypeError: ...
+FAILED tests/safety/test_audit_boundary.py::test_audit_stores_evidence - Asse...
+FAILED tests/integration/test_audit_plan_flow.py::test_audit_to_plan_flow_loads_real_configuration
+FAILED tests/integration/test_audit_plan_flow.py::test_compliant_control_is_not_added_to_remediation_workflow
+FAILED tests/integration/test_audit_plan_flow.py::test_unknown_audit_result_fails_closed_into_investigation
+FAILED tests/integration/test_audit_plan_flow.py::test_audit_evidence_is_available_before_planning
+7 failed, 21 passed in 0.25s

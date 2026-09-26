@@ -93,8 +93,11 @@ class AuditEngine:
             )
 
         if self._evidence_store is not None:
-            for evidence in result.evidence:
-                self._store_evidence(evidence)
+            for sequence, evidence in enumerate(result.evidence):
+                self._store_evidence(
+                    evidence=evidence,
+                    sequence=sequence,
+                )
 
         return result
 
@@ -103,6 +106,7 @@ class AuditEngine:
         requests: list[AuditRequest] | tuple[AuditRequest, ...],
     ) -> tuple[AuditResult, ...]:
         """Audit requests sequentially while preserving input order."""
+
         if not isinstance(requests, (list, tuple)):
             raise TypeError("requests must be a list or tuple")
 
@@ -129,12 +133,20 @@ class AuditEngine:
 
         return control_or_request, host
 
-    def _store_evidence(self, evidence: Evidence) -> None:
+    def _store_evidence(
+        self,
+        *,
+        evidence: Evidence,
+        sequence: int,
+    ) -> None:
         """
-        Persist evidence when the configured EvidenceStore supports it.
+        Persist one evidence object in the configured EvidenceStore.
 
-        Evidence persistence is deliberately isolated here so the audit
-        workflow remains independent of the storage implementation.
+        EvidenceStore requires an explicit stable identifier. The identifier
+        is derived from the audit target, control, collection timestamp, and
+        evidence sequence within the AuditResult.
+
+        The evidence itself is never modified.
         """
         store = self._evidence_store
 
@@ -145,10 +157,18 @@ class AuditEngine:
 
         if add is None:
             raise TypeError(
-                "evidence_store must provide an add(evidence) method"
+                "evidence_store must provide an add("
+                "evidence_id, evidence) method"
             )
 
-        add(evidence)
+        evidence_id = (
+            f"{evidence.host}:"
+            f"{evidence.control_id}:"
+            f"{evidence.collected_at.isoformat()}:"
+            f"{sequence}"
+        )
+
+        add(evidence_id, evidence)
 
 
 class UnsupportedAuditProvider:
