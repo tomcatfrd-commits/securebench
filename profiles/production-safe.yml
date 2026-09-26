@@ -1,0 +1,21 @@
+profile:
+  id: production-safe
+  name: Production Safe
+  description: >
+    Conservative remediation profile for production systems that are already
+    providing business services. Only controls explicitly classified as safe
+    or safe_with_precheck may enter the automatic remediation workflow.
+
+  defaults:
+    classification: investigate
+    require_approval_for_unknown: true
+    allow_best_effort_rollback: false
+
+  rules:
+
+    # CIS-1.1.1.1 is allowed only after host-specific prechecks confirm that
+    # the cramfs module is not required by the running workload.
+    CIS-1.1.1.1:
+      classification: safe_with_precheck
+      enabled: true
+      require_approval: false

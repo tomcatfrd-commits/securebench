@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "securebench"
+version = "0.1.0"
+description = "Modular security benchmark auditing, remediation, verification, and rollback platform."
+readme = "README.md"
+requires-python = ">=3.14,<4.0"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "SecureBench Contributors" }
+]
+
+dependencies = [
+    "ansible-core>=2.19,<3.0",
+    "PyYAML>=6.0,<7.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=6.0",
+    "ruff>=0.12",
+    "mypy>=1.17"
+]
+
+[project.scripts]
+securebench = "securebench.cli.main:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.mypy]
+python_version = "3.14"
+strict = true

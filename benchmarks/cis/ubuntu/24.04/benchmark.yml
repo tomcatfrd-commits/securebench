@@ -1,0 +1,13 @@
+benchmark:
+  id: cis-ubuntu-24.04
+  name: CIS Ubuntu Linux 24.04 LTS Benchmark
+  version: "2.0.0"
+  platform: ubuntu-24.04
+  description: >
+    Security configuration benchmark definition for Ubuntu Server 24.04 LTS.
+    This file defines benchmark metadata and references control definitions.
+    Remediation policy is intentionally defined separately in SecureBench
+    profiles.
+
+controls:
+  path: controls
