@@ -61,6 +61,10 @@ class RemediationResult:
     message: str = ""
 
 
+# Backward-compatible alias expected by package __init__ and older callers.
+RemediationExecution = RemediationResult
+
+
 class RemediationEngine:
     """
     Execute remediation plan items through a provider.
