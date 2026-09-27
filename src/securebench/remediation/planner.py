@@ -9,7 +9,6 @@ from securebench.core.exceptions import PlanningError
 from securebench.core.profile import Profile
 from securebench.core.result import AuditResult, ComplianceStatus
 from securebench.policy.engine import PolicyEngine, PolicyEvaluation
-
 from .conflict import ConflictResolver
 from .dependency import DependencyResolver
 
@@ -207,9 +206,10 @@ class RemediationPlanner:
         it.
 
         Controls introduced only because they are dependencies may not have
-        their own audit result. Such controls are represented with an UNKNOWN
-        audit result so they can never become automatically remediable without
-        explicit audit evidence.
+        their own audit result or policy evaluation. Such controls are
+        represented with an UNKNOWN audit result and no policy evaluation,
+        so they can never become automatically remediable without explicit
+        audit evidence.
         """
         audit_by_control = self._index_audits(audits)
         evaluation_by_control = self._index_evaluations(evaluations)
@@ -243,8 +243,10 @@ class RemediationPlanner:
 
         default_host = self._default_host(audits)
 
-        # Include every control. _build_item decides the action (including
-        # SKIP for PASS and INVESTIGATE for UNKNOWN / non-FAIL).
+        # Include every control. Dependency-only controls may not have a
+        # policy evaluation because this compatibility API receives already
+        # evaluated controls only. They receive UNKNOWN audit evidence and
+        # therefore _build_item() will force INVESTIGATE.
         items = tuple(
             self._build_item(
                 control=control,
@@ -260,7 +262,7 @@ class RemediationPlanner:
                         ),
                     ),
                 ),
-                evaluation=evaluation_by_control[control.control_id],
+                evaluation=evaluation_by_control.get(control.control_id),
             )
             for control in ordered_controls
         )
@@ -482,13 +484,17 @@ class RemediationPlanner:
         *,
         control: Control,
         audit: AuditResult,
-        evaluation: PolicyEvaluation,
+        evaluation: PolicyEvaluation | None,
     ) -> RemediationPlanItem:
         """
         Translate audit state and policy decision into one plan action.
 
         Compliance is checked before policy because a passing control must
         never enter remediation merely because its policy permits changes.
+
+        A dependency without an explicit policy evaluation is safe here
+        because its synthetic audit result is UNKNOWN. UNKNOWN always maps
+        to INVESTIGATE before policy evaluation is consulted.
         """
         if audit.status is ComplianceStatus.PASS:
             return RemediationPlanItem(
@@ -513,6 +519,20 @@ class RemediationPlanner:
                 ),
                 audit_result=audit,
                 policy_evaluation=evaluation,
+            )
+
+        if evaluation is None:
+            return RemediationPlanItem(
+                control=control,
+                control_id=control.control_id,
+                host=audit.host,
+                action=PlanAction.INVESTIGATE,
+                reason=(
+                    "No policy evaluation was supplied for this control; "
+                    "automatic remediation is not permitted."
+                ),
+                audit_result=audit,
+                policy_evaluation=None,
             )
 
         if not evaluation.allowed:
