@@ -27,6 +27,10 @@ class EvidenceRecord:
 
     ``evidence_id`` provides a stable reference that can later be attached
     to transaction records, reports, and rollback records.
+
+    The Evidence fields are exposed through read-only properties so callers
+    that only need audit evidence do not have to know about the storage
+    wrapper.
     """
 
     evidence_id: str
@@ -40,16 +44,59 @@ class EvidenceRecord:
         if not isinstance(self.evidence, Evidence):
             raise TypeError("evidence must be an Evidence instance")
 
+    @property
+    def control_id(self) -> str:
+        """Return the control ID associated with this evidence."""
+
+        return self.evidence.control_id
+
+    @property
+    def host(self) -> str:
+        """Return the host associated with this evidence."""
+
+        return self.evidence.host
+
+    @property
+    def source(self) -> str:
+        """Return the evidence collection source."""
+
+        return self.evidence.source
+
+    @property
+    def observed(self) -> Any:
+        """Return the observed value."""
+
+        return self.evidence.observed
+
+    @property
+    def expected(self) -> Any:
+        """Return the expected value."""
+
+        return self.evidence.expected
+
+    @property
+    def collected_at(self) -> datetime:
+        """Return the evidence collection timestamp."""
+
+        return self.evidence.collected_at
+
+    @property
+    def details(self) -> Mapping[str, Any]:
+        """Return additional evidence details."""
+
+        return self.evidence.details
+
 
 class EvidenceStore:
     """
     In-memory evidence store.
 
-    The store keeps EvidenceRecord objects internally while exposing the
-    underlying Evidence objects for control/host-oriented queries.
+    The public storage API accepts an Evidence object and generates the
+    storage identifier internally. This keeps evidence collection independent
+    from persistence details.
 
     A persistent backend can later replace this implementation without
-    changing the audit engine API.
+    changing the AuditEngine contract.
     """
 
     def __init__(self) -> None:
@@ -57,90 +104,45 @@ class EvidenceStore:
 
     def add(
         self,
-        evidence: Evidence | str,
-        evidence_value: Evidence | None = None,
+        evidence: Evidence,
         *,
         evidence_id: str | None = None,
         metadata: Mapping[str, Any] | None = None,
     ) -> EvidenceRecord:
         """
-        Store evidence and return its EvidenceRecord.
+        Store evidence and return its storage record.
 
-        Preferred form:
+        ``evidence_id`` is optional. When omitted, SecureBench generates a
+        unique identifier. Supplying an explicit ID is supported for callers
+        that need deterministic identifiers.
 
-            store.add(evidence)
-
-        An explicit ID may also be supplied:
-
-            store.add(evidence, evidence_id="evidence-001")
-
-        For backward compatibility with the previous API, this form is also
-        accepted:
-
-            store.add("evidence-001", evidence)
-
-        If no ID is supplied, a unique ID is generated automatically.
+        Duplicate IDs are rejected rather than silently overwritten.
         """
 
-        if isinstance(evidence, str):
-            if evidence_value is None:
-                raise TypeError(
-                    "evidence must be supplied when the first argument "
-                    "is an evidence ID"
-                )
-
-            if evidence_id is not None:
-                raise TypeError(
-                    "evidence_id must not be supplied when the first "
-                    "argument is already an evidence ID"
-                )
-
-            resolved_evidence_id = evidence
-            resolved_evidence = evidence_value
-
-        else:
-            if evidence_value is not None:
-                raise TypeError(
-                    "evidence_value must not be supplied when the first "
-                    "argument is an Evidence object"
-                )
-
-            resolved_evidence = evidence
-
-            if not isinstance(resolved_evidence, Evidence):
-                raise TypeError("evidence must be an Evidence instance")
-
-            resolved_evidence_id = (
-                evidence_id
-                if evidence_id is not None
-                else self._generate_evidence_id()
-            )
-
-        if not isinstance(resolved_evidence, Evidence):
+        if not isinstance(evidence, Evidence):
             raise TypeError("evidence must be an Evidence instance")
 
-        if not isinstance(resolved_evidence_id, str):
-            raise TypeError("evidence_id must be a string")
+        record_id = evidence_id or str(uuid4())
 
-        if not resolved_evidence_id.strip():
+        if not isinstance(record_id, str) or not record_id.strip():
             raise ValueError("evidence_id must not be empty")
 
-        if resolved_evidence_id in self._records:
+        if record_id in self._records:
             raise ValueError(
-                f"evidence ID '{resolved_evidence_id}' already exists"
+                f"evidence ID '{record_id}' already exists"
             )
 
         record = EvidenceRecord(
-            evidence_id=resolved_evidence_id,
-            evidence=resolved_evidence,
+            evidence_id=record_id,
+            evidence=evidence,
             metadata=dict(metadata or {}),
         )
 
-        self._records[resolved_evidence_id] = record
+        self._records[record_id] = record
         return record
 
     def get(self, evidence_id: str) -> EvidenceRecord:
-        """Return an evidence record by ID."""
+        """Return evidence by its storage ID."""
 
         try:
             return self._records[evidence_id]
@@ -155,7 +157,7 @@ class EvidenceStore:
         return evidence_id in self._records
 
     def all(self) -> tuple[EvidenceRecord, ...]:
-        """Return all stored evidence records in insertion order."""
+        """Return all stored evidence in insertion order."""
 
         return tuple(self._records.values())
 
@@ -163,53 +165,24 @@ class EvidenceStore:
         self,
         control_id: str,
         host: str | None = None,
-    ) -> tuple[Evidence, ...]:
-        """
-        Return Evidence objects belonging to a control.
-
-        If ``host`` is supplied, results are restricted to that host.
-
-        This method deliberately returns Evidence rather than EvidenceRecord
-        because callers of the audit layer care about the observed evidence,
-        while the internal record ID is an implementation/storage concern.
-        """
-
-        return tuple(
-            record.evidence
-            for record in self._records.values()
-            if record.evidence.control_id == control_id
-            and (host is None or record.evidence.host == host)
-        )
-
-    def records_for_control(
-        self,
-        control_id: str,
-        host: str | None = None,
     ) -> tuple[EvidenceRecord, ...]:
         """
-        Return complete EvidenceRecord objects for a control.
+        Return evidence belonging to a control.
 
-        This provides access to storage metadata and evidence IDs when those
-        are required by transaction/reporting/rollback layers.
+        If ``host`` is supplied, results are restricted to that host.
         """
 
         return tuple(
             record
             for record in self._records.values()
-            if record.evidence.control_id == control_id
-            and (host is None or record.evidence.host == host)
+            if record.control_id == control_id
+            and (host is None or record.host == host)
         )
 
     def clear(self) -> None:
         """Remove all in-memory evidence."""
 
         self._records.clear()
-
-    @staticmethod
-    def _generate_evidence_id() -> str:
-        """Generate a unique identifier for automatically stored evidence."""
-
-        return f"evidence-{uuid4().hex}"
 
 
 def create_evidence(

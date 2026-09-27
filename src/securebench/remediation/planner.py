@@ -158,6 +158,8 @@ class RemediationPlanner:
             tuple(normalized_controls),
         )
 
+        # Include every control. _build_item decides SKIP / INVESTIGATE /
+        # PRECHECK / APPROVAL_REQUIRED / REMEDIATE from audit status + policy.
         items = tuple(
             self._build_item(
                 control=control,
@@ -165,8 +167,6 @@ class RemediationPlanner:
                 evaluation=evaluations[control.control_id],
             )
             for control in ordered_controls
-            if audits_by_id[control.control_id].status
-            is ComplianceStatus.FAIL
         )
 
         return RemediationPlan(items=items)
@@ -239,6 +239,8 @@ class RemediationPlanner:
 
         default_host = self._default_host(audits)
 
+        # Include every control. _build_item decides the action (including
+        # SKIP for PASS and INVESTIGATE for UNKNOWN / non-FAIL).
         items = tuple(
             self._build_item(
                 control=control,
@@ -257,9 +259,6 @@ class RemediationPlanner:
                 evaluation=evaluation_by_control[control.control_id],
             )
             for control in ordered_controls
-            if audit_by_control.get(control.control_id) is not None
-            and audit_by_control[control.control_id].status
-            is ComplianceStatus.FAIL
         )
 
         return RemediationPlan(items=items)
@@ -489,10 +488,6 @@ class RemediationPlanner:
 
         Compliance is checked before policy because a passing control must
         never enter remediation merely because its policy permits changes.
-
-        This method still understands PASS and UNKNOWN for defensive
-        compatibility, but the public planning paths exclude those statuses
-        before constructing plan items.
         """
         if audit.status is ComplianceStatus.PASS:
             return RemediationPlanItem(
