@@ -46,6 +46,28 @@ class ConflictResolver:
             for control in graph.controls
         }
 
+    def find_conflicts(
+        self,
+        control_ids: tuple[str, ...] | list[str],
+    ) -> tuple[str, ...]:
+        """
+        Return a sorted tuple of human-readable conflict descriptors.
+
+        Used by RemediationPlanner, which joins the result with
+        ``", ".join(sorted(conflicts))``.
+        """
+        resolution = self.validate(tuple(control_ids))
+        if resolution.is_conflict_free:
+            return ()
+
+        descriptors: set[str] = set()
+        for conflict in resolution.conflicts:
+            left, right = sorted(
+                (conflict.control_id, conflict.conflicting_control_id)
+            )
+            descriptors.add(f"{left}<->{right}")
+        return tuple(sorted(descriptors))
+
     def validate(
         self,
         control_ids: tuple[str, ...],
@@ -72,19 +94,14 @@ class ConflictResolver:
         seen: set[tuple[str, str]] = set()
 
         for control_id in control_ids:
-            for conflicting_id in self._graph.conflicts_for(control_id):
-                if conflicting_id not in requested:
+            control = self._graph.get_control(control_id)
+            for other_id in getattr(control, "conflicts", ()) or ():
+                if other_id not in requested:
                     continue
-
-                pair = tuple(
-                    sorted((control_id, conflicting_id))
-                )
-
+                pair = tuple(sorted((control_id, other_id)))
                 if pair in seen:
                     continue
-
                 seen.add(pair)
-
                 conflicts.append(
                     Conflict(
                         control_id=pair[0],
@@ -92,16 +109,13 @@ class ConflictResolver:
                     )
                 )
 
-        return ConflictResolution(
-            conflicts=tuple(conflicts)
-        )
+        return ConflictResolution(conflicts=tuple(conflicts))
 
-    def validate_or_raise(
+    def ensure_conflict_free(
         self,
         control_ids: tuple[str, ...],
     ) -> None:
         resolution = self.validate(control_ids)
-
         if resolution.is_conflict_free:
             return
 
