@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Mapping, Protocol
+from typing import Protocol
 
 
 class SnapshotCapability(StrEnum):
@@ -14,9 +14,8 @@ class SnapshotCapability(StrEnum):
 class Snapshot:
     snapshot_id: str
     host: str
-    provider: str
-    capability: SnapshotCapability
-    details: Mapping[str, object]
+    transaction_id: str
+    capability: SnapshotCapability = SnapshotCapability.SUPPORTED
 
     def __post_init__(self) -> None:
         if not isinstance(self.snapshot_id, str) or not self.snapshot_id.strip():
@@ -25,14 +24,11 @@ class Snapshot:
         if not isinstance(self.host, str) or not self.host.strip():
             raise ValueError("host must be a non-empty string")
 
-        if not isinstance(self.provider, str) or not self.provider.strip():
-            raise ValueError("provider must be a non-empty string")
+        if not isinstance(self.transaction_id, str) or not self.transaction_id.strip():
+            raise ValueError("transaction_id must be a non-empty string")
 
         if not isinstance(self.capability, SnapshotCapability):
             raise TypeError("capability must be a SnapshotCapability")
-
-        if not isinstance(self.details, Mapping):
-            raise TypeError("details must be a mapping")
 
 
 class SnapshotProvider(Protocol):
@@ -43,20 +39,25 @@ class SnapshotProvider(Protocol):
     def create(
         self,
         host: str,
-        context: Mapping[str, object],
+        transaction_id: str,
     ) -> Snapshot:
         ...
 
     def restore(
         self,
         snapshot: Snapshot,
-        host: str,
-        context: Mapping[str, object],
     ) -> None:
         ...
 
 
 class UnsupportedSnapshotProvider:
+    """
+    Explicitly unsupported snapshot backend.
+
+    Callers must treat the absence of snapshot support as a hard failure
+    for any workflow that requires pre-change snapshots.
+    """
+
     @property
     def capability(self) -> SnapshotCapability:
         return SnapshotCapability.UNSUPPORTED
@@ -64,18 +65,16 @@ class UnsupportedSnapshotProvider:
     def create(
         self,
         host: str,
-        context: Mapping[str, object],
+        transaction_id: str,
     ) -> Snapshot:
-        raise RuntimeError(
+        raise NotImplementedError(
             "Snapshot creation is unsupported by the configured provider."
         )
 
     def restore(
         self,
         snapshot: Snapshot,
-        host: str,
-        context: Mapping[str, object],
     ) -> None:
-        raise RuntimeError(
+        raise NotImplementedError(
             "Snapshot restoration is unsupported by the configured provider."
         )
