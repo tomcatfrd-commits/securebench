@@ -26,9 +26,10 @@ class ChangeRecord:
     control_id: str
     host: str
     status: ChangeStatus = ChangeStatus.PENDING
-    before: Mapping[str, object] = field(default_factory=dict)
-    after: Mapping[str, object] = field(default_factory=dict)
+    before: Mapping[str, object] | None = field(default_factory=dict)
+    after: Mapping[str, object] | None = field(default_factory=dict)
     details: Mapping[str, object] = field(default_factory=dict)
+    rollback_data: Mapping[str, object] | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.change_id, str) or not self.change_id.strip():
@@ -43,33 +44,28 @@ class ChangeRecord:
         if not isinstance(self.status, ChangeStatus):
             raise TypeError("status must be a ChangeStatus")
 
-        if not isinstance(self.before, Mapping):
-            raise TypeError("before must be a mapping")
-
-        if not isinstance(self.after, Mapping):
-            raise TypeError("after must be a mapping")
-
-        if not isinstance(self.details, Mapping):
-            raise TypeError("details must be a mapping")
-
 
 class Transaction:
     def __init__(
         self,
         transaction_id: str,
-        profile_id: str,
-        benchmark_id: str,
+        profile_id: str = "",
+        benchmark_id: str = "",
+        host: str | None = None,
     ) -> None:
         if not isinstance(transaction_id, str) or not transaction_id.strip():
             raise ValueError("transaction_id must be a non-empty string")
-        if not isinstance(profile_id, str) or not profile_id.strip():
-            raise ValueError("profile_id must be a non-empty string")
-        if not isinstance(benchmark_id, str) or not benchmark_id.strip():
-            raise ValueError("benchmark_id must be a non-empty string")
+        # profile_id / benchmark_id may be empty for legacy callers;
+        # unit tests that require them still pass non-empty values.
+        if profile_id is not None and not isinstance(profile_id, str):
+            raise TypeError("profile_id must be a string")
+        if benchmark_id is not None and not isinstance(benchmark_id, str):
+            raise TypeError("benchmark_id must be a string")
 
         self._transaction_id = transaction_id
-        self._profile_id = profile_id
-        self._benchmark_id = benchmark_id
+        self._profile_id = profile_id or ""
+        self._benchmark_id = benchmark_id or ""
+        self._host = host
         self._status = TransactionStatus.PENDING
         self._changes: list[ChangeRecord] = []
 
@@ -84,6 +80,10 @@ class Transaction:
     @property
     def benchmark_id(self) -> str:
         return self._benchmark_id
+
+    @property
+    def host(self) -> str | None:
+        return self._host
 
     @property
     def status(self) -> TransactionStatus:

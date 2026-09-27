@@ -3,19 +3,15 @@ JSON reporting for SecureBench.
 
 Reporting is intentionally read-only. It converts SecureBench domain
 objects into serializable structures without changing their state.
-
-JSON is the first reporting format because it can later serve as the
-machine-readable interchange format for CLI output, APIs, dashboards,
-archival evidence, and CI/CD pipelines.
 """
 
 from __future__ import annotations
 
 import json
 from dataclasses import asdict, is_dataclass
-from enum import StrEnum
+from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 from securebench.core import (
     AuditResult,
@@ -30,45 +26,54 @@ class JsonReporter:
     Serialize SecureBench results and transactions as JSON.
     """
 
-    def audit_result(
+    def render_audit(
         self,
-        result: AuditResult,
+        results: Iterable[AuditResult],
         *,
         indent: int = 2,
     ) -> str:
-        """Return one audit result as JSON."""
+        """Return a list of audit results as JSON."""
 
-        return self._dump(result, indent=indent)
+        return self._dump(list(results), indent=indent)
 
-    def execution_result(
+    def render(
         self,
-        result: ExecutionResult,
         *,
+        audits: Iterable[AuditResult] | None = None,
+        executions: Iterable[ExecutionResult] | None = None,
+        verifications: Iterable[VerificationResult] | None = None,
+        transaction: Transaction | None = None,
         indent: int = 2,
     ) -> str:
-        """Return one execution result as JSON."""
+        """Return a combined report as JSON."""
 
-        return self._dump(result, indent=indent)
+        payload: dict[str, Any] = {}
+        if audits is not None:
+            payload["audits"] = list(audits)
+        if executions is not None:
+            payload["executions"] = list(executions)
+        if verifications is not None:
+            payload["verifications"] = list(verifications)
+        if transaction is not None:
+            payload["transaction"] = transaction
+        return self._dump(payload, indent=indent)
 
-    def verification_result(
+    def write_audit(
         self,
-        result: VerificationResult,
+        results: Iterable[AuditResult],
+        path: str | Path,
         *,
         indent: int = 2,
-    ) -> str:
-        """Return one verification result as JSON."""
+    ) -> Path:
+        """Write an audit report to a JSON file."""
 
-        return self._dump(result, indent=indent)
-
-    def transaction(
-        self,
-        transaction: Transaction,
-        *,
-        indent: int = 2,
-    ) -> str:
-        """Return a transaction and its change records as JSON."""
-
-        return self._dump(transaction, indent=indent)
+        output_path = Path(path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(
+            self.render_audit(results, indent=indent) + "\n",
+            encoding="utf-8",
+        )
+        return output_path
 
     def write(
         self,
@@ -77,70 +82,71 @@ class JsonReporter:
         *,
         indent: int = 2,
     ) -> Path:
-        """
-        Serialize data and write it to a JSON file.
-
-        Parent directories are created when necessary.
-        """
+        """Serialize data and write it to a JSON file."""
 
         output_path = Path(path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-
         output_path.write_text(
             self._dump(data, indent=indent) + "\n",
             encoding="utf-8",
         )
-
         return output_path
 
-    @staticmethod
-    def _dump(
-        data: Any,
-        *,
-        indent: int,
-    ) -> str:
-        """Serialize arbitrary supported SecureBench data."""
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
 
+    def _dump(self, data: Any, *, indent: int) -> str:
         return json.dumps(
-            JsonReporter._to_serializable(data),
+            self._to_serializable(data),
             indent=indent,
             ensure_ascii=False,
             sort_keys=True,
         )
 
-    @staticmethod
-    def _to_serializable(value: Any) -> Any:
-        """
-        Recursively convert SecureBench domain objects into JSON-compatible
-        Python values.
-        """
-
-        if isinstance(value, StrEnum):
+    def _to_serializable(self, value: Any) -> Any:
+        if isinstance(value, Enum):
             return value.value
 
-        if is_dataclass(value):
-            return JsonReporter._to_serializable(asdict(value))
+        if isinstance(value, Transaction):
+            return {
+                "transaction_id": value.transaction_id,
+                "profile_id": value.profile_id,
+                "benchmark_id": value.benchmark_id,
+                "status": value.status.value,
+                "changes": [
+                    self._to_serializable(change) for change in value.changes
+                ],
+            }
+
+        if is_dataclass(value) and not isinstance(value, type):
+            return self._to_serializable(asdict(value))
 
         if isinstance(value, dict):
             return {
-                str(key): JsonReporter._to_serializable(item)
+                str(key): self._to_serializable(item)
                 for key, item in value.items()
             }
 
         if isinstance(value, (list, tuple, set, frozenset)):
-            return [
-                JsonReporter._to_serializable(item)
-                for item in value
-            ]
+            return [self._to_serializable(item) for item in value]
 
         if hasattr(value, "isoformat"):
-            return value.isoformat()
+            try:
+                return value.isoformat()
+            except Exception:
+                pass
 
-        if value is None or isinstance(
-            value,
-            (str, int, float, bool),
-        ):
+        if value is None or isinstance(value, (str, int, float, bool)):
             return value
+
+        # Fallback for plain objects with a public __dict__
+        if hasattr(value, "__dict__"):
+            return {
+                key: self._to_serializable(item)
+                for key, item in vars(value).items()
+                if not key.startswith("_")
+            }
 
         raise TypeError(
             f"unsupported value for JSON serialization: "
