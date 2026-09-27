@@ -201,8 +201,19 @@ class RollbackEngine:
 
             control = controls.get(change.control_id)
             if control is None:
-                # Coordinator tests expect KeyError for missing definitions.
-                raise KeyError(change.control_id)
+                change.status = ChangeStatus.ROLLBACK_REQUIRED
+                results.append(
+                    RollbackExecution(
+                        control_id=change.control_id,
+                        host=change.host,
+                        success=False,
+                        message=(
+                            "Control definition is missing; "
+                            "rollback cannot be performed."
+                        ),
+                    )
+                )
+                break
 
             result = self.rollback_control(
                 control=control,

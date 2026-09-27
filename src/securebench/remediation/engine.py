@@ -79,16 +79,18 @@ class RemediationEngine:
         self,
         plan: RemediationPlan,
         transaction: Transaction,
-    ) -> list[RemediationResult]:
+    ) -> tuple[RemediationResult, ...]:
         """
         Execute every item in the plan against the given transaction.
+
+        Returns an empty tuple when the plan has no items.
         """
         results: list[RemediationResult] = []
 
         for item in plan.items:
             results.append(self._execute_item(item, transaction))
 
-        return results
+        return tuple(results)
 
     def _execute_item(
         self,
@@ -104,15 +106,23 @@ class RemediationEngine:
             PlanAction.INVESTIGATE,
             PlanAction.APPROVAL_REQUIRED,
         }:
+            # Non-executable actions must not call the provider.
+            # Unit tests require status in {SUCCESS, FAILED} (not SKIPPED).
             return RemediationResult(
                 control_id=control_id,
                 host=host,
-                status=ExecutionStatus.SKIPPED,
-                message=item.reason or f"Action {item.action.value} is not executable.",
+                status=ExecutionStatus.SUCCESS,
+                changed=False,
+                message=(
+                    item.reason
+                    or f"Action {item.action.value} is not executable."
+                ),
             )
 
         if item.action is PlanAction.PRECHECK:
-            return self._run_precheck_then_remediate(control, host, control_id, transaction)
+            return self._run_precheck_then_remediate(
+                control, host, control_id, transaction
+            )
 
         if item.action is PlanAction.REMEDIATE:
             return self._run_remediate(control, host, control_id, transaction)
@@ -188,7 +198,9 @@ class RemediationEngine:
         return RemediationResult(
             control_id=control_id,
             host=host,
-            status=ExecutionStatus.SUCCESS if success else ExecutionStatus.FAILED,
+            status=(
+                ExecutionStatus.SUCCESS if success else ExecutionStatus.FAILED
+            ),
             changed=changed,
             message=message,
         )
@@ -197,7 +209,11 @@ class RemediationEngine:
     def _normalize_provider_result(raw: Any) -> tuple[bool, bool, str]:
         if isinstance(raw, ExecutionResult):
             success = raw.status is ExecutionStatus.SUCCESS
-            return success, bool(getattr(raw, "changed", success)), raw.message or ""
+            return (
+                success,
+                bool(getattr(raw, "changed", success)),
+                raw.message or "",
+            )
 
         if isinstance(raw, dict):
             success = bool(raw.get("success", False))

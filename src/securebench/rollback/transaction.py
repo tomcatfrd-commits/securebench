@@ -9,7 +9,6 @@ from dataclasses import dataclass
 from securebench.core import (
     Control,
     Transaction,
-    TransactionStatus,
 )
 
 from .engine import RollbackEngine, RollbackExecution
@@ -56,19 +55,27 @@ class TransactionRollbackCoordinator:
         """
         Roll back successful changes in reverse order via the rollback engine.
         """
-        # Delegate to the engine, which already implements reverse-order
-        # processing and fail-closed behaviour.
+        # Coordinator tests expect KeyError when a successful change has no
+        # control definition in the supplied map.
+        for change in transaction.changes:
+            if change.status is None:
+                continue
+            from securebench.core import ChangeStatus
+
+            if (
+                change.status is ChangeStatus.SUCCESS
+                and change.control_id not in controls
+            ):
+                raise KeyError(change.control_id)
+
         engine_result = self._rollback_engine.rollback_transaction(
             transaction=transaction,
             controls=controls,
             profile=profile,
         )
 
-        # Engine returns TransactionRollbackResult with .success / .executions
         success = bool(getattr(engine_result, "success", False))
-        executions = tuple(
-            getattr(engine_result, "executions", ()) or ()
-        )
+        executions = tuple(getattr(engine_result, "executions", ()) or ())
 
         snapshot_restored = False
         if snapshot is not None and success:
@@ -86,13 +93,11 @@ class TransactionRollbackCoordinator:
 
         if success:
             transaction.mark_rolled_back()
-        else:
-            # only mark if there was something to roll back
-            if transaction.changes:
-                try:
-                    transaction.mark_rollback_required()
-                except Exception:
-                    pass
+        elif transaction.changes:
+            try:
+                transaction.mark_rollback_required()
+            except Exception:
+                pass
 
         return TransactionRollbackResult(
             success=success,
