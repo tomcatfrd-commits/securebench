@@ -46,7 +46,7 @@ tests\unit\test_policy.py .....FFFFFFFFFF.F.........                     [ 78%]
 tests\unit\test_profile.py ........................                      [ 82%]
 tests\unit\test_remediation.py FFFFFFFFFFFFF                             [ 84%]
 tests\unit\test_reporting.py FFFFFFFFFFFFFFFFFFFF                        [ 88%]
-tests\unit\test_rollback.py .....FF.FFF..F                               [ 90%]
+tests\unit\test_rollback.py ..............                               [ 90%]
 tests\unit\test_rollback_transaction.py FFFFFF....                       [ 92%]
 tests\unit\test_snapshot.py ............                                 [ 94%]
 tests\unit\test_transaction.py ..................                        [ 97%]
@@ -345,7 +345,7 @@ _________________________ test_audit_stores_evidence __________________________
 
         assert len(evidence) == 1
 >       assert evidence[0] is result.evidence[0]
-E       AssertionError: assert EvidenceRecord(evidence_id='TEST-1:production-01:recording-audit-provider', evidence=Evidence(control_id='TEST-1', hos...collected_at=datetime.datetime(2026, 9, 27, 10, 23, 16, 78856, tzinfo=datetime.timezone.utc), details={}), metadata={}) is Evidence(control_id='TEST-1', host='production-01', source='recording-audit-provider', observed={'compliant': True}, e...iant': True}, collected_at=datetime.datetime(2026, 9, 27, 10, 23, 16, 78856, tzinfo=datetime.timezone.utc), details={})
+E       AssertionError: assert EvidenceRecord(evidence_id='TEST-1:production-01:recording-audit-provider', evidence=Evidence(control_id='TEST-1', hos...collected_at=datetime.datetime(2026, 9, 27, 10, 26, 3, 426597, tzinfo=datetime.timezone.utc), details={}), metadata={}) is Evidence(control_id='TEST-1', host='production-01', source='recording-audit-provider', observed={'compliant': True}, e...iant': True}, collected_at=datetime.datetime(2026, 9, 27, 10, 26, 3, 426597, tzinfo=datetime.timezone.utc), details={})
 
 tests\safety\test_audit_boundary.py:132: AssertionError
 ___________ test_benchmark_rejects_control_from_different_benchmark ___________
@@ -406,7 +406,7 @@ src\securebench\remediation\planner.py:236: in plan
     ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.remediation.planner.RemediationPlanner object at 0x00000237B154D220>
+self = <securebench.remediation.planner.RemediationPlanner object at 0x000002510FD0E300>
 controls = (Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test control.', platform='ubun...ck_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})))
 
     def _resolve_order(
@@ -480,7 +480,7 @@ src\securebench\remediation\planner.py:236: in plan
     ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.remediation.planner.RemediationPlanner object at 0x00000237B1653CB0>
+self = <securebench.remediation.planner.RemediationPlanner object at 0x000002510FE1BD90>
 controls = (Control(control_id='B', benchmark_id='test-benchmark', title='Control B', description='Test control.', platform='ubun...pability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=('A',), conflicts=(), metadata=mappingproxy({})),)
 
     def _resolve_order(
@@ -539,7 +539,7 @@ src\securebench\remediation\planner.py:236: in plan
     ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.remediation.planner.RemediationPlanner object at 0x00000237B1650750>
+self = <securebench.remediation.planner.RemediationPlanner object at 0x000002510FE18750>
 controls = (Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test control.', platform='ubun...k_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})),)
 
     def _resolve_order(
@@ -712,7 +712,7 @@ E         Use -v to get more diff
 tests\safety\test_plan_integrity.py:138: AssertionError
 _______ test_production_safe_profile_requires_investigation_by_default ________
 
-loader = <securebench.core.loader.ConfigurationLoader object at 0x00000237B18468F0>
+loader = <securebench.core.loader.ConfigurationLoader object at 0x00000251100073E0>
 
     def test_production_safe_profile_requires_investigation_by_default(
         loader: ConfigurationLoader,
@@ -1756,7 +1756,7 @@ E       TypeError: AnsibleExecutor.__init__() got an unexpected keyword argument
 tests\unit\test_ansible_execution.py:295: TypeError
 __________________ test_backend_audit_selects_audit_playbook __________________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-12/test_backend_audit_selects_aud0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_audit_selects_aud0')
 
     def test_backend_audit_selects_audit_playbook(tmp_path: Path) -> None:
         executor = FakeExecutor()
@@ -1773,7 +1773,7 @@ E       TypeError: AnsibleExecutionBackend.audit() takes 1 positional argument b
 tests\unit\test_ansible_execution.py:312: TypeError
 _______________ test_backend_precheck_selects_precheck_playbook _______________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-12/test_backend_precheck_selects_0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_precheck_selects_0')
 
     def test_backend_precheck_selects_precheck_playbook(
         tmp_path: Path,
@@ -1792,7 +1792,7 @@ E       TypeError: AnsibleExecutionBackend.precheck() takes 1 positional argumen
 tests\unit\test_ansible_execution.py:341: TypeError
 _____________ test_backend_remediate_selects_remediation_playbook _____________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-12/test_backend_remediate_selects0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_remediate_selects0')
 
     def test_backend_remediate_selects_remediation_playbook(
         tmp_path: Path,
@@ -1811,7 +1811,7 @@ E       TypeError: AnsibleExecutionBackend.remediate() takes 1 positional argume
 tests\unit\test_ansible_execution.py:362: TypeError
 _______________ test_backend_rollback_selects_rollback_playbook _______________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-12/test_backend_rollback_selects_0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_rollback_selects_0')
 
     def test_backend_rollback_selects_rollback_playbook(
         tmp_path: Path,
@@ -1845,7 +1845,7 @@ E       TypeError: AnsibleExecutionBackend.rollback() takes 1 positional argumen
 tests\unit\test_ansible_execution.py:397: TypeError
 ______________ test_backend_verify_selects_verification_playbook ______________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-12/test_backend_verify_selects_ve0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_verify_selects_ve0')
 
     def test_backend_verify_selects_verification_playbook(
         tmp_path: Path,
@@ -1864,7 +1864,7 @@ E       TypeError: AnsibleExecutionBackend.verify() takes 1 positional argument 
 tests\unit\test_ansible_execution.py:419: TypeError
 ______________ test_backend_passes_control_id_host_and_operation ______________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-12/test_backend_passes_control_id0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_passes_control_id0')
 
     def test_backend_passes_control_id_host_and_operation(
         tmp_path: Path,
@@ -1883,7 +1883,7 @@ E       TypeError: AnsibleExecutionBackend.audit() takes 1 positional argument b
 tests\unit\test_ansible_execution.py:445: TypeError
 ____________________ test_backend_passes_context_variables ____________________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-12/test_backend_passes_context_va0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_passes_context_va0')
 
     def test_backend_passes_context_variables(
         tmp_path: Path,
@@ -1918,7 +1918,7 @@ E       TypeError: AnsibleExecutionBackend.audit() takes 1 positional argument b
 tests\unit\test_ansible_execution.py:481: TypeError
 _____________ test_backend_fails_when_playbook_mapping_is_missing _____________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-12/test_backend_fails_when_playbo0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_fails_when_playbo0')
 
     def test_backend_fails_when_playbook_mapping_is_missing(
         tmp_path: Path,
@@ -1945,7 +1945,7 @@ E           TypeError: AnsibleExecutionBackend.audit() takes 1 positional argume
 tests\unit\test_ansible_execution.py:508: TypeError
 __________ test_backend_fails_when_playbook_configuration_is_missing __________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-12/test_backend_fails_when_playbo1')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_fails_when_playbo1')
 
     def test_backend_fails_when_playbook_configuration_is_missing(
         tmp_path: Path,
@@ -1970,7 +1970,7 @@ E           TypeError: AnsibleExecutionBackend.audit() takes 1 positional argume
 tests\unit\test_ansible_execution.py:530: TypeError
 ___________ test_backend_remediation_failure_is_reported_as_failed ____________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-12/test_backend_remediation_failu0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_remediation_failu0')
 
     def test_backend_remediation_failure_is_reported_as_failed(
         tmp_path: Path,
@@ -1994,7 +1994,7 @@ E       TypeError: AnsibleExecutionBackend.remediate() takes 1 positional argume
 tests\unit\test_ansible_execution.py:551: TypeError
 _____________ test_backend_rollback_failure_is_reported_as_failed _____________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-12/test_backend_rollback_failure_0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_rollback_failure_0')
 
     def test_backend_rollback_failure_is_reported_as_failed(
         tmp_path: Path,
@@ -2033,7 +2033,7 @@ E       TypeError: AnsibleExecutionBackend.rollback() takes 1 positional argumen
 tests\unit\test_ansible_execution.py:587: TypeError
 ____ TestControl.test_control_rejects_invalid_enum_types[severity-medium] _____
 
-self = <test_core_models.TestControl object at 0x00000237B1635910>
+self = <test_core_models.TestControl object at 0x000002510FE015B0>
 field = 'severity', value = 'medium'
 
     @pytest.mark.parametrize(
@@ -2092,7 +2092,7 @@ E           ValueError: severity must be a ControlSeverity
 src\securebench\core\control.py:191: ValueError
 _ TestControl.test_control_rejects_invalid_enum_types[rollback_capability-guaranteed] _
 
-self = <test_core_models.TestControl object at 0x00000237B1679750>
+self = <test_core_models.TestControl object at 0x000002510FE39950>
 field = 'rollback_capability', value = 'guaranteed'
 
     @pytest.mark.parametrize(
@@ -2159,7 +2159,7 @@ E           ValueError: rollback_capability must be a RollbackCapability
 src\securebench\core\control.py:199: ValueError
 _________ TestControl.test_control_rejects_invalid_dependencies_type __________
 
-self = <test_core_models.TestControl object at 0x00000237B1679AD0>
+self = <test_core_models.TestControl object at 0x000002510FE39CD0>
 
     def test_control_rejects_invalid_dependencies_type(self) -> None:
         with pytest.raises(TypeError):
@@ -2194,7 +2194,7 @@ E               ValueError: dependencys must be a tuple
 src\securebench\core\control.py:224: ValueError
 ___________ TestControl.test_control_rejects_invalid_conflicts_type ___________
 
-self = <test_core_models.TestControl object at 0x00000237B1690980>
+self = <test_core_models.TestControl object at 0x000002510FE4C9F0>
 
     def test_control_rejects_invalid_conflicts_type(self) -> None:
         with pytest.raises(TypeError):
@@ -2229,7 +2229,7 @@ E               ValueError: conflicts must be a tuple
 src\securebench\core\control.py:224: ValueError
 ______________ TestControl.test_control_rejects_self_dependency _______________
 
-self = <test_core_models.TestControl object at 0x00000237B163EA50>
+self = <test_core_models.TestControl object at 0x000002510FDFEC90>
 
     def test_control_rejects_self_dependency(self) -> None:
 >       with pytest.raises(ValueError, match="cannot depend on itself"):
@@ -2241,7 +2241,7 @@ E         Actual message: "control 'A' cannot dependency itself"
 tests\unit\test_core_models.py:128: AssertionError
 _______________ TestControl.test_control_rejects_self_conflict ________________
 
-self = <test_core_models.TestControl object at 0x00000237B16716D0>
+self = <test_core_models.TestControl object at 0x000002510FE29D60>
 
     def test_control_rejects_self_conflict(self) -> None:
 >       with pytest.raises(ValueError, match="cannot conflict with itself"):
@@ -2253,7 +2253,7 @@ E         Actual message: "control 'A' cannot conflict itself"
 tests\unit\test_core_models.py:132: AssertionError
 _______________ TestControl.test_invalid_safety_metadata_raises _______________
 
-self = <test_core_models.TestControl object at 0x00000237B1671EA0>
+self = <test_core_models.TestControl object at 0x000002510FE2A530>
 
     def test_invalid_safety_metadata_raises(self) -> None:
         control = make_control(metadata={"safety": "invalid"})
@@ -2288,7 +2288,7 @@ E           ValueError: control 'TEST-001' has invalid safety metadata
 src\securebench\core\control.py:270: ValueError
 ____________ TestControl.test_invalid_requirements_metadata_raises ____________
 
-self = <test_core_models.TestControl object at 0x00000237B1671FE0>
+self = <test_core_models.TestControl object at 0x000002510FE2A670>
 
     def test_invalid_requirements_metadata_raises(self) -> None:
         control = make_control(metadata={"requirements": "invalid"})
@@ -2322,7 +2322,7 @@ E           ValueError: control 'TEST-001' has invalid requirements metadata
 src\securebench\core\control.py:288: ValueError
 ________ TestConfigurationLoader.test_loads_real_cis_control_metadata _________
 
-self = <test_loader.TestConfigurationLoader object at 0x00000237B165D450>
+self = <test_loader.TestConfigurationLoader object at 0x000002510FDB5810>
 
     def test_loads_real_cis_control_metadata(self) -> None:
         loader = ConfigurationLoader()
@@ -2336,7 +2336,7 @@ E       AssertionError: assert ('L1', 'Server', 'Workstation') == 'L1'
 tests\unit\test_loader.py:44: AssertionError
 __________ TestConfigurationLoader.test_unknown_control_fails_closed __________
 
-self = <test_loader.TestConfigurationLoader object at 0x00000237B168CC00>
+self = <test_loader.TestConfigurationLoader object at 0x000002510FE48C00>
 
     def test_unknown_control_fails_closed(self) -> None:
         loader = ConfigurationLoader()
@@ -2352,7 +2352,7 @@ E        +  where False = ProfileRule(classification=<SafetyClassification.APPRO
 tests\unit\test_loader.py:106: AssertionError
 _________ TestRemediationPlanner.test_plan_item_requires_valid_action _________
 
-self = <test_planner.TestRemediationPlanner object at 0x00000237B1576DD0>
+self = <test_planner.TestRemediationPlanner object at 0x000002510FD32EA0>
 
     def test_plan_item_requires_valid_action(self) -> None:
 >       item = RemediationPlanItem(
@@ -2366,7 +2366,7 @@ E       TypeError: RemediationPlanItem.__init__() missing 1 required positional 
 tests\unit\test_planner.py:356: TypeError
 _____________ TestRemediationPlanner.test_plan_item_is_immutable ______________
 
-self = <test_planner.TestRemediationPlanner object at 0x00000237B15C2990>
+self = <test_planner.TestRemediationPlanner object at 0x000002510FD868D0>
 
     def test_plan_item_is_immutable(self) -> None:
 >       item = RemediationPlanItem(
@@ -2380,7 +2380,7 @@ E       TypeError: RemediationPlanItem.__init__() missing 1 required positional 
 tests\unit\test_planner.py:368: TypeError
 _ TestControlClassifier.test_disabled_safe_control_is_not_automatically_remediable _
 
-self = <test_policy.TestControlClassifier object at 0x00000237B168D590>
+self = <test_policy.TestControlClassifier object at 0x000002510FE49590>
 
     def test_disabled_safe_control_is_not_automatically_remediable(self) -> None:
         control = make_control()
@@ -2395,14 +2395,14 @@ self = <test_policy.TestControlClassifier object at 0x00000237B168D590>
         assert result.automatically_remediable is False
 >       assert "disabled" in result.reason.lower()
 E       AssertionError: assert 'disabled' in 'control is classified as safe by the selected profile.'
-E        +  where 'control is classified as safe by the selected profile.' = <built-in method lower of str object at 0x00000237B138DB90>()
-E        +    where <built-in method lower of str object at 0x00000237B138DB90> = 'Control is classified as safe by the selected profile.'.lower
+E        +  where 'control is classified as safe by the selected profile.' = <built-in method lower of str object at 0x000002510FB4DB30>()
+E        +    where <built-in method lower of str object at 0x000002510FB4DB30> = 'Control is classified as safe by the selected profile.'.lower
 E        +      where 'Control is classified as safe by the selected profile.' = ClassificationResult(control_id='TEST-001', classification=<SafetyClassification.SAFE: 'safe'>, enabled=False, requires_precheck=False, requires_approval=False, reason='Control is classified as safe by the selected profile.').reason
 
 tests\unit\test_policy.py:147: AssertionError
 __________ TestClassificationPolicyRule.test_safe_allows_remediation __________
 
-self = <test_policy.TestClassificationPolicyRule object at 0x00000237B165DF90>
+self = <test_policy.TestClassificationPolicyRule object at 0x000002510FDB6350>
 
     def test_safe_allows_remediation(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2416,7 +2416,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:152: TypeError
 ___ TestClassificationPolicyRule.test_safe_with_precheck_requires_precheck ____
 
-self = <test_policy.TestClassificationPolicyRule object at 0x00000237B165E0D0>
+self = <test_policy.TestClassificationPolicyRule object at 0x000002510FDB6490>
 
     def test_safe_with_precheck_requires_precheck(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2430,7 +2430,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:165: TypeError
 ____ TestClassificationPolicyRule.test_approval_required_requires_approval ____
 
-self = <test_policy.TestClassificationPolicyRule object at 0x00000237B15FE3F0>
+self = <test_policy.TestClassificationPolicyRule object at 0x000002510FDAE650>
 
     def test_approval_required_requires_approval(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2445,7 +2445,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:178: TypeError
 ____________ TestClassificationPolicyRule.test_investigate_denies _____________
 
-self = <test_policy.TestClassificationPolicyRule object at 0x00000237B15FE520>
+self = <test_policy.TestClassificationPolicyRule object at 0x000002510FDAE780>
 
     def test_investigate_denies(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2459,7 +2459,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:191: TypeError
 _____________ TestClassificationPolicyRule.test_prohibited_denies _____________
 
-self = <test_policy.TestClassificationPolicyRule object at 0x00000237B1426D50>
+self = <test_policy.TestClassificationPolicyRule object at 0x000002510FBE6E70>
 
     def test_prohibited_denies(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2474,7 +2474,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:202: TypeError
 ______ TestRollbackPolicyRule.test_guaranteed_rollback_is_always_allowed ______
 
-self = <test_policy.TestRollbackPolicyRule object at 0x00000237B165E210>
+self = <test_policy.TestRollbackPolicyRule object at 0x000002510FDB65D0>
 
     def test_guaranteed_rollback_is_always_allowed(self) -> None:
         rule = RollbackPolicyRule()
@@ -2490,7 +2490,7 @@ E       TypeError: RollbackPolicyRule.evaluate() takes 2 positional arguments bu
 tests\unit\test_policy.py:218: TypeError
 ____ TestRollbackPolicyRule.test_best_effort_rollback_is_denied_by_default ____
 
-self = <test_policy.TestRollbackPolicyRule object at 0x00000237B165E350>
+self = <test_policy.TestRollbackPolicyRule object at 0x000002510FDB6710>
 
     def test_best_effort_rollback_is_denied_by_default(self) -> None:
         rule = RollbackPolicyRule()
@@ -2508,7 +2508,7 @@ E       TypeError: RollbackPolicyRule.evaluate() takes 2 positional arguments bu
 tests\unit\test_policy.py:231: TypeError
 _ TestRollbackPolicyRule.test_best_effort_rollback_can_be_allowed_by_profile __
 
-self = <test_policy.TestRollbackPolicyRule object at 0x00000237B15FE650>
+self = <test_policy.TestRollbackPolicyRule object at 0x000002510FDAE8B0>
 
     def test_best_effort_rollback_can_be_allowed_by_profile(self) -> None:
         rule = RollbackPolicyRule()
@@ -2526,7 +2526,7 @@ E       TypeError: RollbackPolicyRule.evaluate() takes 2 positional arguments bu
 tests\unit\test_policy.py:246: TypeError
 ______ TestRollbackPolicyRule.test_unsupported_rollback_is_always_denied ______
 
-self = <test_policy.TestRollbackPolicyRule object at 0x00000237B15FE780>
+self = <test_policy.TestRollbackPolicyRule object at 0x000002510FDAE9E0>
 
     def test_unsupported_rollback_is_always_denied(self) -> None:
         rule = RollbackPolicyRule()
@@ -2544,7 +2544,7 @@ E       TypeError: RollbackPolicyRule.evaluate() takes 2 positional arguments bu
 tests\unit\test_policy.py:261: TypeError
 _________ TestPolicyEngine.test_safe_with_precheck_requires_precheck __________
 
-self = <test_policy.TestPolicyEngine object at 0x00000237B165E490>
+self = <test_policy.TestPolicyEngine object at 0x000002510FDB6850>
 
     def test_safe_with_precheck_requires_precheck(self) -> None:
         control = make_control(
@@ -3103,7 +3103,7 @@ E       AttributeError: 'JsonReporter' object has no attribute 'render'
 tests\unit\test_reporting.py:132: AttributeError
 ____________________ test_json_reporter_can_write_to_file _____________________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-12/test_json_reporter_can_write_t0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_json_reporter_can_write_t0')
 
     def test_json_reporter_can_write_to_file(tmp_path: Path) -> None:
         reporter = JsonReporter()
@@ -3151,7 +3151,7 @@ E       AttributeError: 'CsvReporter' object has no attribute 'render_audit'
 tests\unit\test_reporting.py:206: AttributeError
 ______________________ test_csv_reporter_writes_to_file _______________________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-12/test_csv_reporter_writes_to_fi0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_csv_reporter_writes_to_fi0')
 
     def test_csv_reporter_writes_to_file(tmp_path: Path) -> None:
         reporter = CsvReporter()
@@ -3275,7 +3275,7 @@ E       AttributeError: 'HtmlReporter' object has no attribute 'render_verificat
 tests\unit\test_reporting.py:347: AttributeError
 ____________________ test_html_reporter_can_write_to_file _____________________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-12/test_html_reporter_can_write_t0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_html_reporter_can_write_t0')
 
     def test_html_reporter_can_write_to_file(tmp_path: Path) -> None:
         reporter = HtmlReporter()
@@ -3343,228 +3343,6 @@ ________________ test_transaction_change_status_is_serialized _________________
 E       AttributeError: 'JsonReporter' object has no attribute 'render'
 
 tests\unit\test_reporting.py:416: AttributeError
-______ TestRollbackEngine.test_only_successful_change_can_be_rolled_back ______
-
-self = <test_rollback.TestRollbackEngine object at 0x00000237B168DF20>
-
-    def test_only_successful_change_can_be_rolled_back(self) -> None:
-        provider = FakeRollbackProvider()
-        engine = RollbackEngine(provider=provider)
-
-        control = make_control()
-        transaction = make_transaction()
-
-        change = make_change(status=ChangeStatus.FAILED)
-        transaction.add_change(change)
-
-        result = engine.rollback_control(
-            transaction=transaction,
-            control=control,
-            host="server01",
-        )
-
-        assert result.success is False
->       assert "status" in result.message.lower()
-E       assert 'status' in "only successful changes can be rolled back; change is in state 'failed'."
-E        +  where "only successful changes can be rolled back; change is in state 'failed'." = <built-in method lower of str object at 0x00000237B1945FB0>()
-E        +    where <built-in method lower of str object at 0x00000237B1945FB0> = "Only successful changes can be rolled back; change is in state 'failed'.".lower
-E        +      where "Only successful changes can be rolled back; change is in state 'failed'." = RollbackExecution(control_id='TEST-001', host='server01', success=False, message="Only successful changes can be rolled back; change is in state 'failed'.").message
-
-tests\unit\test_rollback.py:243: AssertionError
-_____________ TestRollbackEngine.test_unknown_change_fails_closed _____________
-
-self = <test_rollback.TestRollbackEngine object at 0x00000237B168E030>
-
-    def test_unknown_change_fails_closed(self) -> None:
-        provider = FakeRollbackProvider()
-        engine = RollbackEngine(provider=provider)
-
-        control = make_control()
-        transaction = make_transaction()
-
->       result = engine.rollback_control(
-            transaction=transaction,
-            control=control,
-            host="server01",
-        )
-
-tests\unit\test_rollback.py:253:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\rollback\engine.py:96: in rollback_control
-    change = self._find_change(transaction, control.control_id, host)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-transaction = <securebench.core.transaction.Transaction object at 0x00000237B1A37EE0>
-control_id = 'TEST-001', host = 'server01'
-
-    @staticmethod
-    def _find_change(
-        transaction: Transaction,
-        control_id: str,
-        host: str,
-    ) -> ChangeRecord:
-        for change in transaction.changes:
-            if change.control_id == control_id and change.host == host:
-                return change
->       raise RollbackError(
-            f"No change found for control '{control_id}' on host '{host}'."
-        )
-E       securebench.core.exceptions.RollbackError: No change found for control 'TEST-001' on host 'server01'.
-
-src\securebench\rollback\engine.py:220: RollbackError
-_ TestRollbackEngine.test_transaction_rollback_processes_changes_in_reverse_order _
-
-self = <test_rollback.TestRollbackEngine object at 0x00000237B178F450>
-
-    def test_transaction_rollback_processes_changes_in_reverse_order(
-        self,
-    ) -> None:
-        provider = FakeRollbackProvider()
-        engine = RollbackEngine(provider=provider)
-
-        control_a = make_control(control_id="A")
-        control_b = make_control(control_id="B")
-        control_c = make_control(control_id="C")
-
-        transaction = make_transaction()
-
-        transaction.add_change(
-            make_change(
-                change_id="change-a",
-                control_id="A",
-            )
-        )
-        transaction.add_change(
-            make_change(
-                change_id="change-b",
-                control_id="B",
-            )
-        )
-        transaction.add_change(
-            make_change(
-                change_id="change-c",
-                control_id="C",
-            )
-        )
-
-        result = engine.rollback_transaction(
-            transaction=transaction,
-            controls={
-                "A": control_a,
-                "B": control_b,
-                "C": control_c,
-            },
-        )
-
->       assert result.success is True
-               ^^^^^^^^^^^^^^
-E       AttributeError: 'tuple' object has no attribute 'success'
-
-tests\unit\test_rollback.py:321: AttributeError
-______ TestRollbackEngine.test_transaction_rollback_stops_after_failure _______
-
-self = <test_rollback.TestRollbackEngine object at 0x00000237B16B4230>
-
-    def test_transaction_rollback_stops_after_failure(self) -> None:
-        class SelectiveProvider(FakeRollbackProvider):
-            def rollback(
-                self,
-                control: Control,
-                host: str,
-            ) -> RollbackExecution:
-                self.calls.append((control.control_id, host))
-
-                if control.control_id == "B":
-                    return RollbackExecution(
-                        control_id=control.control_id,
-                        host=host,
-                        success=False,
-                        message="Rollback failed",
-                    )
-
-                return RollbackExecution(
-                    control_id=control.control_id,
-                    host=host,
-                    success=True,
-                    message="Rollback completed",
-                )
-
-        provider = SelectiveProvider()
-        engine = RollbackEngine(provider=provider)
-
-        controls = {
-            "A": make_control(control_id="A"),
-            "B": make_control(control_id="B"),
-            "C": make_control(control_id="C"),
-        }
-
-        transaction = make_transaction()
-
-        transaction.add_change(
-            make_change(
-                change_id="change-a",
-                control_id="A",
-            )
-        )
-        transaction.add_change(
-            make_change(
-                change_id="change-b",
-                control_id="B",
-            )
-        )
-        transaction.add_change(
-            make_change(
-                change_id="change-c",
-                control_id="C",
-            )
-        )
-
-        result = engine.rollback_transaction(
-            transaction=transaction,
-            controls=controls,
-        )
-
->       assert result.success is False
-               ^^^^^^^^^^^^^^
-E       AttributeError: 'tuple' object has no attribute 'success'
-
-tests\unit\test_rollback.py:391: AttributeError
-_______ TestRollbackEngine.test_missing_control_definition_fails_closed _______
-
-self = <test_rollback.TestRollbackEngine object at 0x00000237B16B4050>
-
-    def test_missing_control_definition_fails_closed(self) -> None:
-        provider = FakeRollbackProvider()
-        engine = RollbackEngine(provider=provider)
-
-        transaction = make_transaction()
-        transaction.add_change(
-            make_change(
-                control_id="MISSING",
-            )
-        )
-
-        result = engine.rollback_transaction(
-            transaction=transaction,
-            controls={},
-        )
-
->       assert result.success is False
-               ^^^^^^^^^^^^^^
-E       AttributeError: 'tuple' object has no attribute 'success'
-
-tests\unit\test_rollback.py:418: AttributeError
-____________ TestRollbackExecution.test_execution_requires_message ____________
-
-self = <test_rollback.TestRollbackExecution object at 0x00000237B15FF230>
-
-    def test_execution_requires_message(self) -> None:
->       with pytest.raises(ValueError):
-             ^^^^^^^^^^^^^^^^^^^^^^^^^
-E       Failed: DID NOT RAISE ValueError
-
-tests\unit\test_rollback.py:447: Failed
 __________ test_coordinator_rolls_back_transaction_in_reverse_order ___________
 
     def test_coordinator_rolls_back_transaction_in_reverse_order() -> None:
@@ -3803,16 +3581,10 @@ FAILED tests/unit/test_reporting.py::test_empty_audit_report_is_valid_csv - A...
 FAILED tests/unit/test_reporting.py::test_empty_audit_report_is_valid_html - ...
 FAILED tests/unit/test_reporting.py::test_transaction_status_is_serialized - ...
 FAILED tests/unit/test_reporting.py::test_transaction_change_status_is_serialized
-FAILED tests/unit/test_rollback.py::TestRollbackEngine::test_only_successful_change_can_be_rolled_back
-FAILED tests/unit/test_rollback.py::TestRollbackEngine::test_unknown_change_fails_closed
-FAILED tests/unit/test_rollback.py::TestRollbackEngine::test_transaction_rollback_processes_changes_in_reverse_order
-FAILED tests/unit/test_rollback.py::TestRollbackEngine::test_transaction_rollback_stops_after_failure
-FAILED tests/unit/test_rollback.py::TestRollbackEngine::test_missing_control_definition_fails_closed
-FAILED tests/unit/test_rollback.py::TestRollbackExecution::test_execution_requires_message
 FAILED tests/unit/test_rollback_transaction.py::test_coordinator_rolls_back_transaction_in_reverse_order
 FAILED tests/unit/test_rollback_transaction.py::test_coordinator_rolls_back_only_successful_changes
 FAILED tests/unit/test_rollback_transaction.py::test_coordinator_stops_when_rollback_fails
 FAILED tests/unit/test_rollback_transaction.py::test_coordinator_fails_closed_for_missing_control
 FAILED tests/unit/test_rollback_transaction.py::test_coordinator_handles_empty_transaction
 FAILED tests/unit/test_rollback_transaction.py::test_coordinator_does_not_rollback_unsupported_control
-======================= 165 failed, 426 passed in 2.36s =======================
+======================= 159 failed, 432 passed in 2.26s =======================

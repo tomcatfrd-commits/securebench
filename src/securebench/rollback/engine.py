@@ -27,9 +27,7 @@ from securebench.core import (
     Control,
     Profile,
     RollbackCapability,
-    RollbackError,
     Transaction,
-    TransactionStatus,
 )
 
 
@@ -58,13 +56,29 @@ class RollbackExecution:
     control_id: str
     host: str
     success: bool
-    message: str = ""
+    message: str
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.control_id, str) or not self.control_id.strip():
+            raise ValueError("control_id must be a non-empty string")
+        if not isinstance(self.host, str) or not self.host.strip():
+            raise ValueError("host must be a non-empty string")
+        if not isinstance(self.message, str) or not self.message.strip():
+            raise ValueError("message must be a non-empty string")
 
     @property
     def succeeded(self) -> bool:
         """Return True only when rollback completed successfully."""
 
         return self.success
+
+
+@dataclass(frozen=True, slots=True)
+class TransactionRollbackResult:
+    """Aggregate result of rolling back a whole transaction."""
+
+    success: bool
+    executions: tuple[RollbackExecution, ...] = ()
 
 
 class RollbackEngine:
@@ -92,8 +106,18 @@ class RollbackEngine:
         Unsupported or disallowed best-effort rollback fails closed
         without calling the provider.
         """
-        # Locate the matching change by control_id + host
         change = self._find_change(transaction, control.control_id, host)
+
+        if change is None:
+            return RollbackExecution(
+                control_id=control.control_id,
+                host=host,
+                success=False,
+                message=(
+                    f"No change found for control '{control.control_id}' "
+                    f"on host '{host}'."
+                ),
+            )
 
         if control.rollback_capability is RollbackCapability.UNSUPPORTED:
             return RollbackExecution(
@@ -128,7 +152,7 @@ class RollbackEngine:
                 success=False,
                 message=(
                     f"Only successful changes can be rolled back; "
-                    f"change is in state '{change.status.value}'."
+                    f"change status is '{change.status.value}'."
                 ),
             )
 
@@ -140,7 +164,7 @@ class RollbackEngine:
                 control_id=control.control_id,
                 host=host,
                 success=False,
-                message=str(exc),
+                message=str(exc) or "Provider raised an unexpected error.",
             )
 
         if result.success:
@@ -156,7 +180,7 @@ class RollbackEngine:
         transaction: Transaction,
         controls: dict[str, Control],
         profile: Profile | None = None,
-    ) -> tuple[RollbackExecution, ...]:
+    ) -> TransactionRollbackResult:
         """
         Roll back all successful changes in reverse order.
 
@@ -196,27 +220,27 @@ class RollbackEngine:
             if not result.success:
                 break
 
-        if results and all(r.success for r in results):
-            # only mark fully rolled back when every attempted change succeeded
-            # and no successful changes remain
-            if not any(
-                c.status is ChangeStatus.SUCCESS for c in transaction.changes
-            ):
-                transaction.mark_rolled_back()
-        elif results:
+        overall_success = bool(results) and all(r.success for r in results)
+
+        if overall_success and not any(
+            c.status is ChangeStatus.SUCCESS for c in transaction.changes
+        ):
+            transaction.mark_rolled_back()
+        elif results and not overall_success:
             transaction.mark_rollback_required()
 
-        return tuple(results)
+        return TransactionRollbackResult(
+            success=overall_success,
+            executions=tuple(results),
+        )
 
     @staticmethod
     def _find_change(
         transaction: Transaction,
         control_id: str,
         host: str,
-    ) -> ChangeRecord:
+    ) -> ChangeRecord | None:
         for change in transaction.changes:
             if change.control_id == control_id and change.host == host:
                 return change
-        raise RollbackError(
-            f"No change found for control '{control_id}' on host '{host}'."
-        )
+        return None
