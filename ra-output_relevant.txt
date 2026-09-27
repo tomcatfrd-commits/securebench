@@ -8,7 +8,7 @@ collected 591 items
 
 tests\integration\test_audit_plan_flow.py ....                           [  0%]
 tests\integration\test_configuration_loading.py .............            [  2%]
-tests\integration\test_remediation_verification_flow.py FFFF             [  3%]
+tests\integration\test_remediation_verification_flow.py F...             [  3%]
 tests\integration\test_transaction_flow.py FFFFF                         [  4%]
 tests\safety\test_ansible_boundary.py FFFFFFFFFFFFF                      [  6%]
 tests\safety\test_approval_boundary.py .......                           [  7%]
@@ -32,7 +32,7 @@ tests\safety\test_reporting_boundary.py FFFFFFFFFFFF                     [ 41%]
 tests\safety\test_rollback_boundary.py FFFFFFF                           [ 42%]
 tests\safety\test_snapshot_boundary.py .FFFFFFFFFFFF                     [ 44%]
 tests\safety\test_transaction_invariants.py FFFFFFF                      [ 45%]
-tests\safety\test_verification_boundary.py FFFFFFFF..F                   [ 47%]
+tests\safety\test_verification_boundary.py ...........                   [ 47%]
 tests\unit\test_ansible_execution.py FFFFFFFFFFFFFFFFF                   [ 50%]
 tests\unit\test_audit.py ...............                                 [ 53%]
 tests\unit\test_conflict_resolution.py .............                     [ 55%]
@@ -50,7 +50,7 @@ tests\unit\test_rollback.py FFFFFFFFFFFFFF                               [ 90%]
 tests\unit\test_rollback_transaction.py FFFFFFFFFF                       [ 92%]
 tests\unit\test_snapshot.py FFFFFFF...FF                                 [ 94%]
 tests\unit\test_transaction.py ..................                        [ 97%]
-tests\unit\test_verification.py FFFFFFF.F.FFF..                          [100%]
+tests\unit\test_verification.py ...............                          [100%]
 
 ================================== FAILURES ===================================
 ____ test_failed_audit_flows_through_precheck_remediation_and_verification ____
@@ -92,137 +92,6 @@ ____ test_failed_audit_flows_through_precheck_remediation_and_verification ____
 E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
 tests\integration\test_remediation_verification_flow.py:156: TypeError
-__________ test_verification_is_independent_of_remediation_provider ___________
-
-    def test_verification_is_independent_of_remediation_provider() -> None:
-        control, _ = _load_production_control()
-        host = "ubuntu-production-01"
-
-        remediation_provider = FakeRemediationProvider()
-        remediation_engine = RemediationEngine(remediation_provider)
-
-        verification_provider = FakeVerificationProvider()
-        verification_engine = VerificationEngine(verification_provider)
-
-        assert remediation_engine is not verification_engine
-        assert remediation_provider is not verification_provider
-
->       result = verification_engine.verify(
-            VerificationRequest(
-                control=control,
-                host=host,
-            )
-        )
-
-tests\integration\test_remediation_verification_flow.py:204:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.verification.engine.VerificationEngine object at 0x00000118342256A0>
-request = VerificationRequest(control=Control(control_id='CIS-1.1.1.1', benchmark_id='cis-ubuntu-24.04', title='Ensure cramfs ke...fy_module_not_required', 'verify_modprobe_configuration_can_be_changed')})})), host='ubuntu-production-01', context={})
-
-    def verify(self, request: VerificationRequest) -> VerificationResult:
-        if not isinstance(request, VerificationRequest):
-            raise TypeError("request must be a VerificationRequest")
-
->       return self._provider.verify(
-            control=request.control,
-            host=request.host,
-            context=request.context,
-        )
-E       TypeError: FakeVerificationProvider.verify() got an unexpected keyword argument 'context'
-
-src\securebench\verification\engine.py:52: TypeError
-_____________ test_failed_verification_does_not_report_compliance _____________
-
-    def test_failed_verification_does_not_report_compliance() -> None:
-        control, _ = _load_production_control()
-        host = "ubuntu-production-01"
-
-        class FailedVerificationProvider:
-            def verify(self, control, host: str) -> VerificationResult:
-                evidence = Evidence(
-                    control_id=control.control_id,
-                    host=host,
-                    source="failed-verification",
-                    observed={"module_loaded": True},
-                    expected={"module_loaded": False},
-                )
-
-                return VerificationResult(
-                    control_id=control.control_id,
-                    host=host,
-                    status=ComplianceStatus.FAIL,
-                    evidence=(evidence,),
-                )
-
-        engine = VerificationEngine(FailedVerificationProvider())
-
->       result = engine.verify(
-            VerificationRequest(
-                control=control,
-                host=host,
-            )
-        )
-
-tests\integration\test_remediation_verification_flow.py:242:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.verification.engine.VerificationEngine object at 0x0000011833D1E710>
-request = VerificationRequest(control=Control(control_id='CIS-1.1.1.1', benchmark_id='cis-ubuntu-24.04', title='Ensure cramfs ke...fy_module_not_required', 'verify_modprobe_configuration_can_be_changed')})})), host='ubuntu-production-01', context={})
-
-    def verify(self, request: VerificationRequest) -> VerificationResult:
-        if not isinstance(request, VerificationRequest):
-            raise TypeError("request must be a VerificationRequest")
-
->       return self._provider.verify(
-            control=request.control,
-            host=request.host,
-            context=request.context,
-        )
-E       TypeError: test_failed_verification_does_not_report_compliance.<locals>.FailedVerificationProvider.verify() got an unexpected keyword argument 'context'
-
-src\securebench\verification\engine.py:52: TypeError
-________________ test_verification_unknown_result_fails_closed ________________
-
-    def test_verification_unknown_result_fails_closed() -> None:
-        control, _ = _load_production_control()
-        host = "ubuntu-production-01"
-
-        class UnknownVerificationProvider:
-            def verify(self, control, host: str) -> VerificationResult:
-                return VerificationResult(
-                    control_id=control.control_id,
-                    host=host,
-                    status=ComplianceStatus.UNKNOWN,
-                )
-
-        engine = VerificationEngine(UnknownVerificationProvider())
-
->       result = engine.verify(
-            VerificationRequest(
-                control=control,
-                host=host,
-            )
-        )
-
-tests\integration\test_remediation_verification_flow.py:267:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.verification.engine.VerificationEngine object at 0x00000118341539D0>
-request = VerificationRequest(control=Control(control_id='CIS-1.1.1.1', benchmark_id='cis-ubuntu-24.04', title='Ensure cramfs ke...fy_module_not_required', 'verify_modprobe_configuration_can_be_changed')})})), host='ubuntu-production-01', context={})
-
-    def verify(self, request: VerificationRequest) -> VerificationResult:
-        if not isinstance(request, VerificationRequest):
-            raise TypeError("request must be a VerificationRequest")
-
->       return self._provider.verify(
-            control=request.control,
-            host=request.host,
-            context=request.context,
-        )
-E       TypeError: test_verification_unknown_result_fails_closed.<locals>.UnknownVerificationProvider.verify() got an unexpected keyword argument 'context'
-
-src\securebench\verification\engine.py:52: TypeError
 _______ test_transaction_can_record_successful_remediation_and_rollback _______
 
     def test_transaction_can_record_successful_remediation_and_rollback() -> None:
@@ -476,7 +345,7 @@ _________________________ test_audit_stores_evidence __________________________
 
         assert len(evidence) == 1
 >       assert evidence[0] is result.evidence[0]
-E       AssertionError: assert EvidenceRecord(evidence_id='TEST-1:production-01:recording-audit-provider', evidence=Evidence(control_id='TEST-1', hos...collected_at=datetime.datetime(2026, 9, 27, 9, 55, 11, 871253, tzinfo=datetime.timezone.utc), details={}), metadata={}) is Evidence(control_id='TEST-1', host='production-01', source='recording-audit-provider', observed={'compliant': True}, e...iant': True}, collected_at=datetime.datetime(2026, 9, 27, 9, 55, 11, 871253, tzinfo=datetime.timezone.utc), details={})
+E       AssertionError: assert EvidenceRecord(evidence_id='TEST-1:production-01:recording-audit-provider', evidence=Evidence(control_id='TEST-1', hos...collected_at=datetime.datetime(2026, 9, 27, 9, 57, 46, 616464, tzinfo=datetime.timezone.utc), details={}), metadata={}) is Evidence(control_id='TEST-1', host='production-01', source='recording-audit-provider', observed={'compliant': True}, e...iant': True}, collected_at=datetime.datetime(2026, 9, 27, 9, 57, 46, 616464, tzinfo=datetime.timezone.utc), details={})
 
 tests\safety\test_audit_boundary.py:132: AssertionError
 ___________ test_benchmark_rejects_control_from_different_benchmark ___________
@@ -537,7 +406,7 @@ src\securebench\remediation\planner.py:236: in plan
     ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.remediation.planner.RemediationPlanner object at 0x0000011833F4E3F0>
+self = <securebench.remediation.planner.RemediationPlanner object at 0x000001AB200CA030>
 controls = (Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test control.', platform='ubun...ck_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})))
 
     def _resolve_order(
@@ -611,7 +480,7 @@ src\securebench\remediation\planner.py:236: in plan
     ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.remediation.planner.RemediationPlanner object at 0x0000011834173D90>
+self = <securebench.remediation.planner.RemediationPlanner object at 0x000001AB201D7D90>
 controls = (Control(control_id='B', benchmark_id='test-benchmark', title='Control B', description='Test control.', platform='ubun...pability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=('A',), conflicts=(), metadata=mappingproxy({})),)
 
     def _resolve_order(
@@ -670,7 +539,7 @@ src\securebench\remediation\planner.py:236: in plan
     ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.remediation.planner.RemediationPlanner object at 0x00000118341903D0>
+self = <securebench.remediation.planner.RemediationPlanner object at 0x000001AB201D4750>
 controls = (Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test control.', platform='ubun...k_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})),)
 
     def _resolve_order(
@@ -843,7 +712,7 @@ E         Use -v to get more diff
 tests\safety\test_plan_integrity.py:138: AssertionError
 _______ test_production_safe_profile_requires_investigation_by_default ________
 
-loader = <securebench.core.loader.ConfigurationLoader object at 0x00000118343AFAC0>
+loader = <securebench.core.loader.ConfigurationLoader object at 0x000001AB203C68F0>
 
     def test_production_safe_profile_requires_investigation_by_default(
         loader: ConfigurationLoader,
@@ -1754,354 +1623,6 @@ ______________ test_rollback_does_not_modify_control_definition _______________
 E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
 tests\safety\test_transaction_invariants.py:319: TypeError
-___________________ test_verification_delegates_to_provider ___________________
-
-    def test_verification_delegates_to_provider() -> None:
-        control = make_control()
-        provider = RecordingVerificationProvider()
-        engine = VerificationEngine(provider=provider)
-
->       result = engine.verify(
-            VerificationRequest(
-                control=control,
-                host="production-01",
-            )
-        )
-
-tests\safety\test_verification_boundary.py:76:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.verification.engine.VerificationEngine object at 0x00000118342AB820>
-request = VerificationRequest(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descript...GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})), host='production-01', context={})
-
-    def verify(self, request: VerificationRequest) -> VerificationResult:
-        if not isinstance(request, VerificationRequest):
-            raise TypeError("request must be a VerificationRequest")
-
->       return self._provider.verify(
-            control=request.control,
-            host=request.host,
-            context=request.context,
-        )
-E       TypeError: RecordingVerificationProvider.verify() got an unexpected keyword argument 'context'
-
-src\securebench\verification\engine.py:52: TypeError
-______________ test_verification_is_read_only_at_engine_boundary ______________
-
-    def test_verification_is_read_only_at_engine_boundary() -> None:
-        control = make_control()
-        provider = RecordingVerificationProvider()
-        engine = VerificationEngine(provider=provider)
-
-        original = (
-            control.control_id,
-            control.title,
-            control.dependencies,
-            control.conflicts,
-        )
-
->       engine.verify(
-            VerificationRequest(
-                control=control,
-                host="production-01",
-            )
-        )
-
-tests\safety\test_verification_boundary.py:102:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.verification.engine.VerificationEngine object at 0x00000118342AB490>
-request = VerificationRequest(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descript...GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})), host='production-01', context={})
-
-    def verify(self, request: VerificationRequest) -> VerificationResult:
-        if not isinstance(request, VerificationRequest):
-            raise TypeError("request must be a VerificationRequest")
-
->       return self._provider.verify(
-            control=request.control,
-            host=request.host,
-            context=request.context,
-        )
-E       TypeError: RecordingVerificationProvider.verify() got an unexpected keyword argument 'context'
-
-src\securebench\verification\engine.py:52: TypeError
-_______________ test_verification_does_not_execute_remediation ________________
-
-    def test_verification_does_not_execute_remediation() -> None:
-        control = make_control()
-
-        class ProviderWithOperationTracking(
-            RecordingVerificationProvider
-        ):
-            def __init__(self) -> None:
-                super().__init__()
-                self.remediation_calls = 0
-
-            def remediate(self) -> None:
-                self.remediation_calls += 1
-
-        provider = ProviderWithOperationTracking()
-        engine = VerificationEngine(provider=provider)
-
->       engine.verify(
-            VerificationRequest(
-                control=control,
-                host="production-01",
-            )
-        )
-
-tests\safety\test_verification_boundary.py:133:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.verification.engine.VerificationEngine object at 0x000001183443F650>
-request = VerificationRequest(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descript...GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})), host='production-01', context={})
-
-    def verify(self, request: VerificationRequest) -> VerificationResult:
-        if not isinstance(request, VerificationRequest):
-            raise TypeError("request must be a VerificationRequest")
-
->       return self._provider.verify(
-            control=request.control,
-            host=request.host,
-            context=request.context,
-        )
-E       TypeError: RecordingVerificationProvider.verify() got an unexpected keyword argument 'context'
-
-src\securebench\verification\engine.py:52: TypeError
-_________________ test_verification_does_not_execute_rollback _________________
-
-    def test_verification_does_not_execute_rollback() -> None:
-        control = make_control()
-
-        class ProviderWithOperationTracking(
-            RecordingVerificationProvider
-        ):
-            def __init__(self) -> None:
-                super().__init__()
-                self.rollback_calls = 0
-
-            def rollback(self) -> None:
-                self.rollback_calls += 1
-
-        provider = ProviderWithOperationTracking()
-        engine = VerificationEngine(provider=provider)
-
->       engine.verify(
-            VerificationRequest(
-                control=control,
-                host="production-01",
-            )
-        )
-
-tests\safety\test_verification_boundary.py:159:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.verification.engine.VerificationEngine object at 0x00000118342C79B0>
-request = VerificationRequest(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descript...GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})), host='production-01', context={})
-
-    def verify(self, request: VerificationRequest) -> VerificationResult:
-        if not isinstance(request, VerificationRequest):
-            raise TypeError("request must be a VerificationRequest")
-
->       return self._provider.verify(
-            control=request.control,
-            host=request.host,
-            context=request.context,
-        )
-E       TypeError: RecordingVerificationProvider.verify() got an unexpected keyword argument 'context'
-
-src\securebench\verification\engine.py:52: TypeError
-____________________ test_failed_verification_is_preserved ____________________
-
-    def test_failed_verification_is_preserved() -> None:
-        control = make_control()
-        provider = RecordingVerificationProvider(
-            status=ComplianceStatus.FAIL,
-        )
-        engine = VerificationEngine(provider=provider)
-
->       result = engine.verify(
-            VerificationRequest(
-                control=control,
-                host="production-01",
-            )
-        )
-
-tests\safety\test_verification_boundary.py:176:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.verification.engine.VerificationEngine object at 0x00000118342C7DF0>
-request = VerificationRequest(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descript...GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})), host='production-01', context={})
-
-    def verify(self, request: VerificationRequest) -> VerificationResult:
-        if not isinstance(request, VerificationRequest):
-            raise TypeError("request must be a VerificationRequest")
-
->       return self._provider.verify(
-            control=request.control,
-            host=request.host,
-            context=request.context,
-        )
-E       TypeError: RecordingVerificationProvider.verify() got an unexpected keyword argument 'context'
-
-src\securebench\verification\engine.py:52: TypeError
-___________________ test_unknown_verification_is_preserved ____________________
-
-    def test_unknown_verification_is_preserved() -> None:
-        control = make_control()
-        provider = RecordingVerificationProvider(
-            status=ComplianceStatus.UNKNOWN,
-        )
-        engine = VerificationEngine(provider=provider)
-
->       result = engine.verify(
-            VerificationRequest(
-                control=control,
-                host="production-01",
-            )
-        )
-
-tests\safety\test_verification_boundary.py:194:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.verification.engine.VerificationEngine object at 0x0000011834312F50>
-request = VerificationRequest(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descript...GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})), host='production-01', context={})
-
-    def verify(self, request: VerificationRequest) -> VerificationResult:
-        if not isinstance(request, VerificationRequest):
-            raise TypeError("request must be a VerificationRequest")
-
->       return self._provider.verify(
-            control=request.control,
-            host=request.host,
-            context=request.context,
-        )
-E       TypeError: RecordingVerificationProvider.verify() got an unexpected keyword argument 'context'
-
-src\securebench\verification\engine.py:52: TypeError
-___________________ test_verification_evidence_is_preserved ___________________
-
-    def test_verification_evidence_is_preserved() -> None:
-        control = make_control()
-        provider = RecordingVerificationProvider()
-        engine = VerificationEngine(provider=provider)
-
->       result = engine.verify(
-            VerificationRequest(
-                control=control,
-                host="production-01",
-            )
-        )
-
-tests\safety\test_verification_boundary.py:210:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.verification.engine.VerificationEngine object at 0x0000011834313250>
-request = VerificationRequest(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descript...GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})), host='production-01', context={})
-
-    def verify(self, request: VerificationRequest) -> VerificationResult:
-        if not isinstance(request, VerificationRequest):
-            raise TypeError("request must be a VerificationRequest")
-
->       return self._provider.verify(
-            control=request.control,
-            host=request.host,
-            context=request.context,
-        )
-E       TypeError: RecordingVerificationProvider.verify() got an unexpected keyword argument 'context'
-
-src\securebench\verification\engine.py:52: TypeError
-_______________ test_verification_many_preserves_request_order ________________
-
-    def test_verification_many_preserves_request_order() -> None:
-        controls = (
-            make_control("TEST-1"),
-            make_control("TEST-2"),
-            make_control("TEST-3"),
-        )
-
-        provider = RecordingVerificationProvider()
-        engine = VerificationEngine(provider=provider)
-
-        requests = tuple(
-            VerificationRequest(
-                control=control,
-                host="production-01",
-            )
-            for control in controls
-        )
-
->       results = engine.verify_many(requests)
-                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-tests\safety\test_verification_boundary.py:242:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\verification\engine.py:62: in verify_many
-    return tuple(self.verify(request) for request in requests)
-           ^^^^^
-src\securebench\verification\engine.py:62: in <genexpr>
-    return tuple(self.verify(request) for request in requests)
-                 ^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.verification.engine.VerificationEngine object at 0x00000118344F2A80>
-request = VerificationRequest(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descript...GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})), host='production-01', context={})
-
-    def verify(self, request: VerificationRequest) -> VerificationResult:
-        if not isinstance(request, VerificationRequest):
-            raise TypeError("request must be a VerificationRequest")
-
->       return self._provider.verify(
-            control=request.control,
-            host=request.host,
-            context=request.context,
-        )
-E       TypeError: RecordingVerificationProvider.verify() got an unexpected keyword argument 'context'
-
-src\securebench\verification\engine.py:52: TypeError
-_________ test_verification_provider_failure_is_not_converted_to_pass _________
-
-    def test_verification_provider_failure_is_not_converted_to_pass() -> None:
-        control = make_control()
-
-        class FailingProvider:
-            def verify(
-                self,
-                control: Control,
-                host: str,
-            ) -> VerificationResult:
-                raise RuntimeError("verification backend failed")
-
-        engine = VerificationEngine(
-            provider=FailingProvider(),
-        )
-
-        try:
->           engine.verify(
-                VerificationRequest(
-                    control=control,
-                    host="production-01",
-                )
-            )
-
-tests\safety\test_verification_boundary.py:301:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.verification.engine.VerificationEngine object at 0x00000118341B3770>
-request = VerificationRequest(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descript...GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})), host='production-01', context={})
-
-    def verify(self, request: VerificationRequest) -> VerificationResult:
-        if not isinstance(request, VerificationRequest):
-            raise TypeError("request must be a VerificationRequest")
-
->       return self._provider.verify(
-            control=request.control,
-            host=request.host,
-            context=request.context,
-        )
-E       TypeError: test_verification_provider_failure_is_not_converted_to_pass.<locals>.FailingProvider.verify() got an unexpected keyword argument 'context'
-
-src\securebench\verification\engine.py:52: TypeError
 _________________ test_ansible_executor_builds_basic_command __________________
 
     def test_ansible_executor_builds_basic_command() -> None:
@@ -2235,7 +1756,7 @@ E       TypeError: AnsibleExecutor.__init__() got an unexpected keyword argument
 tests\unit\test_ansible_execution.py:295: TypeError
 __________________ test_backend_audit_selects_audit_playbook __________________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-9/test_backend_audit_selects_aud0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-10/test_backend_audit_selects_aud0')
 
     def test_backend_audit_selects_audit_playbook(tmp_path: Path) -> None:
         executor = FakeExecutor()
@@ -2252,7 +1773,7 @@ E       TypeError: AnsibleExecutionBackend.audit() takes 1 positional argument b
 tests\unit\test_ansible_execution.py:312: TypeError
 _______________ test_backend_precheck_selects_precheck_playbook _______________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-9/test_backend_precheck_selects_0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-10/test_backend_precheck_selects_0')
 
     def test_backend_precheck_selects_precheck_playbook(
         tmp_path: Path,
@@ -2271,7 +1792,7 @@ E       TypeError: AnsibleExecutionBackend.precheck() takes 1 positional argumen
 tests\unit\test_ansible_execution.py:341: TypeError
 _____________ test_backend_remediate_selects_remediation_playbook _____________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-9/test_backend_remediate_selects0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-10/test_backend_remediate_selects0')
 
     def test_backend_remediate_selects_remediation_playbook(
         tmp_path: Path,
@@ -2290,7 +1811,7 @@ E       TypeError: AnsibleExecutionBackend.remediate() takes 1 positional argume
 tests\unit\test_ansible_execution.py:362: TypeError
 _______________ test_backend_rollback_selects_rollback_playbook _______________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-9/test_backend_rollback_selects_0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-10/test_backend_rollback_selects_0')
 
     def test_backend_rollback_selects_rollback_playbook(
         tmp_path: Path,
@@ -2324,7 +1845,7 @@ E       TypeError: AnsibleExecutionBackend.rollback() takes 1 positional argumen
 tests\unit\test_ansible_execution.py:397: TypeError
 ______________ test_backend_verify_selects_verification_playbook ______________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-9/test_backend_verify_selects_ve0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-10/test_backend_verify_selects_ve0')
 
     def test_backend_verify_selects_verification_playbook(
         tmp_path: Path,
@@ -2343,7 +1864,7 @@ E       TypeError: AnsibleExecutionBackend.verify() takes 1 positional argument 
 tests\unit\test_ansible_execution.py:419: TypeError
 ______________ test_backend_passes_control_id_host_and_operation ______________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-9/test_backend_passes_control_id0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-10/test_backend_passes_control_id0')
 
     def test_backend_passes_control_id_host_and_operation(
         tmp_path: Path,
@@ -2362,7 +1883,7 @@ E       TypeError: AnsibleExecutionBackend.audit() takes 1 positional argument b
 tests\unit\test_ansible_execution.py:445: TypeError
 ____________________ test_backend_passes_context_variables ____________________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-9/test_backend_passes_context_va0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-10/test_backend_passes_context_va0')
 
     def test_backend_passes_context_variables(
         tmp_path: Path,
@@ -2397,7 +1918,7 @@ E       TypeError: AnsibleExecutionBackend.audit() takes 1 positional argument b
 tests\unit\test_ansible_execution.py:481: TypeError
 _____________ test_backend_fails_when_playbook_mapping_is_missing _____________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-9/test_backend_fails_when_playbo0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-10/test_backend_fails_when_playbo0')
 
     def test_backend_fails_when_playbook_mapping_is_missing(
         tmp_path: Path,
@@ -2424,7 +1945,7 @@ E           TypeError: AnsibleExecutionBackend.audit() takes 1 positional argume
 tests\unit\test_ansible_execution.py:508: TypeError
 __________ test_backend_fails_when_playbook_configuration_is_missing __________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-9/test_backend_fails_when_playbo1')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-10/test_backend_fails_when_playbo1')
 
     def test_backend_fails_when_playbook_configuration_is_missing(
         tmp_path: Path,
@@ -2449,7 +1970,7 @@ E           TypeError: AnsibleExecutionBackend.audit() takes 1 positional argume
 tests\unit\test_ansible_execution.py:530: TypeError
 ___________ test_backend_remediation_failure_is_reported_as_failed ____________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-9/test_backend_remediation_failu0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-10/test_backend_remediation_failu0')
 
     def test_backend_remediation_failure_is_reported_as_failed(
         tmp_path: Path,
@@ -2473,7 +1994,7 @@ E       TypeError: AnsibleExecutionBackend.remediate() takes 1 positional argume
 tests\unit\test_ansible_execution.py:551: TypeError
 _____________ test_backend_rollback_failure_is_reported_as_failed _____________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-9/test_backend_rollback_failure_0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-10/test_backend_rollback_failure_0')
 
     def test_backend_rollback_failure_is_reported_as_failed(
         tmp_path: Path,
@@ -2512,7 +2033,7 @@ E       TypeError: AnsibleExecutionBackend.rollback() takes 1 positional argumen
 tests\unit\test_ansible_execution.py:587: TypeError
 ____ TestControl.test_control_rejects_invalid_enum_types[severity-medium] _____
 
-self = <test_core_models.TestControl object at 0x000001183411DE20>
+self = <test_core_models.TestControl object at 0x000001AB201ADE20>
 field = 'severity', value = 'medium'
 
     @pytest.mark.parametrize(
@@ -2571,7 +2092,7 @@ E           ValueError: severity must be a ControlSeverity
 src\securebench\core\control.py:191: ValueError
 _ TestControl.test_control_rejects_invalid_enum_types[rollback_capability-guaranteed] _
 
-self = <test_core_models.TestControl object at 0x000001183416DC50>
+self = <test_core_models.TestControl object at 0x000001AB201F9CD0>
 field = 'rollback_capability', value = 'guaranteed'
 
     @pytest.mark.parametrize(
@@ -2638,7 +2159,7 @@ E           ValueError: rollback_capability must be a RollbackCapability
 src\securebench\core\control.py:199: ValueError
 _________ TestControl.test_control_rejects_invalid_dependencies_type __________
 
-self = <test_core_models.TestControl object at 0x000001183416DFD0>
+self = <test_core_models.TestControl object at 0x000001AB201FA050>
 
     def test_control_rejects_invalid_dependencies_type(self) -> None:
         with pytest.raises(TypeError):
@@ -2673,7 +2194,7 @@ E               ValueError: dependencys must be a tuple
 src\securebench\core\control.py:224: ValueError
 ___________ TestControl.test_control_rejects_invalid_conflicts_type ___________
 
-self = <test_core_models.TestControl object at 0x0000011834180B40>
+self = <test_core_models.TestControl object at 0x000001AB20214C20>
 
     def test_control_rejects_invalid_conflicts_type(self) -> None:
         with pytest.raises(TypeError):
@@ -2708,7 +2229,7 @@ E               ValueError: conflicts must be a tuple
 src\securebench\core\control.py:224: ValueError
 ______________ TestControl.test_control_rejects_self_dependency _______________
 
-self = <test_core_models.TestControl object at 0x0000011834132A50>
+self = <test_core_models.TestControl object at 0x000001AB201BEBD0>
 
     def test_control_rejects_self_dependency(self) -> None:
 >       with pytest.raises(ValueError, match="cannot depend on itself"):
@@ -2720,7 +2241,7 @@ E         Actual message: "control 'A' cannot dependency itself"
 tests\unit\test_core_models.py:128: AssertionError
 _______________ TestControl.test_control_rejects_self_conflict ________________
 
-self = <test_core_models.TestControl object at 0x0000011834165680>
+self = <test_core_models.TestControl object at 0x000001AB201ED720>
 
     def test_control_rejects_self_conflict(self) -> None:
 >       with pytest.raises(ValueError, match="cannot conflict with itself"):
@@ -2732,7 +2253,7 @@ E         Actual message: "control 'A' cannot conflict itself"
 tests\unit\test_core_models.py:132: AssertionError
 _______________ TestControl.test_invalid_safety_metadata_raises _______________
 
-self = <test_core_models.TestControl object at 0x0000011834165E50>
+self = <test_core_models.TestControl object at 0x000001AB201EDEF0>
 
     def test_invalid_safety_metadata_raises(self) -> None:
         control = make_control(metadata={"safety": "invalid"})
@@ -2767,7 +2288,7 @@ E           ValueError: control 'TEST-001' has invalid safety metadata
 src\securebench\core\control.py:270: ValueError
 ____________ TestControl.test_invalid_requirements_metadata_raises ____________
 
-self = <test_core_models.TestControl object at 0x0000011834165F90>
+self = <test_core_models.TestControl object at 0x000001AB201EE030>
 
     def test_invalid_requirements_metadata_raises(self) -> None:
         control = make_control(metadata={"requirements": "invalid"})
@@ -2801,7 +2322,7 @@ E           ValueError: control 'TEST-001' has invalid requirements metadata
 src\securebench\core\control.py:288: ValueError
 ________ TestConfigurationLoader.test_loads_real_cis_control_metadata _________
 
-self = <test_loader.TestConfigurationLoader object at 0x0000011834151590>
+self = <test_loader.TestConfigurationLoader object at 0x000001AB201E1590>
 
     def test_loads_real_cis_control_metadata(self) -> None:
         loader = ConfigurationLoader()
@@ -2815,7 +2336,7 @@ E       AssertionError: assert ('L1', 'Server', 'Workstation') == 'L1'
 tests\unit\test_loader.py:44: AssertionError
 __________ TestConfigurationLoader.test_unknown_control_fails_closed __________
 
-self = <test_loader.TestConfigurationLoader object at 0x000001183417CC00>
+self = <test_loader.TestConfigurationLoader object at 0x000001AB20210C00>
 
     def test_unknown_control_fails_closed(self) -> None:
         loader = ConfigurationLoader()
@@ -2831,7 +2352,7 @@ E        +  where False = ProfileRule(classification=<SafetyClassification.APPRO
 tests\unit\test_loader.py:106: AssertionError
 _________ TestRemediationPlanner.test_plan_item_requires_valid_action _________
 
-self = <test_planner.TestRemediationPlanner object at 0x000001183405EEA0>
+self = <test_planner.TestRemediationPlanner object at 0x000001AB200F2DD0>
 
     def test_plan_item_requires_valid_action(self) -> None:
 >       item = RemediationPlanItem(
@@ -2845,7 +2366,7 @@ E       TypeError: RemediationPlanItem.__init__() missing 1 required positional 
 tests\unit\test_planner.py:356: TypeError
 _____________ TestRemediationPlanner.test_plan_item_is_immutable ______________
 
-self = <test_planner.TestRemediationPlanner object at 0x00000118340BE750>
+self = <test_planner.TestRemediationPlanner object at 0x000001AB2014E750>
 
     def test_plan_item_is_immutable(self) -> None:
 >       item = RemediationPlanItem(
@@ -2859,7 +2380,7 @@ E       TypeError: RemediationPlanItem.__init__() missing 1 required positional 
 tests\unit\test_planner.py:368: TypeError
 _ TestControlClassifier.test_disabled_safe_control_is_not_automatically_remediable _
 
-self = <test_policy.TestControlClassifier object at 0x000001183417D590>
+self = <test_policy.TestControlClassifier object at 0x000001AB20211590>
 
     def test_disabled_safe_control_is_not_automatically_remediable(self) -> None:
         control = make_control()
@@ -2874,14 +2395,14 @@ self = <test_policy.TestControlClassifier object at 0x000001183417D590>
         assert result.automatically_remediable is False
 >       assert "disabled" in result.reason.lower()
 E       AssertionError: assert 'disabled' in 'control is classified as safe by the selected profile.'
-E        +  where 'control is classified as safe by the selected profile.' = <built-in method lower of str object at 0x0000011833E75E30>()
-E        +    where <built-in method lower of str object at 0x0000011833E75E30> = 'Control is classified as safe by the selected profile.'.lower
+E        +  where 'control is classified as safe by the selected profile.' = <built-in method lower of str object at 0x000001AB1FF05DD0>()
+E        +    where <built-in method lower of str object at 0x000001AB1FF05DD0> = 'Control is classified as safe by the selected profile.'.lower
 E        +      where 'Control is classified as safe by the selected profile.' = ClassificationResult(control_id='TEST-001', classification=<SafetyClassification.SAFE: 'safe'>, enabled=False, requires_precheck=False, requires_approval=False, reason='Control is classified as safe by the selected profile.').reason
 
 tests\unit\test_policy.py:147: AssertionError
 __________ TestClassificationPolicyRule.test_safe_allows_remediation __________
 
-self = <test_policy.TestClassificationPolicyRule object at 0x00000118341520D0>
+self = <test_policy.TestClassificationPolicyRule object at 0x000001AB201E20D0>
 
     def test_safe_allows_remediation(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2895,7 +2416,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:152: TypeError
 ___ TestClassificationPolicyRule.test_safe_with_precheck_requires_precheck ____
 
-self = <test_policy.TestClassificationPolicyRule object at 0x0000011834152210>
+self = <test_policy.TestClassificationPolicyRule object at 0x000001AB201E2210>
 
     def test_safe_with_precheck_requires_precheck(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2909,7 +2430,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:165: TypeError
 ____ TestClassificationPolicyRule.test_approval_required_requires_approval ____
 
-self = <test_policy.TestClassificationPolicyRule object at 0x00000118340E6520>
+self = <test_policy.TestClassificationPolicyRule object at 0x000001AB2016E650>
 
     def test_approval_required_requires_approval(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2924,7 +2445,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:178: TypeError
 ____________ TestClassificationPolicyRule.test_investigate_denies _____________
 
-self = <test_policy.TestClassificationPolicyRule object at 0x00000118340E6650>
+self = <test_policy.TestClassificationPolicyRule object at 0x000001AB2016E780>
 
     def test_investigate_denies(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2938,7 +2459,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:191: TypeError
 _____________ TestClassificationPolicyRule.test_prohibited_denies _____________
 
-self = <test_policy.TestClassificationPolicyRule object at 0x0000011833F1AE70>
+self = <test_policy.TestClassificationPolicyRule object at 0x000001AB1FFA6E70>
 
     def test_prohibited_denies(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2953,7 +2474,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:202: TypeError
 ______ TestRollbackPolicyRule.test_guaranteed_rollback_is_always_allowed ______
 
-self = <test_policy.TestRollbackPolicyRule object at 0x0000011834152350>
+self = <test_policy.TestRollbackPolicyRule object at 0x000001AB201E2350>
 
     def test_guaranteed_rollback_is_always_allowed(self) -> None:
         rule = RollbackPolicyRule()
@@ -2969,7 +2490,7 @@ E       TypeError: RollbackPolicyRule.evaluate() takes 2 positional arguments bu
 tests\unit\test_policy.py:218: TypeError
 ____ TestRollbackPolicyRule.test_best_effort_rollback_is_denied_by_default ____
 
-self = <test_policy.TestRollbackPolicyRule object at 0x0000011834152490>
+self = <test_policy.TestRollbackPolicyRule object at 0x000001AB201E2490>
 
     def test_best_effort_rollback_is_denied_by_default(self) -> None:
         rule = RollbackPolicyRule()
@@ -2987,7 +2508,7 @@ E       TypeError: RollbackPolicyRule.evaluate() takes 2 positional arguments bu
 tests\unit\test_policy.py:231: TypeError
 _ TestRollbackPolicyRule.test_best_effort_rollback_can_be_allowed_by_profile __
 
-self = <test_policy.TestRollbackPolicyRule object at 0x00000118340E6780>
+self = <test_policy.TestRollbackPolicyRule object at 0x000001AB2016E8B0>
 
     def test_best_effort_rollback_can_be_allowed_by_profile(self) -> None:
         rule = RollbackPolicyRule()
@@ -3005,7 +2526,7 @@ E       TypeError: RollbackPolicyRule.evaluate() takes 2 positional arguments bu
 tests\unit\test_policy.py:246: TypeError
 ______ TestRollbackPolicyRule.test_unsupported_rollback_is_always_denied ______
 
-self = <test_policy.TestRollbackPolicyRule object at 0x00000118340E68B0>
+self = <test_policy.TestRollbackPolicyRule object at 0x000001AB2016E9E0>
 
     def test_unsupported_rollback_is_always_denied(self) -> None:
         rule = RollbackPolicyRule()
@@ -3023,7 +2544,7 @@ E       TypeError: RollbackPolicyRule.evaluate() takes 2 positional arguments bu
 tests\unit\test_policy.py:261: TypeError
 _________ TestPolicyEngine.test_safe_with_precheck_requires_precheck __________
 
-self = <test_policy.TestPolicyEngine object at 0x00000118341525D0>
+self = <test_policy.TestPolicyEngine object at 0x000001AB201E25D0>
 
     def test_safe_with_precheck_requires_precheck(self) -> None:
         control = make_control(
@@ -3582,7 +3103,7 @@ E       AttributeError: 'JsonReporter' object has no attribute 'render'
 tests\unit\test_reporting.py:132: AttributeError
 ____________________ test_json_reporter_can_write_to_file _____________________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-9/test_json_reporter_can_write_t0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-10/test_json_reporter_can_write_t0')
 
     def test_json_reporter_can_write_to_file(tmp_path: Path) -> None:
         reporter = JsonReporter()
@@ -3630,7 +3151,7 @@ E       AttributeError: 'CsvReporter' object has no attribute 'render_audit'
 tests\unit\test_reporting.py:206: AttributeError
 ______________________ test_csv_reporter_writes_to_file _______________________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-9/test_csv_reporter_writes_to_fi0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-10/test_csv_reporter_writes_to_fi0')
 
     def test_csv_reporter_writes_to_file(tmp_path: Path) -> None:
         reporter = CsvReporter()
@@ -3754,7 +3275,7 @@ E       AttributeError: 'HtmlReporter' object has no attribute 'render_verificat
 tests\unit\test_reporting.py:347: AttributeError
 ____________________ test_html_reporter_can_write_to_file _____________________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-9/test_html_reporter_can_write_t0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-10/test_html_reporter_can_write_t0')
 
     def test_html_reporter_can_write_to_file(tmp_path: Path) -> None:
         reporter = HtmlReporter()
@@ -3824,7 +3345,7 @@ E       AttributeError: 'JsonReporter' object has no attribute 'render'
 tests\unit\test_reporting.py:416: AttributeError
 _ TestRollbackEngine.test_successful_control_rollback_marks_change_rolled_back _
 
-self = <test_rollback.TestRollbackEngine object at 0x0000011834152FD0>
+self = <test_rollback.TestRollbackEngine object at 0x000001AB201E2FD0>
 
     def test_successful_control_rollback_marks_change_rolled_back(
         self,
@@ -3847,10 +3368,10 @@ self = <test_rollback.TestRollbackEngine object at 0x0000011834152FD0>
 tests\unit\test_rollback.py:118:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.rollback.engine.RollbackEngine object at 0x0000011834226270>
+self = <securebench.rollback.engine.RollbackEngine object at 0x000001AB2028E900>
 control = Control(control_id='TEST-001', benchmark_id='test-benchmark', title='Test control', description='Test description', pl...ack_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({}))
 host = 'server01'
-transaction = <securebench.core.transaction.Transaction object at 0x0000011834478E60>
+transaction = <securebench.core.transaction.Transaction object at 0x000001AB1E23BBF0>
 
     def rollback_control(
         self,
@@ -3880,7 +3401,7 @@ E       TypeError: Transaction.get_change() got an unexpected keyword argument '
 src\securebench\rollback\engine.py:107: TypeError
 _ TestRollbackEngine.test_failed_control_rollback_marks_change_rollback_required _
 
-self = <test_rollback.TestRollbackEngine object at 0x0000011834152990>
+self = <test_rollback.TestRollbackEngine object at 0x000001AB201E2990>
 
     def test_failed_control_rollback_marks_change_rollback_required(
         self,
@@ -3903,10 +3424,10 @@ self = <test_rollback.TestRollbackEngine object at 0x0000011834152990>
 tests\unit\test_rollback.py:144:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.rollback.engine.RollbackEngine object at 0x0000011834406710>
+self = <securebench.rollback.engine.RollbackEngine object at 0x000001AB2039BED0>
 control = Control(control_id='TEST-001', benchmark_id='test-benchmark', title='Test control', description='Test description', pl...ack_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({}))
 host = 'server01'
-transaction = <securebench.core.transaction.Transaction object at 0x0000011834361450>
+transaction = <securebench.core.transaction.Transaction object at 0x000001AB20441650>
 
     def rollback_control(
         self,
@@ -3936,7 +3457,7 @@ E       TypeError: Transaction.get_change() got an unexpected keyword argument '
 src\securebench\rollback\engine.py:107: TypeError
 __________ TestRollbackEngine.test_unsupported_rollback_fails_closed __________
 
-self = <test_rollback.TestRollbackEngine object at 0x00000118340E7100>
+self = <test_rollback.TestRollbackEngine object at 0x000001AB2016F230>
 
     def test_unsupported_rollback_fails_closed(self) -> None:
         provider = FakeRollbackProvider()
@@ -3959,10 +3480,10 @@ self = <test_rollback.TestRollbackEngine object at 0x00000118340E7100>
 tests\unit\test_rollback.py:165:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.rollback.engine.RollbackEngine object at 0x0000011834406AD0>
+self = <securebench.rollback.engine.RollbackEngine object at 0x000001AB20399810>
 control = Control(control_id='TEST-001', benchmark_id='test-benchmark', title='Test control', description='Test description', pl...k_capability=<RollbackCapability.UNSUPPORTED: 'unsupported'>, dependencies=(), conflicts=(), metadata=mappingproxy({}))
 host = 'server01'
-transaction = <securebench.core.transaction.Transaction object at 0x0000011834361850>
+transaction = <securebench.core.transaction.Transaction object at 0x000001AB20440D50>
 
     def rollback_control(
         self,
@@ -3987,7 +3508,7 @@ E           securebench.core.exceptions.RollbackError: control 'TEST-001' does n
 src\securebench\rollback\engine.py:103: RollbackError
 ______ TestRollbackEngine.test_best_effort_rollback_is_denied_by_default ______
 
-self = <test_rollback.TestRollbackEngine object at 0x00000118340E7230>
+self = <test_rollback.TestRollbackEngine object at 0x000001AB2016F360>
 
     def test_best_effort_rollback_is_denied_by_default(self) -> None:
         provider = FakeRollbackProvider()
@@ -4014,7 +3535,7 @@ E       TypeError: RollbackEngine.rollback_control() got an unexpected keyword a
 tests\unit\test_rollback.py:188: TypeError
 _________ TestRollbackEngine.test_best_effort_rollback_can_be_allowed _________
 
-self = <test_rollback.TestRollbackEngine object at 0x0000011833F1BAD0>
+self = <test_rollback.TestRollbackEngine object at 0x000001AB1FFA7AD0>
 
     def test_best_effort_rollback_can_be_allowed(self) -> None:
         provider = FakeRollbackProvider()
@@ -4041,7 +3562,7 @@ E       TypeError: RollbackEngine.rollback_control() got an unexpected keyword a
 tests\unit\test_rollback.py:213: TypeError
 ______ TestRollbackEngine.test_only_successful_change_can_be_rolled_back ______
 
-self = <test_rollback.TestRollbackEngine object at 0x000001183417DF20>
+self = <test_rollback.TestRollbackEngine object at 0x000001AB20211F20>
 
     def test_only_successful_change_can_be_rolled_back(self) -> None:
         provider = FakeRollbackProvider()
@@ -4062,10 +3583,10 @@ self = <test_rollback.TestRollbackEngine object at 0x000001183417DF20>
 tests\unit\test_rollback.py:236:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.rollback.engine.RollbackEngine object at 0x0000011834580170>
+self = <securebench.rollback.engine.RollbackEngine object at 0x000001AB20494A70>
 control = Control(control_id='TEST-001', benchmark_id='test-benchmark', title='Test control', description='Test description', pl...ack_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({}))
 host = 'server01'
-transaction = <securebench.core.transaction.Transaction object at 0x00000118345B8F30>
+transaction = <securebench.core.transaction.Transaction object at 0x000001AB205D8FA0>
 
     def rollback_control(
         self,
@@ -4095,7 +3616,7 @@ E       TypeError: Transaction.get_change() got an unexpected keyword argument '
 src\securebench\rollback\engine.py:107: TypeError
 _____________ TestRollbackEngine.test_unknown_change_fails_closed _____________
 
-self = <test_rollback.TestRollbackEngine object at 0x000001183417E030>
+self = <test_rollback.TestRollbackEngine object at 0x000001AB20212030>
 
     def test_unknown_change_fails_closed(self) -> None:
         provider = FakeRollbackProvider()
@@ -4113,10 +3634,10 @@ self = <test_rollback.TestRollbackEngine object at 0x000001183417E030>
 tests\unit\test_rollback.py:253:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.rollback.engine.RollbackEngine object at 0x000001183417F570>
+self = <securebench.rollback.engine.RollbackEngine object at 0x000001AB203918C0>
 control = Control(control_id='TEST-001', benchmark_id='test-benchmark', title='Test control', description='Test description', pl...ack_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({}))
 host = 'server01'
-transaction = <securebench.core.transaction.Transaction object at 0x00000118345B8EC0>
+transaction = <securebench.core.transaction.Transaction object at 0x000001AB205D9BE0>
 
     def rollback_control(
         self,
@@ -4146,7 +3667,7 @@ E       TypeError: Transaction.get_change() got an unexpected keyword argument '
 src\securebench\rollback\engine.py:107: TypeError
 __ TestRollbackEngine.test_provider_failure_does_not_mark_change_rolled_back __
 
-self = <test_rollback.TestRollbackEngine object at 0x000001183427B450>
+self = <test_rollback.TestRollbackEngine object at 0x000001AB2030B550>
 
     def test_provider_failure_does_not_mark_change_rolled_back(self) -> None:
         provider = FakeRollbackProvider(success=False)
@@ -4167,10 +3688,10 @@ self = <test_rollback.TestRollbackEngine object at 0x000001183427B450>
 tests\unit\test_rollback.py:272:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.rollback.engine.RollbackEngine object at 0x000001183417EF10>
+self = <securebench.rollback.engine.RollbackEngine object at 0x000001AB20391AE0>
 control = Control(control_id='TEST-001', benchmark_id='test-benchmark', title='Test control', description='Test description', pl...ack_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({}))
 host = 'server01'
-transaction = <securebench.core.transaction.Transaction object at 0x00000118345B8670>
+transaction = <securebench.core.transaction.Transaction object at 0x000001AB205D96A0>
 
     def rollback_control(
         self,
@@ -4200,7 +3721,7 @@ E       TypeError: Transaction.get_change() got an unexpected keyword argument '
 src\securebench\rollback\engine.py:107: TypeError
 _ TestRollbackEngine.test_transaction_rollback_processes_changes_in_reverse_order _
 
-self = <test_rollback.TestRollbackEngine object at 0x000001183427B650>
+self = <test_rollback.TestRollbackEngine object at 0x000001AB2030B750>
 
     def test_transaction_rollback_processes_changes_in_reverse_order(
         self,
@@ -4245,9 +3766,9 @@ self = <test_rollback.TestRollbackEngine object at 0x000001183427B650>
 tests\unit\test_rollback.py:312:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.rollback.engine.RollbackEngine object at 0x00000118344ECD50>
+self = <securebench.rollback.engine.RollbackEngine object at 0x000001AB20502650>
 controls = {'A': Control(control_id='A', benchmark_id='test-benchmark', title='Test control', description='Test description', pla...ck_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({}))}
-transaction = <securebench.core.transaction.Transaction object at 0x00000118345B8750>
+transaction = <securebench.core.transaction.Transaction object at 0x000001AB205D9A90>
 
     def rollback_transaction(
         self,
@@ -4275,7 +3796,7 @@ E       AttributeError: type object 'TransactionStatus' has no attribute 'FAILED
 src\securebench\rollback\engine.py:162: AttributeError
 ______ TestRollbackEngine.test_transaction_rollback_stops_after_failure _______
 
-self = <test_rollback.TestRollbackEngine object at 0x00000118341A4140>
+self = <test_rollback.TestRollbackEngine object at 0x000001AB20238140>
 
     def test_transaction_rollback_stops_after_failure(self) -> None:
         class SelectiveProvider(FakeRollbackProvider):
@@ -4339,9 +3860,9 @@ self = <test_rollback.TestRollbackEngine object at 0x00000118341A4140>
 tests\unit\test_rollback.py:386:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.rollback.engine.RollbackEngine object at 0x00000118344ED650>
+self = <securebench.rollback.engine.RollbackEngine object at 0x000001AB20503650>
 controls = {'A': Control(control_id='A', benchmark_id='test-benchmark', title='Test control', description='Test description', pla...ck_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({}))}
-transaction = <securebench.core.transaction.Transaction object at 0x00000118345B94E0>
+transaction = <securebench.core.transaction.Transaction object at 0x000001AB205DA200>
 
     def rollback_transaction(
         self,
@@ -4369,7 +3890,7 @@ E       AttributeError: type object 'TransactionStatus' has no attribute 'FAILED
 src\securebench\rollback\engine.py:162: AttributeError
 _______ TestRollbackEngine.test_missing_control_definition_fails_closed _______
 
-self = <test_rollback.TestRollbackEngine object at 0x0000011834163F20>
+self = <test_rollback.TestRollbackEngine object at 0x000001AB201F7F20>
 
     def test_missing_control_definition_fails_closed(self) -> None:
         provider = FakeRollbackProvider()
@@ -4390,9 +3911,9 @@ self = <test_rollback.TestRollbackEngine object at 0x0000011834163F20>
 tests\unit\test_rollback.py:413:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.rollback.engine.RollbackEngine object at 0x000001183458A4E0>
+self = <securebench.rollback.engine.RollbackEngine object at 0x000001AB205566C0>
 controls = {}
-transaction = <securebench.core.transaction.Transaction object at 0x00000118345B9BE0>
+transaction = <securebench.core.transaction.Transaction object at 0x000001AB205DA900>
 
     def rollback_transaction(
         self,
@@ -4420,7 +3941,7 @@ E       AttributeError: type object 'TransactionStatus' has no attribute 'FAILED
 src\securebench\rollback\engine.py:162: AttributeError
 _______________ TestRollbackExecution.test_successful_execution _______________
 
-self = <test_rollback.TestRollbackExecution object at 0x0000011834153110>
+self = <test_rollback.TestRollbackExecution object at 0x000001AB201E3110>
 
     def test_successful_execution(self) -> None:
 >       execution = RollbackExecution(
@@ -4434,7 +3955,7 @@ E       TypeError: RollbackExecution.__init__() got an unexpected keyword argume
 tests\unit\test_rollback.py:425: TypeError
 _________________ TestRollbackExecution.test_failed_execution _________________
 
-self = <test_rollback.TestRollbackExecution object at 0x0000011834153250>
+self = <test_rollback.TestRollbackExecution object at 0x000001AB201E3250>
 
     def test_failed_execution(self) -> None:
 >       execution = RollbackExecution(
@@ -4448,7 +3969,7 @@ E       TypeError: RollbackExecution.__init__() got an unexpected keyword argume
 tests\unit\test_rollback.py:437: TypeError
 ____________ TestRollbackExecution.test_execution_requires_message ____________
 
-self = <test_rollback.TestRollbackExecution object at 0x00000118340E7360>
+self = <test_rollback.TestRollbackExecution object at 0x000001AB2016F490>
 
     def test_execution_requires_message(self) -> None:
         with pytest.raises(ValueError):
@@ -4891,229 +4412,8 @@ capability = <SnapshotCapability.UNSUPPORTED: 'unsupported'>
 E       TypeError: Snapshot.__init__() got an unexpected keyword argument 'transaction_id'
 
 tests\unit\test_snapshot.py:18: TypeError
-_______________ test_verification_engine_delegates_to_provider ________________
-
-    def test_verification_engine_delegates_to_provider() -> None:
-        provider = FakeVerificationProvider()
-        engine = VerificationEngine(provider=provider)
-
->       result = engine.verify(make_control(), "server01")
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: VerificationEngine.verify() takes 2 positional arguments but 3 were given
-
-tests\unit\test_verification.py:74: TypeError
-______________ test_verification_engine_does_not_modify_control _______________
-
-    def test_verification_engine_does_not_modify_control() -> None:
-        provider = FakeVerificationProvider()
-        engine = VerificationEngine(provider=provider)
-
-        control = make_control()
->       result = engine.verify(control, "server01")
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: VerificationEngine.verify() takes 2 positional arguments but 3 were given
-
-tests\unit\test_verification.py:87: TypeError
-__________ test_verification_engine_preserves_provider_status[pass] ___________
-
-status = <ComplianceStatus.PASS: 'pass'>
-
-    @pytest.mark.parametrize(
-        "status",
-        [
-            ComplianceStatus.PASS,
-            ComplianceStatus.FAIL,
-            ComplianceStatus.UNKNOWN,
-            ComplianceStatus.ERROR,
-        ],
-    )
-    def test_verification_engine_preserves_provider_status(
-        status: ComplianceStatus,
-    ) -> None:
-        provider = FakeVerificationProvider(status=status)
-        engine = VerificationEngine(provider=provider)
-
->       result = engine.verify(make_control(), "server01")
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: VerificationEngine.verify() takes 2 positional arguments but 3 were given
-
-tests\unit\test_verification.py:109: TypeError
-__________ test_verification_engine_preserves_provider_status[fail] ___________
-
-status = <ComplianceStatus.FAIL: 'fail'>
-
-    @pytest.mark.parametrize(
-        "status",
-        [
-            ComplianceStatus.PASS,
-            ComplianceStatus.FAIL,
-            ComplianceStatus.UNKNOWN,
-            ComplianceStatus.ERROR,
-        ],
-    )
-    def test_verification_engine_preserves_provider_status(
-        status: ComplianceStatus,
-    ) -> None:
-        provider = FakeVerificationProvider(status=status)
-        engine = VerificationEngine(provider=provider)
-
->       result = engine.verify(make_control(), "server01")
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: VerificationEngine.verify() takes 2 positional arguments but 3 were given
-
-tests\unit\test_verification.py:109: TypeError
-_________ test_verification_engine_preserves_provider_status[unknown] _________
-
-status = <ComplianceStatus.UNKNOWN: 'unknown'>
-
-    @pytest.mark.parametrize(
-        "status",
-        [
-            ComplianceStatus.PASS,
-            ComplianceStatus.FAIL,
-            ComplianceStatus.UNKNOWN,
-            ComplianceStatus.ERROR,
-        ],
-    )
-    def test_verification_engine_preserves_provider_status(
-        status: ComplianceStatus,
-    ) -> None:
-        provider = FakeVerificationProvider(status=status)
-        engine = VerificationEngine(provider=provider)
-
->       result = engine.verify(make_control(), "server01")
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: VerificationEngine.verify() takes 2 positional arguments but 3 were given
-
-tests\unit\test_verification.py:109: TypeError
-__________ test_verification_engine_preserves_provider_status[error] __________
-
-status = <ComplianceStatus.ERROR: 'error'>
-
-    @pytest.mark.parametrize(
-        "status",
-        [
-            ComplianceStatus.PASS,
-            ComplianceStatus.FAIL,
-            ComplianceStatus.UNKNOWN,
-            ComplianceStatus.ERROR,
-        ],
-    )
-    def test_verification_engine_preserves_provider_status(
-        status: ComplianceStatus,
-    ) -> None:
-        provider = FakeVerificationProvider(status=status)
-        engine = VerificationEngine(provider=provider)
-
->       result = engine.verify(make_control(), "server01")
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: VerificationEngine.verify() takes 2 positional arguments but 3 were given
-
-tests\unit\test_verification.py:109: TypeError
-_______ test_verification_engine_is_read_only_from_workflow_perspective _______
-
-    def test_verification_engine_is_read_only_from_workflow_perspective() -> None:
-        provider = FakeVerificationProvider()
-        engine = VerificationEngine(provider=provider)
-
-        control = make_control()
-
-        before = (
-            control.control_id,
-            control.title,
-            control.remediation,
-            control.rollback,
-            control.metadata,
-        )
-
->       engine.verify(control, "server01")
-E       TypeError: VerificationEngine.verify() takes 2 positional arguments but 3 were given
-
-tests\unit\test_verification.py:129: TypeError
-________________ test_verification_many_preserves_input_order _________________
-
-    def test_verification_many_preserves_input_order() -> None:
-        provider = FakeVerificationProvider()
-        engine = VerificationEngine(provider=provider)
-
-        controls = [
-            make_control("TEST-1"),
-            make_control("TEST-2"),
-            make_control("TEST-3"),
-        ]
-
-        requests = [
-            VerificationRequest(control=controls[0], host="server01"),
-            VerificationRequest(control=controls[1], host="server02"),
-            VerificationRequest(control=controls[2], host="server03"),
-        ]
-
->       results = engine.verify_many(requests)
-                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-tests\unit\test_verification.py:170:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\verification\engine.py:62: in verify_many
-    return tuple(self.verify(request) for request in requests)
-           ^^^^^
-src\securebench\verification\engine.py:62: in <genexpr>
-    return tuple(self.verify(request) for request in requests)
-                 ^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.verification.engine.VerificationEngine object at 0x00000118345E4190>
-request = VerificationRequest(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descript...ult': 'safe', 'prechecks': ()}), 'requirements': mappingproxy({'setting': 'expected'})})), host='server01', context={})
-
-    def verify(self, request: VerificationRequest) -> VerificationResult:
-        if not isinstance(request, VerificationRequest):
-            raise TypeError("request must be a VerificationRequest")
-
->       return self._provider.verify(
-            control=request.control,
-            host=request.host,
-            context=request.context,
-        )
-E       TypeError: FakeVerificationProvider.verify() got an unexpected keyword argument 'context'
-
-src\securebench\verification\engine.py:52: TypeError
-__________________ test_unsupported_provider_returns_unknown __________________
-
-    def test_unsupported_provider_returns_unknown() -> None:
-        provider = UnsupportedVerificationProvider()
-        engine = VerificationEngine(provider=provider)
-
->       result = engine.verify(make_control(), "server01")
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: VerificationEngine.verify() takes 2 positional arguments but 3 were given
-
-tests\unit\test_verification.py:202: TypeError
-____________ test_unsupported_provider_does_not_claim_verification ____________
-
-    def test_unsupported_provider_does_not_claim_verification() -> None:
-        provider = UnsupportedVerificationProvider()
-        engine = VerificationEngine(provider=provider)
-
->       result = engine.verify(make_control(), "server01")
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: VerificationEngine.verify() takes 2 positional arguments but 3 were given
-
-tests\unit\test_verification.py:214: TypeError
-____________ test_verification_engine_propagates_provider_failure _____________
-
-    def test_verification_engine_propagates_provider_failure() -> None:
-        provider = FailingVerificationProvider()
-        engine = VerificationEngine(provider=provider)
-
-        with pytest.raises(RuntimeError, match="Verification failed"):
->           engine.verify(make_control(), "server01")
-E           TypeError: VerificationEngine.verify() takes 2 positional arguments but 3 were given
-
-tests\unit\test_verification.py:225: TypeError
 =========================== short test summary info ===========================
 FAILED tests/integration/test_remediation_verification_flow.py::test_failed_audit_flows_through_precheck_remediation_and_verification
-FAILED tests/integration/test_remediation_verification_flow.py::test_verification_is_independent_of_remediation_provider
-FAILED tests/integration/test_remediation_verification_flow.py::test_failed_verification_does_not_report_compliance
-FAILED tests/integration/test_remediation_verification_flow.py::test_verification_unknown_result_fails_closed
 FAILED tests/integration/test_transaction_flow.py::test_transaction_can_record_successful_remediation_and_rollback
 FAILED tests/integration/test_transaction_flow.py::test_failed_change_is_not_rolled_back
 FAILED tests/integration/test_transaction_flow.py::test_rollback_uses_reverse_change_order
@@ -5193,15 +4493,6 @@ FAILED tests/safety/test_transaction_invariants.py::test_unsupported_rollback_is
 FAILED tests/safety/test_transaction_invariants.py::test_missing_control_fails_closed
 FAILED tests/safety/test_transaction_invariants.py::test_empty_transaction_does_not_invoke_provider
 FAILED tests/safety/test_transaction_invariants.py::test_rollback_does_not_modify_control_definition
-FAILED tests/safety/test_verification_boundary.py::test_verification_delegates_to_provider
-FAILED tests/safety/test_verification_boundary.py::test_verification_is_read_only_at_engine_boundary
-FAILED tests/safety/test_verification_boundary.py::test_verification_does_not_execute_remediation
-FAILED tests/safety/test_verification_boundary.py::test_verification_does_not_execute_rollback
-FAILED tests/safety/test_verification_boundary.py::test_failed_verification_is_preserved
-FAILED tests/safety/test_verification_boundary.py::test_unknown_verification_is_preserved
-FAILED tests/safety/test_verification_boundary.py::test_verification_evidence_is_preserved
-FAILED tests/safety/test_verification_boundary.py::test_verification_many_preserves_request_order
-FAILED tests/safety/test_verification_boundary.py::test_verification_provider_failure_is_not_converted_to_pass
 FAILED tests/unit/test_ansible_execution.py::test_ansible_executor_builds_basic_command
 FAILED tests/unit/test_ansible_execution.py::test_ansible_executor_serializes_extra_vars_as_json
 FAILED tests/unit/test_ansible_execution.py::test_ansible_executor_adds_check_mode
@@ -5308,15 +4599,4 @@ FAILED tests/unit/test_snapshot.py::test_snapshot_requires_non_empty_host - T...
 FAILED tests/unit/test_snapshot.py::test_snapshot_requires_non_empty_transaction_id
 FAILED tests/unit/test_snapshot.py::test_unsupported_snapshot_provider_create_fails_closed
 FAILED tests/unit/test_snapshot.py::test_unsupported_snapshot_provider_restore_fails_closed
-FAILED tests/unit/test_verification.py::test_verification_engine_delegates_to_provider
-FAILED tests/unit/test_verification.py::test_verification_engine_does_not_modify_control
-FAILED tests/unit/test_verification.py::test_verification_engine_preserves_provider_status[pass]
-FAILED tests/unit/test_verification.py::test_verification_engine_preserves_provider_status[fail]
-FAILED tests/unit/test_verification.py::test_verification_engine_preserves_provider_status[unknown]
-FAILED tests/unit/test_verification.py::test_verification_engine_preserves_provider_status[error]
-FAILED tests/unit/test_verification.py::test_verification_engine_is_read_only_from_workflow_perspective
-FAILED tests/unit/test_verification.py::test_verification_many_preserves_input_order
-FAILED tests/unit/test_verification.py::test_unsupported_provider_returns_unknown
-FAILED tests/unit/test_verification.py::test_unsupported_provider_does_not_claim_verification
-FAILED tests/unit/test_verification.py::test_verification_engine_propagates_provider_failure
-======================= 209 failed, 382 passed in 2.63s =======================
+======================= 186 failed, 405 passed in 2.47s =======================
