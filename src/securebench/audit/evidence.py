@@ -8,9 +8,6 @@ Evidence is intentionally separate from AuditResult:
 
     Evidence    = what was observed
     AuditResult = how that observation was evaluated
-
-EvidenceRecord is the storage-layer wrapper that adds a stable identifier and
-metadata without changing the original Evidence object.
 """
 
 from __future__ import annotations
@@ -18,6 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Mapping
+from uuid import uuid4
 
 from securebench.core import Evidence
 
@@ -29,8 +27,6 @@ class EvidenceRecord:
 
     ``evidence_id`` provides a stable reference that can later be attached
     to transaction records, reports, and rollback records.
-
-    The original ``Evidence`` object is retained by identity.
     """
 
     evidence_id: str
@@ -38,10 +34,7 @@ class EvidenceRecord:
     metadata: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        if not isinstance(self.evidence_id, str):
-            raise TypeError("evidence_id must be a string")
-
-        if not self.evidence_id.strip():
+        if not isinstance(self.evidence_id, str) or not self.evidence_id.strip():
             raise ValueError("evidence_id must not be empty")
 
         if not isinstance(self.evidence, Evidence):
@@ -52,13 +45,8 @@ class EvidenceStore:
     """
     In-memory evidence store.
 
-    Evidence is stored internally as EvidenceRecord objects so that every
-    observation has a stable storage identity and optional metadata.
-
-    The store exposes two different retrieval levels:
-
-    - get()/all(): storage records, including evidence IDs and metadata.
-    - for_control(): the original Evidence objects for control-level consumers.
+    The store keeps EvidenceRecord objects internally while exposing the
+    underlying Evidence objects for control/host-oriented queries.
 
     A persistent backend can later replace this implementation without
     changing the audit engine API.
@@ -69,45 +57,90 @@ class EvidenceStore:
 
     def add(
         self,
-        evidence_id: str,
-        evidence: Evidence,
+        evidence: Evidence | str,
+        evidence_value: Evidence | None = None,
         *,
+        evidence_id: str | None = None,
         metadata: Mapping[str, Any] | None = None,
     ) -> EvidenceRecord:
         """
-        Store evidence under a unique ID.
+        Store evidence and return its EvidenceRecord.
 
-        Duplicate IDs are rejected rather than silently overwritten.
+        Preferred form:
 
-        The supplied Evidence instance is stored unchanged. In particular,
-        the returned EvidenceRecord references the exact same Evidence object.
+            store.add(evidence)
+
+        An explicit ID may also be supplied:
+
+            store.add(evidence, evidence_id="evidence-001")
+
+        For backward compatibility with the previous API, this form is also
+        accepted:
+
+            store.add("evidence-001", evidence)
+
+        If no ID is supplied, a unique ID is generated automatically.
         """
 
-        if not isinstance(evidence_id, str):
-            raise TypeError("evidence_id must be a string")
+        if isinstance(evidence, str):
+            if evidence_value is None:
+                raise TypeError(
+                    "evidence must be supplied when the first argument "
+                    "is an evidence ID"
+                )
 
-        if not evidence_id.strip():
-            raise ValueError("evidence_id must not be empty")
+            if evidence_id is not None:
+                raise TypeError(
+                    "evidence_id must not be supplied when the first "
+                    "argument is already an evidence ID"
+                )
 
-        if not isinstance(evidence, Evidence):
+            resolved_evidence_id = evidence
+            resolved_evidence = evidence_value
+
+        else:
+            if evidence_value is not None:
+                raise TypeError(
+                    "evidence_value must not be supplied when the first "
+                    "argument is an Evidence object"
+                )
+
+            resolved_evidence = evidence
+
+            if not isinstance(resolved_evidence, Evidence):
+                raise TypeError("evidence must be an Evidence instance")
+
+            resolved_evidence_id = (
+                evidence_id
+                if evidence_id is not None
+                else self._generate_evidence_id()
+            )
+
+        if not isinstance(resolved_evidence, Evidence):
             raise TypeError("evidence must be an Evidence instance")
 
-        if evidence_id in self._records:
+        if not isinstance(resolved_evidence_id, str):
+            raise TypeError("evidence_id must be a string")
+
+        if not resolved_evidence_id.strip():
+            raise ValueError("evidence_id must not be empty")
+
+        if resolved_evidence_id in self._records:
             raise ValueError(
-                f"evidence ID '{evidence_id}' already exists"
+                f"evidence ID '{resolved_evidence_id}' already exists"
             )
 
         record = EvidenceRecord(
-            evidence_id=evidence_id,
-            evidence=evidence,
+            evidence_id=resolved_evidence_id,
+            evidence=resolved_evidence,
             metadata=dict(metadata or {}),
         )
 
-        self._records[evidence_id] = record
+        self._records[resolved_evidence_id] = record
         return record
 
     def get(self, evidence_id: str) -> EvidenceRecord:
-        """Return the complete stored record by evidence ID."""
+        """Return an evidence record by ID."""
 
         try:
             return self._records[evidence_id]
@@ -122,7 +155,7 @@ class EvidenceStore:
         return evidence_id in self._records
 
     def all(self) -> tuple[EvidenceRecord, ...]:
-        """Return all stored records in insertion order."""
+        """Return all stored evidence records in insertion order."""
 
         return tuple(self._records.values())
 
@@ -132,12 +165,13 @@ class EvidenceStore:
         host: str | None = None,
     ) -> tuple[Evidence, ...]:
         """
-        Return the original Evidence objects belonging to a control.
+        Return Evidence objects belonging to a control.
 
         If ``host`` is supplied, results are restricted to that host.
 
-        The returned objects are the exact Evidence instances originally
-        supplied to add(); they are not reconstructed copies.
+        This method deliberately returns Evidence rather than EvidenceRecord
+        because callers of the audit layer care about the observed evidence,
+        while the internal record ID is an implementation/storage concern.
         """
 
         return tuple(
@@ -147,10 +181,35 @@ class EvidenceStore:
             and (host is None or record.evidence.host == host)
         )
 
+    def records_for_control(
+        self,
+        control_id: str,
+        host: str | None = None,
+    ) -> tuple[EvidenceRecord, ...]:
+        """
+        Return complete EvidenceRecord objects for a control.
+
+        This provides access to storage metadata and evidence IDs when those
+        are required by transaction/reporting/rollback layers.
+        """
+
+        return tuple(
+            record
+            for record in self._records.values()
+            if record.evidence.control_id == control_id
+            and (host is None or record.evidence.host == host)
+        )
+
     def clear(self) -> None:
         """Remove all in-memory evidence."""
 
         self._records.clear()
+
+    @staticmethod
+    def _generate_evidence_id() -> str:
+        """Generate a unique identifier for automatically stored evidence."""
+
+        return f"evidence-{uuid4().hex}"
 
 
 def create_evidence(
