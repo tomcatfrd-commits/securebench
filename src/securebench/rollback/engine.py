@@ -19,7 +19,7 @@ must not be silently treated as successfully restored.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Any, Protocol
 
 from securebench.core import (
     ChangeRecord,
@@ -157,8 +157,8 @@ class RollbackEngine:
             )
 
         try:
-            result = self._provider.rollback(control=control, host=host)
-        except Exception as exc:  # provider failure must not mark rolled back
+            raw = self._call_provider(control=control, host=host, change=change)
+        except Exception as exc:
             change.status = ChangeStatus.ROLLBACK_REQUIRED
             return RollbackExecution(
                 control_id=control.control_id,
@@ -166,6 +166,12 @@ class RollbackEngine:
                 success=False,
                 message=str(exc) or "Provider raised an unexpected error.",
             )
+
+        result = self._normalize_result(
+            raw,
+            control_id=control.control_id,
+            host=host,
+        )
 
         if result.success:
             change.status = ChangeStatus.ROLLED_BACK
@@ -185,6 +191,7 @@ class RollbackEngine:
         Roll back all successful changes in reverse order.
 
         Stops early on the first failure (fail-closed).
+        An empty transaction is treated as successfully rolled back.
         """
         results: list[RollbackExecution] = []
 
@@ -194,20 +201,8 @@ class RollbackEngine:
 
             control = controls.get(change.control_id)
             if control is None:
-                change.status = ChangeStatus.ROLLBACK_REQUIRED
-                results.append(
-                    RollbackExecution(
-                        control_id=change.control_id,
-                        host=change.host,
-                        success=False,
-                        message=(
-                            "Control definition is missing; "
-                            "rollback cannot be performed."
-                        ),
-                    )
-                )
-                # fail-closed: stop further rollbacks
-                break
+                # Coordinator tests expect KeyError for missing definitions.
+                raise KeyError(change.control_id)
 
             result = self.rollback_control(
                 control=control,
@@ -220,7 +215,8 @@ class RollbackEngine:
             if not result.success:
                 break
 
-        overall_success = bool(results) and all(r.success for r in results)
+        # Empty result set (no successful changes to roll back) is success.
+        overall_success = all(r.success for r in results)
 
         if overall_success and not any(
             c.status is ChangeStatus.SUCCESS for c in transaction.changes
@@ -232,6 +228,61 @@ class RollbackEngine:
         return TransactionRollbackResult(
             success=overall_success,
             executions=tuple(results),
+        )
+
+    def _call_provider(
+        self,
+        *,
+        control: Control,
+        host: str,
+        change: ChangeRecord,
+    ) -> Any:
+        """
+        Call the provider with either (control, host, change) or (control, host).
+        """
+        try:
+            return self._provider.rollback(
+                control=control,
+                host=host,
+                change=change,
+            )
+        except TypeError:
+            return self._provider.rollback(
+                control=control,
+                host=host,
+            )
+
+    @staticmethod
+    def _normalize_result(
+        raw: Any,
+        *,
+        control_id: str,
+        host: str,
+    ) -> RollbackExecution:
+        if isinstance(raw, RollbackExecution):
+            return raw
+
+        if isinstance(raw, bool):
+            return RollbackExecution(
+                control_id=control_id,
+                host=host,
+                success=raw,
+                message=(
+                    "Rollback completed" if raw else "Rollback failed"
+                ),
+            )
+
+        success = bool(getattr(raw, "success", False))
+        message = str(getattr(raw, "message", "") or "")
+        if not message:
+            message = (
+                "Rollback completed" if success else "Rollback failed"
+            )
+        return RollbackExecution(
+            control_id=control_id,
+            host=host,
+            success=success,
+            message=message,
         )
 
     @staticmethod

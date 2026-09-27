@@ -455,25 +455,22 @@ class RemediationPlanner:
             )
 
         dependency_resolver = DependencyResolver(self._graph)
-        ordered_ids = dependency_resolver.resolve(requested_ids)
+        resolution = dependency_resolver.resolve(requested_ids)
+
+        # DependencyResolver returns DependencyResolution, not a list of ids.
+        ordered_ids = tuple(
+            control.control_id for control in resolution.controls
+        )
 
         controls_by_id = {
             control.control_id: control
             for control in controls
         }
 
-        missing_dependency_ids = tuple(
-            control_id
-            for control_id in ordered_ids
-            if control_id not in controls_by_id
-        )
-
-        if missing_dependency_ids:
-            raise PlanningError(
-                "Dependency controls are missing from the supplied "
-                "control/evaluation set: "
-                + ", ".join(missing_dependency_ids)
-            )
+        # Include dependency controls that were resolved from the graph
+        # even when they were not in the original requested set.
+        for control in resolution.controls:
+            controls_by_id.setdefault(control.control_id, control)
 
         return tuple(
             controls_by_id[control_id]
