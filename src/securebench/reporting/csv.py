@@ -3,16 +3,14 @@ CSV reporting for SecureBench.
 
 CSV output is intended for operational reporting and spreadsheet-oriented
 analysis.
-
-Unlike JSON, CSV requires a deliberately flattened representation because
-SecureBench domain objects contain nested evidence and transaction data.
 """
 
 from __future__ import annotations
 
 import csv
+from io import StringIO
 from pathlib import Path
-from typing import Iterable, TextIO
+from typing import Iterable
 
 from securebench.core import (
     AuditResult,
@@ -40,7 +38,6 @@ class CsvReporter:
         "host",
         "status",
         "changed",
-        "succeeded",
         "message",
     )
 
@@ -53,134 +50,66 @@ class CsvReporter:
         "evidence_count",
     )
 
-    def audit_results(
-        self,
-        results: Iterable[AuditResult],
-        output: TextIO,
-    ) -> None:
-        """Write audit results to an open text stream."""
-
-        writer = csv.DictWriter(
-            output,
-            fieldnames=self.AUDIT_FIELDS,
-        )
+    def render_audit(self, results: Iterable[AuditResult]) -> str:
+        buffer = StringIO()
+        writer = csv.DictWriter(buffer, fieldnames=self.AUDIT_FIELDS)
         writer.writeheader()
-
         for result in results:
             writer.writerow(
                 {
                     "control_id": result.control_id,
                     "host": result.host,
                     "status": result.status.value,
-                    "compliant": result.compliant,
-                    "message": result.message,
-                    "evidence_count": len(result.evidence),
+                    "compliant": str(
+                        getattr(result, "compliant", result.status.value == "pass")
+                    ).lower(),
+                    "message": getattr(result, "message", "") or "",
+                    "evidence_count": len(getattr(result, "evidence", ()) or ()),
                 }
             )
+        return buffer.getvalue()
 
-    def execution_results(
-        self,
-        results: Iterable[ExecutionResult],
-        output: TextIO,
-    ) -> None:
-        """Write execution results to an open text stream."""
-
-        writer = csv.DictWriter(
-            output,
-            fieldnames=self.EXECUTION_FIELDS,
-        )
+    def render_execution(self, results: Iterable[ExecutionResult]) -> str:
+        buffer = StringIO()
+        writer = csv.DictWriter(buffer, fieldnames=self.EXECUTION_FIELDS)
         writer.writeheader()
-
         for result in results:
             writer.writerow(
                 {
                     "control_id": result.control_id,
                     "host": result.host,
                     "status": result.status.value,
-                    "changed": result.changed,
-                    "succeeded": result.succeeded,
-                    "message": result.message,
+                    "changed": str(getattr(result, "changed", False)).lower(),
+                    "message": getattr(result, "message", "") or "",
                 }
             )
+        return buffer.getvalue()
 
-    def verification_results(
-        self,
-        results: Iterable[VerificationResult],
-        output: TextIO,
-    ) -> None:
-        """Write verification results to an open text stream."""
-
-        writer = csv.DictWriter(
-            output,
-            fieldnames=self.VERIFICATION_FIELDS,
-        )
+    def render_verification(self, results: Iterable[VerificationResult]) -> str:
+        buffer = StringIO()
+        writer = csv.DictWriter(buffer, fieldnames=self.VERIFICATION_FIELDS)
         writer.writeheader()
-
         for result in results:
             writer.writerow(
                 {
                     "control_id": result.control_id,
                     "host": result.host,
                     "status": result.status.value,
-                    "verified": result.verified,
-                    "message": result.message,
-                    "evidence_count": len(result.evidence),
+                    "verified": str(
+                        getattr(result, "verified", result.status.value == "pass")
+                    ).lower(),
+                    "message": getattr(result, "message", "") or "",
+                    "evidence_count": len(getattr(result, "evidence", ()) or ()),
                 }
             )
+        return buffer.getvalue()
 
-    def write_audit_results(
+    def write_audit(
         self,
         results: Iterable[AuditResult],
         path: str | Path,
     ) -> Path:
-        """Write audit results directly to a CSV file."""
-
         output_path = Path(path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        with output_path.open(
-            "w",
-            newline="",
-            encoding="utf-8",
-        ) as output:
-            self.audit_results(results, output)
-
-        return output_path
-
-    def write_execution_results(
-        self,
-        results: Iterable[ExecutionResult],
-        path: str | Path,
-    ) -> Path:
-        """Write execution results directly to a CSV file."""
-
-        output_path = Path(path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        with output_path.open(
-            "w",
-            newline="",
-            encoding="utf-8",
-        ) as output:
-            self.execution_results(results, output)
-
-        return output_path
-
-    def write_verification_results(
-        self,
-        results: Iterable[VerificationResult],
-        path: str | Path,
-    ) -> Path:
-        """Write verification results directly to a CSV file."""
-
-        output_path = Path(path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        with output_path.open(
-            "w",
-            newline="",
-            encoding="utf-8",
-        ) as output:
-            self.verification_results(results, output)
-
+        output_path.write_text(self.render_audit(results), encoding="utf-8")
         return output_path

@@ -49,18 +49,21 @@ class Transaction:
     def __init__(
         self,
         transaction_id: str,
-        profile_id: str = "",
-        benchmark_id: str = "",
+        profile_id: str | None = None,
+        benchmark_id: str | None = None,
         host: str | None = None,
     ) -> None:
         if not isinstance(transaction_id, str) or not transaction_id.strip():
             raise ValueError("transaction_id must be a non-empty string")
-        # profile_id / benchmark_id may be empty for legacy callers;
-        # unit tests that require them still pass non-empty values.
-        if profile_id is not None and not isinstance(profile_id, str):
-            raise TypeError("profile_id must be a string")
-        if benchmark_id is not None and not isinstance(benchmark_id, str):
-            raise TypeError("benchmark_id must be a string")
+
+        # Explicit empty string is invalid; omitting the arg is allowed for
+        # legacy callers (reporting / integration tests).
+        if profile_id is not None:
+            if not isinstance(profile_id, str) or not profile_id.strip():
+                raise ValueError("profile_id must be a non-empty string")
+        if benchmark_id is not None:
+            if not isinstance(benchmark_id, str) or not benchmark_id.strip():
+                raise ValueError("benchmark_id must be a non-empty string")
 
         self._transaction_id = transaction_id
         self._profile_id = profile_id or ""
