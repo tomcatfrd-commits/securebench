@@ -57,16 +57,11 @@ class ProfileRule:
                 )
 
         if (
-            self.classification
-            in {
-                SafetyClassification.INVESTIGATE,
-                SafetyClassification.PROHIBITED,
-            }
-            and self.enabled
+                self.classification is SafetyClassification.PROHIBITED
+                and self.enabled
         ):
             raise ValueError(
-                f"{self.classification.value} controls cannot be enabled "
-                "for remediation"
+                "prohibited controls cannot be enabled for remediation"
             )
 
 

@@ -35,16 +35,11 @@ class AuditEngine:
     """
     Benchmark-independent audit orchestration.
 
-    The engine delegates the actual system inspection to an AuditProvider.
-    It does not modify the target system.
+    The engine delegates system inspection to an AuditProvider and never
+    modifies the target system itself.
 
-    Two calling forms are supported:
-
-        audit(control, host)
-        audit(AuditRequest(control=control, host=host))
-
-    The first form is the simple public API. The request-object form is
-    retained for workflows that already construct AuditRequest objects.
+    Evidence returned by the provider is persisted exactly as supplied.
+    The engine does not manufacture evidence when the provider returns none.
     """
 
     def __init__(
@@ -66,9 +61,9 @@ class AuditEngine:
         """
         Audit one control on one host.
 
-        The provider result is returned unchanged with respect to its
-        compliance status and evidence. The engine only handles orchestration
-        and optional evidence persistence.
+        The provider remains responsible for producing the actual observation.
+        The engine validates the provider result and optionally persists every
+        evidence item returned by that provider.
         """
         control, target_host = self._normalize_request(
             control_or_request,
@@ -93,11 +88,8 @@ class AuditEngine:
             )
 
         if self._evidence_store is not None:
-            for sequence, evidence in enumerate(result.evidence):
-                self._store_evidence(
-                    evidence=evidence,
-                    sequence=sequence,
-                )
+            for evidence in result.evidence:
+                self._store_evidence(evidence)
 
         return result
 
@@ -106,7 +98,6 @@ class AuditEngine:
         requests: list[AuditRequest] | tuple[AuditRequest, ...],
     ) -> tuple[AuditResult, ...]:
         """Audit requests sequentially while preserving input order."""
-
         if not isinstance(requests, (list, tuple)):
             raise TypeError("requests must be a list or tuple")
 
@@ -133,42 +124,41 @@ class AuditEngine:
 
         return control_or_request, host
 
-    def _store_evidence(
-        self,
-        *,
-        evidence: Evidence,
-        sequence: int,
-    ) -> None:
+    def _store_evidence(self, evidence: Evidence) -> None:
         """
-        Persist one evidence object in the configured EvidenceStore.
+        Persist one provider-produced evidence item.
 
-        EvidenceStore requires an explicit stable identifier. The identifier
-        is derived from the audit target, control, collection timestamp, and
-        evidence sequence within the AuditResult.
-
-        The evidence itself is never modified.
+        EvidenceStore requires an explicit stable ID. The ID is derived from
+        the immutable identity of the evidence rather than from an arbitrary
+        counter, so the same control/host/source combination is deterministic.
         """
         store = self._evidence_store
 
         if store is None:
             return
 
-        add = getattr(store, "add", None)
+        evidence_id = self._evidence_id(evidence)
 
-        if add is None:
-            raise TypeError(
-                "evidence_store must provide an add("
-                "evidence_id, evidence) method"
-            )
-
-        evidence_id = (
-            f"{evidence.host}:"
-            f"{evidence.control_id}:"
-            f"{evidence.collected_at.isoformat()}:"
-            f"{sequence}"
+        store.add(
+            evidence_id=evidence_id,
+            evidence=evidence,
         )
 
-        add(evidence_id, evidence)
+    @staticmethod
+    def _evidence_id(evidence: Evidence) -> str:
+        """
+        Build the EvidenceStore key for one evidence object.
+
+        The ID is intentionally derived from evidence identity and contains
+        only stable fields needed to distinguish evidence records.
+        """
+        return ":".join(
+            (
+                evidence.control_id,
+                evidence.host,
+                evidence.source,
+            )
+        )
 
 
 class UnsupportedAuditProvider:

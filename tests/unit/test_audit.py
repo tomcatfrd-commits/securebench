@@ -51,11 +51,21 @@ class FakeAuditProvider:
     def audit(self, control: Control, host: str) -> AuditResult:
         self.calls.append((control.control_id, host))
 
+        from securebench.core.result import Evidence
+
+        evidence = Evidence(
+            control_id=control.control_id,
+            host=host,
+            source="fake-audit-provider",
+            observed={"compliant": True},
+            expected={"compliant": True},
+        )
+
         return AuditResult(
             control_id=control.control_id,
             host=host,
             status=ComplianceStatus.PASS,
-            evidence=(),
+            evidence=(evidence,),
             message="Control is compliant.",
         )
 

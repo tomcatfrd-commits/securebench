@@ -8,6 +8,9 @@ Evidence is intentionally separate from AuditResult:
 
     Evidence    = what was observed
     AuditResult = how that observation was evaluated
+
+EvidenceRecord is the storage-layer wrapper that adds a stable identifier and
+metadata without changing the original Evidence object.
 """
 
 from __future__ import annotations
@@ -26,6 +29,8 @@ class EvidenceRecord:
 
     ``evidence_id`` provides a stable reference that can later be attached
     to transaction records, reports, and rollback records.
+
+    The original ``Evidence`` object is retained by identity.
     """
 
     evidence_id: str
@@ -33,19 +38,30 @@ class EvidenceRecord:
     metadata: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        if not isinstance(self.evidence_id, str):
+            raise TypeError("evidence_id must be a string")
+
         if not self.evidence_id.strip():
             raise ValueError("evidence_id must not be empty")
+
+        if not isinstance(self.evidence, Evidence):
+            raise TypeError("evidence must be an Evidence instance")
 
 
 class EvidenceStore:
     """
     In-memory evidence store.
 
-    This is intentionally a small abstraction.
+    Evidence is stored internally as EvidenceRecord objects so that every
+    observation has a stable storage identity and optional metadata.
 
-    The first implementation can use memory while the architecture is being
-    developed. A persistent backend can later store evidence in JSON, SQLite,
-    PostgreSQL, or another database without changing the audit engine API.
+    The store exposes two different retrieval levels:
+
+    - get()/all(): storage records, including evidence IDs and metadata.
+    - for_control(): the original Evidence objects for control-level consumers.
+
+    A persistent backend can later replace this implementation without
+    changing the audit engine API.
     """
 
     def __init__(self) -> None:
@@ -62,7 +78,19 @@ class EvidenceStore:
         Store evidence under a unique ID.
 
         Duplicate IDs are rejected rather than silently overwritten.
+
+        The supplied Evidence instance is stored unchanged. In particular,
+        the returned EvidenceRecord references the exact same Evidence object.
         """
+
+        if not isinstance(evidence_id, str):
+            raise TypeError("evidence_id must be a string")
+
+        if not evidence_id.strip():
+            raise ValueError("evidence_id must not be empty")
+
+        if not isinstance(evidence, Evidence):
+            raise TypeError("evidence must be an Evidence instance")
 
         if evidence_id in self._records:
             raise ValueError(
@@ -79,7 +107,7 @@ class EvidenceStore:
         return record
 
     def get(self, evidence_id: str) -> EvidenceRecord:
-        """Return evidence by ID."""
+        """Return the complete stored record by evidence ID."""
 
         try:
             return self._records[evidence_id]
@@ -94,7 +122,7 @@ class EvidenceStore:
         return evidence_id in self._records
 
     def all(self) -> tuple[EvidenceRecord, ...]:
-        """Return all stored evidence in insertion order."""
+        """Return all stored records in insertion order."""
 
         return tuple(self._records.values())
 
@@ -102,15 +130,18 @@ class EvidenceStore:
         self,
         control_id: str,
         host: str | None = None,
-    ) -> tuple[EvidenceRecord, ...]:
+    ) -> tuple[Evidence, ...]:
         """
-        Return evidence belonging to a control.
+        Return the original Evidence objects belonging to a control.
 
         If ``host`` is supplied, results are restricted to that host.
+
+        The returned objects are the exact Evidence instances originally
+        supplied to add(); they are not reconstructed copies.
         """
 
         return tuple(
-            record
+            record.evidence
             for record in self._records.values()
             if record.evidence.control_id == control_id
             and (host is None or record.evidence.host == host)

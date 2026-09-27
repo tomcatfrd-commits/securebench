@@ -9,7 +9,6 @@ control:
   platform: ubuntu-24.04
 
   severity: low
-
   audit: cis.ubuntu.24.04.1.1.1.1.audit
   remediation: cis.ubuntu.24.04.1.1.1.1.remediate
   rollback: cis.ubuntu.24.04.1.1.1.1.rollback
@@ -33,18 +32,18 @@ control:
       - NIST SP 800-53 CM-7a
       - CCI-000381
 
-  requirements:
-    module: cramfs
-    expected:
-      module_loaded: false
-      module_loadable: false
+    requirements:
+      module: cramfs
+      expected:
+        module_loaded: false
+        module_loadable: false
 
-  safety:
-    default_classification: safe_with_precheck
-    prechecks:
-      - verify_filesystem_not_in_use
-      - verify_module_not_required
-      - verify_modprobe_configuration_can_be_changed
+    safety:
+      default: safe_with_precheck
+      prechecks:
+        - verify_filesystem_not_in_use
+        - verify_module_not_required
+        - verify_modprobe_configuration_can_be_changed
 
   dependencies: []
   conflicts: []

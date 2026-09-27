@@ -90,7 +90,10 @@ class Evidence:
 @dataclass(frozen=True, slots=True)
 class AuditResult:
     """
-    Result of auditing one control on one host.
+    Immutable result of auditing one control on one host.
+
+    ``collected_at`` identifies when the audit result itself was produced.
+    Individual evidence objects retain their own collection timestamps.
     """
 
     control_id: str
@@ -98,6 +101,9 @@ class AuditResult:
     status: ComplianceStatus
     evidence: tuple[Evidence, ...] = ()
     message: str = ""
+    collected_at: datetime = field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
 
     @property
     def compliant(self) -> bool:
@@ -117,6 +123,9 @@ class VerificationResult:
     status: ComplianceStatus
     evidence: tuple[Evidence, ...] = ()
     message: str = ""
+    collected_at: datetime = field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
 
     @property
     def verified(self) -> bool:
