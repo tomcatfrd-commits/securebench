@@ -9,6 +9,7 @@ from securebench.core.exceptions import PlanningError
 from securebench.core.profile import Profile
 from securebench.core.result import AuditResult, ComplianceStatus
 from securebench.policy.engine import PolicyEngine, PolicyEvaluation
+
 from .conflict import ConflictResolver
 from .dependency import DependencyResolver
 
@@ -44,7 +45,11 @@ class RemediationPlanItem:
 
     def __post_init__(self) -> None:
         if not self.control_id:
-            object.__setattr__(self, "control_id", self.control.control_id)
+            object.__setattr__(
+                self,
+                "control_id",
+                self.control.control_id,
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -152,17 +157,20 @@ class RemediationPlanner:
         evaluations: dict[str, PolicyEvaluation] = {}
 
         for control in normalized_controls:
-            evaluations[control.control_id] = self._policy_engine.evaluate(
-                control,
-                profile,
+            evaluations[control.control_id] = (
+                self._policy_engine.evaluate(
+                    control,
+                    profile,
+                )
             )
 
         ordered_controls = self._resolve_order(
             tuple(normalized_controls),
         )
 
-        # Include every control. _build_item decides SKIP / INVESTIGATE /
-        # PRECHECK / APPROVAL_REQUIRED / REMEDIATE from audit status + policy.
+        # The build() API receives complete audit evidence for every
+        # requested control. Keep the existing behavior here: every supplied
+        # control receives a plan item, including SKIP / INVESTIGATE items.
         items = tuple(
             self._build_item(
                 control=control,
@@ -210,7 +218,12 @@ class RemediationPlanner:
         represented with an UNKNOWN audit result and no policy evaluation,
         so they can never become automatically remediable without explicit
         audit evidence.
+
+        Directly supplied controls are included in the compatibility plan
+        only when their audit status is FAIL. PASS and UNKNOWN controls do
+        not require remediation planning and therefore produce no plan item.
         """
+
         audit_by_control = self._index_audits(audits)
         evaluation_by_control = self._index_evaluations(evaluations)
 
@@ -229,6 +242,7 @@ class RemediationPlanner:
             missing_audits = sorted(
                 set(evaluation_by_control) - set(audit_by_control)
             )
+
             raise PlanningError(
                 "Audit and policy evaluation sets do not match: "
                 f"missing evaluations={missing_evaluations}, "
@@ -243,31 +257,44 @@ class RemediationPlanner:
 
         default_host = self._default_host(audits)
 
-        # Include every control. Dependency-only controls may not have a
-        # policy evaluation because this compatibility API receives already
-        # evaluated controls only. They receive UNKNOWN audit evidence and
-        # therefore _build_item() will force INVESTIGATE.
-        items = tuple(
-            self._build_item(
-                control=control,
-                audit=audit_by_control.get(
-                    control.control_id,
-                    AuditResult(
-                        control_id=control.control_id,
-                        host=default_host,
-                        status=ComplianceStatus.UNKNOWN,
-                        message=(
-                            "No direct audit result was supplied for this "
-                            "dependency control."
-                        ),
-                    ),
-                ),
-                evaluation=evaluation_by_control.get(control.control_id),
-            )
-            for control in ordered_controls
-        )
+        items: list[RemediationPlanItem] = []
 
-        return RemediationPlan(items=items)
+        for control in ordered_controls:
+            audit = audit_by_control.get(control.control_id)
+
+            if audit is not None:
+                # A directly supplied PASS or UNKNOWN control does not
+                # require a remediation-plan item.
+                #
+                # Only FAIL controls are eligible to enter the planning
+                # decision path.
+                if audit.status is not ComplianceStatus.FAIL:
+                    continue
+            else:
+                # This control was introduced by dependency resolution.
+                # There is no direct audit evidence for it, so fail closed
+                # with UNKNOWN evidence.
+                audit = AuditResult(
+                    control_id=control.control_id,
+                    host=default_host,
+                    status=ComplianceStatus.UNKNOWN,
+                    message=(
+                        "No direct audit result was supplied for this "
+                        "dependency control."
+                    ),
+                )
+
+            items.append(
+                self._build_item(
+                    control=control,
+                    audit=audit,
+                    evaluation=evaluation_by_control.get(
+                        control.control_id
+                    ),
+                )
+            )
+
+        return RemediationPlan(items=tuple(items))
 
     @staticmethod
     def _normalize_controls(
@@ -278,7 +305,9 @@ class RemediationPlanner:
 
         for control in controls:
             if not isinstance(control, Control):
-                raise TypeError("controls must contain Control objects")
+                raise TypeError(
+                    "controls must contain Control objects"
+                )
 
         return tuple(controls)
 
@@ -396,7 +425,9 @@ class RemediationPlanner:
         return result
 
     @staticmethod
-    def _default_host(audits: tuple[AuditResult, ...]) -> str:
+    def _default_host(
+        audits: tuple[AuditResult, ...],
+    ) -> str:
         """
         Return the host to associate with dependency-only audit results.
 
@@ -459,9 +490,9 @@ class RemediationPlanner:
         dependency_resolver = DependencyResolver(self._graph)
         resolution = dependency_resolver.resolve(requested_ids)
 
-        # DependencyResolver returns DependencyResolution, not a list of ids.
         ordered_ids = tuple(
-            control.control_id for control in resolution.controls
+            control.control_id
+            for control in resolution.controls
         )
 
         controls_by_id = {
@@ -472,7 +503,10 @@ class RemediationPlanner:
         # Include dependency controls that were resolved from the graph
         # even when they were not in the original requested set.
         for control in resolution.controls:
-            controls_by_id.setdefault(control.control_id, control)
+            controls_by_id.setdefault(
+                control.control_id,
+                control,
+            )
 
         return tuple(
             controls_by_id[control_id]
