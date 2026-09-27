@@ -90,8 +90,8 @@ class Benchmark:
 
             if control.benchmark_id != self.benchmark_id:
                 raise ValueError(
-                    f"control '{control.control_id}' belongs to benchmark "
-                    f"'{control.benchmark_id}', not '{self.benchmark_id}'"
+                    f"benchmark_id mismatch: control '{control.control_id}' belongs "
+                    f"to benchmark '{control.benchmark_id}', not '{self.benchmark_id}'"
                 )
 
         self._validate_control_references(

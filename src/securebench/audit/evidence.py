@@ -165,15 +165,19 @@ class EvidenceStore:
         self,
         control_id: str,
         host: str | None = None,
-    ) -> tuple[EvidenceRecord, ...]:
+    ) -> tuple[Evidence, ...]:
         """
-        Return evidence belonging to a control.
+        Return the original evidence objects belonging to a control.
 
         If ``host`` is supplied, results are restricted to that host.
+
+        The storage wrapper remains an internal persistence detail.
+        Callers retrieving evidence receive the exact immutable Evidence
+        objects that were originally stored.
         """
 
         return tuple(
-            record
+            record.evidence
             for record in self._records.values()
             if record.control_id == control_id
             and (host is None or record.host == host)
