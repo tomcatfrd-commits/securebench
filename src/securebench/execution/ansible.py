@@ -26,7 +26,7 @@ from __future__ import annotations
 import json
 import subprocess
 from dataclasses import dataclass
-from typing import Any, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 from securebench.core import (
     Control,
@@ -64,90 +64,92 @@ class AnsibleExecutor:
 
     Keeping subprocess handling here prevents the higher-level execution
     backend from becoming coupled to command construction details.
+
+    A custom ``runner`` may be injected for tests. It must accept a
+    command list and return an object with ``returncode``, ``stdout``,
+    and ``stderr`` attributes (compatible with ``subprocess.CompletedProcess``).
     """
 
     def __init__(
         self,
         *,
         executable: str = "ansible-playbook",
+        runner: Callable[[list[str]], Any] | None = None,
     ) -> None:
         self._executable = executable
+        self._runner = runner or self._default_runner
 
-    def run(
-        self,
-        *,
-        playbook: str,
-        inventory: str | None,
-        extra_vars: Mapping[str, Any] | None = None,
-        check_mode: bool = False,
-        limit: str | None = None,
-        tags: Sequence[str] = (),
-    ) -> AnsibleRunResult:
+    def run(self, command: list[str] | None = None, **kwargs: Any) -> AnsibleRunResult:
         """
-        Execute ansible-playbook.
-
-        Parameters
-        ----------
-        playbook:
-            Path to the playbook to execute.
-
-        inventory:
-            Ansible inventory path or inventory specification.
-
-        extra_vars:
-            Variables passed to Ansible as JSON.
-
-        check_mode:
-            Adds Ansible ``--check`` so the backend requests a dry run.
-
-        limit:
-            Optional host limit.
-
-        tags:
-            Optional Ansible tags.
+        Execute a command list (test / low-level API) or build a playbook
+        invocation from keyword arguments (backend API).
         """
+        if command is not None and kwargs:
+            raise TypeError("run() accepts either a command list or keyword args, not both")
 
-        command = [
-            self._executable,
-            playbook,
-        ]
+        if command is not None:
+            if not command:
+                raise ValueError("command must not be empty")
+            return self._invoke(list(command))
 
+        # High-level playbook invocation used by AnsibleExecutionBackend
+        playbook = kwargs.get("playbook")
+        if not playbook:
+            raise ValueError("playbook is required when calling run() with keywords")
+
+        built: list[str] = [self._executable, str(playbook)]
+
+        inventory = kwargs.get("inventory")
         if inventory:
-            command.extend(["--inventory", inventory])
+            built.extend(["--inventory", str(inventory)])
 
+        extra_vars = kwargs.get("extra_vars")
         if extra_vars:
-            command.extend(
-                [
-                    "--extra-vars",
-                    json.dumps(extra_vars),
-                ]
-            )
+            built.extend(["--extra-vars", json.dumps(extra_vars)])
 
-        if check_mode:
-            command.append("--check")
+        if kwargs.get("check_mode"):
+            built.append("--check")
 
+        limit = kwargs.get("limit")
         if limit:
-            command.extend(["--limit", limit])
+            built.extend(["--limit", str(limit)])
 
+        tags = kwargs.get("tags") or ()
         if tags:
-            command.extend(["--tags", ",".join(tags)])
+            built.extend(["--tags", ",".join(tags)])
 
+        return self._invoke(built)
+
+    def _invoke(self, command: list[str]) -> AnsibleRunResult:
         try:
-            completed = subprocess.run(
-                command,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            completed = self._runner(command)
         except OSError as exc:
             raise AnsibleExecutionError(
-                f"failed to execute '{self._executable}': {exc}"
+                f"failed to execute command {command!r}: {exc}"
             ) from exc
 
+        return_code = getattr(completed, "returncode", getattr(completed, "return_code", 1))
+        stdout = getattr(completed, "stdout", "") or ""
+        stderr = getattr(completed, "stderr", "") or ""
+
+        if return_code != 0:
+            raise AnsibleExecutionError(
+                f"command failed with exit code {return_code}: {stderr or stdout}"
+            )
+
         return AnsibleRunResult(
-            return_code=completed.returncode,
-            stdout=completed.stdout,
-            stderr=completed.stderr,
+            return_code=return_code,
+            stdout=stdout,
+            stderr=stderr,
+        )
+
+    @staticmethod
+    def _default_runner(command: list[str]) -> Any:
+        return subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=False,
         )
 
 
@@ -157,9 +159,6 @@ class AnsibleExecutionBackend(ExecutionBackend):
 
     Control definitions refer to named SecureBench operations. The backend
     maps those operations to Ansible playbooks through ``ExecutionContext``.
-
-    This first implementation deliberately keeps that mapping explicit
-    rather than inventing a dynamic playbook-discovery mechanism.
     """
 
     def __init__(
@@ -176,13 +175,12 @@ class AnsibleExecutionBackend(ExecutionBackend):
         host: str,
         context: ExecutionContext,
     ) -> ExecutionResult:
-        """Execute the Ansible audit operation for a control."""
-
         return self._run_operation(
             operation="audit",
             control=control,
             host=host,
             context=context,
+            check_mode=True,
         )
 
     def precheck(
@@ -192,8 +190,6 @@ class AnsibleExecutionBackend(ExecutionBackend):
         host: str,
         context: ExecutionContext,
     ) -> ExecutionResult:
-        """Execute the Ansible precheck operation for a control."""
-
         return self._run_operation(
             operation="precheck",
             control=control,
@@ -209,13 +205,12 @@ class AnsibleExecutionBackend(ExecutionBackend):
         host: str,
         context: ExecutionContext,
     ) -> ExecutionResult:
-        """Execute the Ansible remediation operation for a control."""
-
         return self._run_operation(
             operation="remediate",
             control=control,
             host=host,
             context=context,
+            check_mode=context.check_mode,
         )
 
     def rollback(
@@ -224,30 +219,13 @@ class AnsibleExecutionBackend(ExecutionBackend):
         control: Control,
         host: str,
         context: ExecutionContext,
-        rollback_data: Mapping[str, Any],
     ) -> ExecutionResult:
-        """
-        Execute the Ansible rollback operation.
-
-        Rollback data is explicitly passed as variables so the rollback
-        implementation can restore the state recorded before remediation.
-        """
-
-        variables = dict(context.variables)
-        variables["securebench_rollback_data"] = dict(rollback_data)
-
-        rollback_context = ExecutionContext(
-            inventory=context.inventory,
-            variables=variables,
-            check_mode=context.check_mode,
-            extra=context.extra,
-        )
-
         return self._run_operation(
             operation="rollback",
             control=control,
             host=host,
-            context=rollback_context,
+            context=context,
+            check_mode=False,
         )
 
     def verify(
@@ -257,8 +235,6 @@ class AnsibleExecutionBackend(ExecutionBackend):
         host: str,
         context: ExecutionContext,
     ) -> ExecutionResult:
-        """Execute the independent Ansible verification operation."""
-
         return self._run_operation(
             operation="verify",
             control=control,
@@ -266,9 +242,6 @@ class AnsibleExecutionBackend(ExecutionBackend):
             context=context,
             check_mode=True,
         )
-
-    def close(self) -> None:
-        """No persistent resources are currently maintained."""
 
     def _run_operation(
         self,
@@ -279,47 +252,30 @@ class AnsibleExecutionBackend(ExecutionBackend):
         context: ExecutionContext,
         check_mode: bool | None = None,
     ) -> ExecutionResult:
-        """
-        Run a named SecureBench operation through Ansible.
+        playbooks = {}
+        if context.extra and isinstance(context.extra, Mapping):
+            playbooks = context.extra.get("playbooks") or {}
 
-        The actual playbook path is supplied through ``context.extra``:
-
-            context.extra["playbooks"]["audit"]
-            context.extra["playbooks"]["precheck"]
-            context.extra["playbooks"]["remediate"]
-            context.extra["playbooks"]["rollback"]
-            context.extra["playbooks"]["verify"]
-
-        This keeps the backend independent from the repository layout.
-        """
-
-        playbooks = context.extra.get("playbooks")
-
-        if not isinstance(playbooks, Mapping):
+        if not playbooks:
             return ExecutionResult(
                 control_id=control.control_id,
                 host=host,
                 status=ExecutionStatus.FAILED,
-                message=(
-                    "Ansible playbook mapping is missing from execution context."
-                ),
+                message="Ansible playbook mapping is missing from execution context.",
             )
 
         playbook = playbooks.get(operation)
-
         if not isinstance(playbook, str) or not playbook.strip():
             return ExecutionResult(
                 control_id=control.control_id,
                 host=host,
                 status=ExecutionStatus.FAILED,
                 message=(
-                    f"No Ansible playbook configured for operation "
-                    f"'{operation}'."
+                    f"No Ansible playbook configured for operation '{operation}'."
                 ),
             )
 
-        variables = dict(context.variables)
-
+        variables = dict(context.variables or {})
         variables.update(
             {
                 "securebench_control_id": control.control_id,
@@ -329,9 +285,7 @@ class AnsibleExecutionBackend(ExecutionBackend):
         )
 
         effective_check_mode = (
-            context.check_mode
-            if check_mode is None
-            else check_mode
+            context.check_mode if check_mode is None else check_mode
         )
 
         try:
