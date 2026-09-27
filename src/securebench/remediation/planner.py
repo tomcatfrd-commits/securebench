@@ -9,7 +9,6 @@ from securebench.core.exceptions import PlanningError
 from securebench.core.profile import Profile
 from securebench.core.result import AuditResult, ComplianceStatus
 from securebench.policy.engine import PolicyEngine, PolicyEvaluation
-
 from .conflict import ConflictResolver
 from .dependency import DependencyResolver
 
@@ -27,10 +26,13 @@ class RemediationPlanItem:
     """
     One control's decision in a remediation plan.
 
-    The item retains both the audit result and policy evaluation so that the
-    plan is explainable and independently auditable.
+    The item retains the original Control object together with its audit
+    result and policy evaluation so that the plan is explainable,
+    independently auditable, and does not require reconstructing domain
+    objects from identifiers.
     """
 
+    control: Control
     control_id: str
     host: str
     action: PlanAction
@@ -117,6 +119,7 @@ class RemediationPlanner:
         accidentally bypass the policy gate by constructing plan items
         directly.
         """
+
         normalized_controls = self._normalize_controls(controls)
         normalized_audits = self._normalize_audits(audits)
 
@@ -145,7 +148,6 @@ class RemediationPlanner:
             )
 
         evaluations: dict[str, PolicyEvaluation] = {}
-
         for control in normalized_controls:
             evaluations[control.control_id] = self._policy_engine.evaluate(
                 control,
@@ -180,6 +182,7 @@ class RemediationPlanner:
         ``create_plan`` is retained as the descriptive workflow API used by
         integration callers.
         """
+
         return self.build(
             controls=controls,
             audits=audit_results,
@@ -194,16 +197,26 @@ class RemediationPlanner:
         """
         Compatibility API for callers that already evaluated policy.
 
-        This method does not have enough information to reconstruct a Control
-        from an AuditResult, so each PolicyEvaluation must expose the Control
-        definition. This is retained for the earlier planner contract while
-        build()/create_plan() remain the preferred APIs.
+        PolicyEvaluation carries the original Control definition, allowing
+        this API to preserve the exact Control object without reconstructing
+        it.
+
+        Controls introduced only because they are dependencies may not have
+        their own audit result. Such controls are represented with an
+        UNKNOWN audit result so they can never become automatically
+        remediable without explicit audit evidence.
         """
+
         audit_by_control = self._index_audits(audits)
         evaluation_by_control = self._index_evaluations(evaluations)
 
-        if not audit_by_control:
+        if not audit_by_control and not evaluation_by_control:
             return RemediationPlan(items=())
+
+        if not audit_by_control or not evaluation_by_control:
+            raise PlanningError(
+                "Audit and policy evaluation sets must both be provided."
+            )
 
         if set(audit_by_control) != set(evaluation_by_control):
             missing_evaluations = sorted(
@@ -224,10 +237,23 @@ class RemediationPlanner:
             tuple(controls.values()),
         )
 
+        default_host = self._default_host(audits)
+
         items = tuple(
             self._build_item(
                 control=control,
-                audit=audit_by_control[control.control_id],
+                audit=audit_by_control.get(
+                    control.control_id,
+                    AuditResult(
+                        control_id=control.control_id,
+                        host=default_host,
+                        status=ComplianceStatus.UNKNOWN,
+                        message=(
+                            "No direct audit result was supplied for this "
+                            "dependency control."
+                        ),
+                    ),
+                ),
                 evaluation=evaluation_by_control[control.control_id],
             )
             for control in ordered_controls
@@ -310,6 +336,14 @@ class RemediationPlanner:
                     f"control {evaluation.control_id!r}"
                 )
 
+            if evaluation.control.control_id != evaluation.control_id:
+                raise PlanningError(
+                    "Policy evaluation control_id does not match its "
+                    "Control definition: "
+                    f"{evaluation.control_id!r} != "
+                    f"{evaluation.control.control_id!r}"
+                )
+
             result[evaluation.control_id] = evaluation
 
         return result
@@ -319,18 +353,71 @@ class RemediationPlanner:
         evaluations: tuple[PolicyEvaluation, ...],
     ) -> dict[str, Control]:
         """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
+        Recover the exact Control objects carried by PolicyEvaluation.
 
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
+        The identity is intentionally preserved. The planner must not create
+        a reconstructed or partially populated Control object.
         """
-        raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
+
+        result: dict[str, Control] = {}
+
+        for evaluation in evaluations:
+            control = evaluation.control
+
+            if not isinstance(control, Control):
+                raise PlanningError(
+                    "Policy evaluation does not contain a valid Control "
+                    f"definition for {evaluation.control_id!r}."
+                )
+
+            if control.control_id != evaluation.control_id:
+                raise PlanningError(
+                    "Policy evaluation control_id does not match its "
+                    "Control definition: "
+                    f"{evaluation.control_id!r} != "
+                    f"{control.control_id!r}"
+                )
+
+            if control.control_id in result:
+                raise PlanningError(
+                    f"Duplicate control definition for "
+                    f"{control.control_id!r}"
+                )
+
+            result[control.control_id] = control
+
+        return result
+
+    @staticmethod
+    def _default_host(audits: tuple[AuditResult, ...]) -> str:
+        """
+        Return the host to associate with dependency-only audit results.
+
+        A compatibility plan is normally constructed from audit results for
+        one target host. Reject an empty host rather than inventing one.
+        """
+
+        if not audits:
+            raise PlanningError(
+                "Cannot construct dependency audit results without a host."
+            )
+
+        hosts = {audit.host for audit in audits}
+
+        if len(hosts) != 1:
+            raise PlanningError(
+                "Compatibility planning requires audit results for one host; "
+                f"received hosts={sorted(hosts)!r}"
+            )
+
+        host = next(iter(hosts))
+
+        if not host.strip():
+            raise PlanningError(
+                "Audit result host must not be empty."
+            )
+
+        return host
 
     def _resolve_order(
         self,
@@ -341,6 +428,7 @@ class RemediationPlanner:
 
         Without a graph, sort by control ID to guarantee deterministic plans.
         """
+
         if self._graph is None:
             return tuple(
                 sorted(
@@ -380,7 +468,7 @@ class RemediationPlanner:
         if missing_dependency_ids:
             raise PlanningError(
                 "Dependency controls are missing from the supplied "
-                "control/audit set: "
+                "control/evaluation set: "
                 + ", ".join(missing_dependency_ids)
             )
 
@@ -402,8 +490,10 @@ class RemediationPlanner:
         Compliance is checked before policy because a passing control must
         never enter remediation merely because its policy permits changes.
         """
+
         if audit.status is ComplianceStatus.PASS:
             return RemediationPlanItem(
+                control=control,
                 control_id=control.control_id,
                 host=audit.host,
                 action=PlanAction.SKIP,
@@ -414,6 +504,7 @@ class RemediationPlanner:
 
         if audit.status is not ComplianceStatus.FAIL:
             return RemediationPlanItem(
+                control=control,
                 control_id=control.control_id,
                 host=audit.host,
                 action=PlanAction.INVESTIGATE,
@@ -427,6 +518,7 @@ class RemediationPlanner:
 
         if not evaluation.allowed:
             return RemediationPlanItem(
+                control=control,
                 control_id=control.control_id,
                 host=audit.host,
                 action=PlanAction.INVESTIGATE,
@@ -437,6 +529,7 @@ class RemediationPlanner:
 
         if evaluation.requires_approval:
             return RemediationPlanItem(
+                control=control,
                 control_id=control.control_id,
                 host=audit.host,
                 action=PlanAction.APPROVAL_REQUIRED,
@@ -448,6 +541,7 @@ class RemediationPlanner:
 
         if evaluation.requires_precheck:
             return RemediationPlanItem(
+                control=control,
                 control_id=control.control_id,
                 host=audit.host,
                 action=PlanAction.PRECHECK,
@@ -458,6 +552,7 @@ class RemediationPlanner:
             )
 
         return RemediationPlanItem(
+            control=control,
             control_id=control.control_id,
             host=audit.host,
             action=PlanAction.REMEDIATE,

@@ -1243,4 +1243,286 @@ FAILED tests/safety/test_policy_execution_boundary.py::test_investigate_control_
 FAILED tests/safety/test_policy_execution_boundary.py::test_prohibited_control_cannot_enter_remediation
 FAILED tests/safety/test_policy_execution_boundary.py::test_compliant_control_never_enters_remediation
 FAILED tests/safety/test_policy_execution_boundary.py::test_unknown_audit_status_does_not_enter_remediation
-23 failed, 28 passed in 0.51s
+23 failed, 28 passed in 0.51sF.F......FFF.............................                                [100%]
+================================== FAILURES ===================================
+____________ test_passed_control_is_never_planned_for_remediation _____________
+
+    def test_passed_control_is_never_planned_for_remediation() -> None:
+        control = make_control()
+
+        audit = AuditResult(
+            control_id=control.control_id,
+            host="production-01",
+            status=ComplianceStatus.PASS,
+        )
+
+        evaluation = make_policy_engine().evaluate(
+            control=control,
+            profile=make_profile(control.control_id),
+        )
+
+        planner = RemediationPlanner(
+            policy_engine=make_policy_engine(),
+        )
+
+        plan = planner.plan(
+            audits=(audit,),
+            evaluations=(evaluation,),
+        )
+
+>       assert plan.items == ()
+E       AssertionError: assert (RemediationP...roval=False),) == ()
+E
+E         Left contains one more item: RemediationPlanItem(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descri...owed=True, reason='All applicable policy rules permit remediation.'), requires_precheck=False, requires_approval=False)
+E         Use -v to get more diff
+
+tests\safety\test_plan_integrity.py:84: AssertionError
+____________ test_unknown_audit_status_does_not_enter_remediation _____________
+
+    def test_unknown_audit_status_does_not_enter_remediation() -> None:
+        control = make_control()
+
+        audit = AuditResult(
+            control_id=control.control_id,
+            host="production-01",
+            status=ComplianceStatus.UNKNOWN,
+        )
+
+        evaluation = make_policy_engine().evaluate(
+            control=control,
+            profile=make_profile(control.control_id),
+        )
+
+        planner = RemediationPlanner(
+            policy_engine=make_policy_engine(),
+        )
+
+        plan = planner.plan(
+            audits=(audit,),
+            evaluations=(evaluation,),
+        )
+
+>       assert plan.items == ()
+E       AssertionError: assert (RemediationP...roval=False),) == ()
+E
+E         Left contains one more item: RemediationPlanItem(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descri...owed=True, reason='All applicable policy rules permit remediation.'), requires_precheck=False, requires_approval=False)
+E         Use -v to get more diff
+
+tests\safety\test_plan_integrity.py:138: AssertionError
+_____________ test_planner_rejects_conflicting_requested_controls _____________
+
+    def test_planner_rejects_conflicting_requested_controls() -> None:
+        control_a = make_control(
+            "A",
+            conflicts=("B",),
+        )
+        control_b = make_control("B")
+
+        benchmark = make_benchmark(
+            control_a,
+            control_b,
+        )
+
+        graph = ControlGraph.from_benchmark(benchmark)
+
+        planner = RemediationPlanner(
+            policy_engine=PolicyEngine(
+                classification_rule=ClassificationPolicyRule(),
+                rollback_rule=RollbackPolicyRule(),
+            ),
+            graph=graph,
+        )
+
+        audits = (
+            make_audit(control_a),
+            make_audit(control_b),
+        )
+
+        evaluations = (
+            make_policy_evaluation(control_a),
+            make_policy_evaluation(control_b),
+        )
+
+        try:
+>           planner.plan(audits, evaluations)
+
+tests\safety\test_dependency_conflict_planning.py:137:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\securebench\remediation\planner.py:236: in plan
+    ordered_controls = self._resolve_order(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <securebench.remediation.planner.RemediationPlanner object at 0x0000025D706BB450>
+controls = (Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test control.', platform='ubun...ck_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})))
+
+    def _resolve_order(
+        self,
+        controls: tuple[Control, ...],
+    ) -> tuple[Control, ...]:
+        """
+        Resolve dependencies/conflicts when a control graph is configured.
+
+        Without a graph, sort by control ID to guarantee deterministic plans.
+        """
+
+        if self._graph is None:
+            return tuple(
+                sorted(
+                    controls,
+                    key=lambda control: control.control_id,
+                )
+            )
+
+        requested_ids = tuple(
+            control.control_id
+            for control in controls
+        )
+
+        conflict_resolver = ConflictResolver(self._graph)
+>       conflicts = conflict_resolver.find_conflicts(requested_ids)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ConflictResolver' object has no attribute 'find_conflicts'
+
+src\securebench\remediation\planner.py:446: AttributeError
+_________ test_planner_includes_dependencies_before_requested_control _________
+
+    def test_planner_includes_dependencies_before_requested_control() -> None:
+        dependency = make_control("A")
+        requested = make_control(
+            "B",
+            dependencies=("A",),
+        )
+
+        benchmark = make_benchmark(
+            dependency,
+            requested,
+        )
+
+        graph = ControlGraph.from_benchmark(benchmark)
+
+        planner = RemediationPlanner(
+            policy_engine=PolicyEngine(
+                classification_rule=ClassificationPolicyRule(),
+                rollback_rule=RollbackPolicyRule(),
+            ),
+            graph=graph,
+        )
+
+        audits = (
+            make_audit(requested),
+        )
+
+        evaluations = (
+            make_policy_evaluation(requested),
+        )
+
+>       plan = planner.plan(
+            audits,
+            evaluations,
+        )
+
+tests\safety\test_dependency_conflict_planning.py:176:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\securebench\remediation\planner.py:236: in plan
+    ordered_controls = self._resolve_order(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <securebench.remediation.planner.RemediationPlanner object at 0x0000025D706CBB60>
+controls = (Control(control_id='B', benchmark_id='test-benchmark', title='Control B', description='Test control.', platform='ubun...pability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=('A',), conflicts=(), metadata=mappingproxy({})),)
+
+    def _resolve_order(
+        self,
+        controls: tuple[Control, ...],
+    ) -> tuple[Control, ...]:
+        """
+        Resolve dependencies/conflicts when a control graph is configured.
+
+        Without a graph, sort by control ID to guarantee deterministic plans.
+        """
+
+        if self._graph is None:
+            return tuple(
+                sorted(
+                    controls,
+                    key=lambda control: control.control_id,
+                )
+            )
+
+        requested_ids = tuple(
+            control.control_id
+            for control in controls
+        )
+
+        conflict_resolver = ConflictResolver(self._graph)
+>       conflicts = conflict_resolver.find_conflicts(requested_ids)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ConflictResolver' object has no attribute 'find_conflicts'
+
+src\securebench\remediation\planner.py:446: AttributeError
+__________________ test_planner_does_not_execute_remediation __________________
+
+    def test_planner_does_not_execute_remediation() -> None:
+        control = make_control("A")
+
+        benchmark = make_benchmark(control)
+
+        graph = ControlGraph.from_benchmark(benchmark)
+
+        planner = RemediationPlanner(
+            policy_engine=PolicyEngine(
+                classification_rule=ClassificationPolicyRule(),
+                rollback_rule=RollbackPolicyRule(),
+            ),
+            graph=graph,
+        )
+
+>       plan = planner.plan(
+            (make_audit(control),),
+            (make_policy_evaluation(control),),
+        )
+
+tests\safety\test_dependency_conflict_planning.py:205:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\securebench\remediation\planner.py:236: in plan
+    ordered_controls = self._resolve_order(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <securebench.remediation.planner.RemediationPlanner object at 0x0000025D706C9C70>
+controls = (Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test control.', platform='ubun...k_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})),)
+
+    def _resolve_order(
+        self,
+        controls: tuple[Control, ...],
+    ) -> tuple[Control, ...]:
+        """
+        Resolve dependencies/conflicts when a control graph is configured.
+
+        Without a graph, sort by control ID to guarantee deterministic plans.
+        """
+
+        if self._graph is None:
+            return tuple(
+                sorted(
+                    controls,
+                    key=lambda control: control.control_id,
+                )
+            )
+
+        requested_ids = tuple(
+            control.control_id
+            for control in controls
+        )
+
+        conflict_resolver = ConflictResolver(self._graph)
+>       conflicts = conflict_resolver.find_conflicts(requested_ids)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ConflictResolver' object has no attribute 'find_conflicts'
+
+src\securebench\remediation\planner.py:446: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/safety/test_plan_integrity.py::test_passed_control_is_never_planned_for_remediation
+FAILED tests/safety/test_plan_integrity.py::test_unknown_audit_status_does_not_enter_remediation
+FAILED tests/safety/test_dependency_conflict_planning.py::test_planner_rejects_conflicting_requested_controls
+FAILED tests/safety/test_dependency_conflict_planning.py::test_planner_includes_dependencies_before_requested_control
+FAILED tests/safety/test_dependency_conflict_planning.py::test_planner_does_not_execute_remediation
+5 failed, 36 passed in 0.28s
