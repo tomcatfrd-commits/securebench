@@ -30,6 +30,7 @@ class ChangeRecord:
     after: Mapping[str, object] | None = field(default_factory=dict)
     details: Mapping[str, object] = field(default_factory=dict)
     rollback_data: Mapping[str, object] | None = None
+    message: str = ""
 
     def __post_init__(self) -> None:
         if not isinstance(self.change_id, str) or not self.change_id.strip():
