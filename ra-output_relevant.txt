@@ -43,7 +43,7 @@ src\securebench\remediation\planner.py:236: in plan
     ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.remediation.planner.RemediationPlanner object at 0x0000015920A71E80>
+self = <securebench.remediation.planner.RemediationPlanner object at 0x0000018A4B481E80>
 controls = (Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test control.', platform='ubun...ck_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})))
 
     def _resolve_order(
@@ -117,7 +117,7 @@ src\securebench\remediation\planner.py:236: in plan
     ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.remediation.planner.RemediationPlanner object at 0x0000015920892AD0>
+self = <securebench.remediation.planner.RemediationPlanner object at 0x0000018A4B2A2AD0>
 controls = (Control(control_id='B', benchmark_id='test-benchmark', title='Control B', description='Test control.', platform='ubun...pability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=('A',), conflicts=(), metadata=mappingproxy({})),)
 
     def _resolve_order(
@@ -176,7 +176,7 @@ src\securebench\remediation\planner.py:236: in plan
     ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.remediation.planner.RemediationPlanner object at 0x0000015920893110>
+self = <securebench.remediation.planner.RemediationPlanner object at 0x0000018A4B2A3110>
 controls = (Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test control.', platform='ubun...k_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})),)
 
     def _resolve_order(
@@ -283,4 +283,4 @@ FAILED tests/safety/test_dependency_conflict_planning.py::test_planner_includes_
 FAILED tests/safety/test_dependency_conflict_planning.py::test_planner_does_not_execute_remediation
 FAILED tests/safety/test_policy_execution_boundary.py::test_compliant_control_never_enters_remediation
 FAILED tests/safety/test_policy_execution_boundary.py::test_unknown_audit_status_does_not_enter_remediation
-5 failed, 27 passed in 0.26s
+5 failed, 27 passed in 0.25s
