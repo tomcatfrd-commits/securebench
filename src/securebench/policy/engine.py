@@ -26,7 +26,6 @@ from securebench.core import (
     Profile,
     SafetyClassification,
 )
-
 from .classifier import ClassificationResult, ControlClassifier
 from .rules import (
     ClassificationPolicyRule,
@@ -47,7 +46,6 @@ class PolicyEvaluation:
     It does NOT mean that remediation may immediately execute.
 
     For example:
-
         REQUIRE_PRECHECK -> allowed to continue, but precheck is mandatory
         REQUIRE_APPROVAL -> allowed into the approval workflow, but not
                             executable without approval
@@ -93,6 +91,10 @@ class PolicyEngine:
 
     The engine is deliberately deterministic. Given the same control,
     profile, and policy configuration, it should produce the same decision.
+
+    Policy rules are injected so the engine remains composable and
+    testable. Profile-specific rollback permission is applied when the
+    rollback rule is evaluated.
     """
 
     def __init__(
@@ -100,11 +102,13 @@ class PolicyEngine:
         *,
         classifier: ControlClassifier | None = None,
         classification_rule: ClassificationPolicyRule | None = None,
+        rollback_rule: RollbackPolicyRule | None = None,
     ) -> None:
         self._classifier = classifier or ControlClassifier()
         self._classification_rule = (
             classification_rule or ClassificationPolicyRule()
         )
+        self._rollback_rule = rollback_rule or RollbackPolicyRule()
 
     def evaluate(
         self,
@@ -127,7 +131,10 @@ class PolicyEngine:
         )
 
         rollback_rule = RollbackPolicyRule(
-            allow_best_effort=profile.allow_best_effort_rollback,
+            allow_best_effort=(
+                self._rollback_rule.allow_best_effort
+                or profile.allow_best_effort_rollback
+            ),
         )
 
         rollback_result = rollback_rule.evaluate(control)
