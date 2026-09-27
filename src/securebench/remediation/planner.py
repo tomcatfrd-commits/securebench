@@ -34,14 +34,18 @@ class RemediationPlanItem:
     """
 
     control: Control
-    control_id: str
     host: str
     action: PlanAction
     reason: str
+    control_id: str = ""
     audit_result: AuditResult | None = None
     policy_evaluation: PolicyEvaluation | None = None
     requires_precheck: bool = False
     requires_approval: bool = False
+
+    def __post_init__(self) -> None:
+        if not self.control_id:
+            object.__setattr__(self, "control_id", self.control.control_id)
 
 
 @dataclass(frozen=True, slots=True)
