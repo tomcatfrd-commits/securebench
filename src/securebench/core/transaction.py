@@ -20,7 +20,7 @@ class ChangeStatus(StrEnum):
     ROLLED_BACK = "rolled_back"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(slots=True)  # mutable – rollback engine updates status
 class ChangeRecord:
     change_id: str
     control_id: str

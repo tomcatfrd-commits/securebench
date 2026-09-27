@@ -25,8 +25,7 @@ from securebench.core import (
     ChangeRecord,
     ChangeStatus,
     Control,
-    ExecutionResult,
-    ExecutionStatus,
+    Profile,
     RollbackCapability,
     RollbackError,
     Transaction,
@@ -37,22 +36,15 @@ from securebench.core import (
 class RollbackProvider(Protocol):
     """
     Interface implemented by control-specific rollback providers.
-
-    The provider is responsible for restoring the state that existed before
-    remediation.
     """
 
     def rollback(
         self,
         control: Control,
         host: str,
-        change: ChangeRecord,
-    ) -> ExecutionResult:
+    ) -> "RollbackExecution":
         """
         Restore one control on one host.
-
-        The implementation must use the transaction's recorded pre-change
-        state or another explicitly supported rollback mechanism.
         """
         ...
 
@@ -65,13 +57,14 @@ class RollbackExecution:
 
     control_id: str
     host: str
-    result: ExecutionResult
+    success: bool
+    message: str = ""
 
     @property
     def succeeded(self) -> bool:
         """Return True only when rollback completed successfully."""
 
-        return self.result.status is ExecutionStatus.SUCCESS
+        return self.success
 
 
 class RollbackEngine:
@@ -91,145 +84,139 @@ class RollbackEngine:
         control: Control,
         host: str,
         transaction: Transaction,
+        profile: Profile | None = None,
     ) -> RollbackExecution:
         """
         Roll back one control within a transaction.
 
-        The control must explicitly support rollback. Unsupported rollback
-        is treated as a hard error rather than silently ignored.
+        Unsupported or disallowed best-effort rollback fails closed
+        without calling the provider.
         """
+        # Locate the matching change by control_id + host
+        change = self._find_change(transaction, control.control_id, host)
 
         if control.rollback_capability is RollbackCapability.UNSUPPORTED:
-            raise RollbackError(
-                f"control '{control.control_id}' does not support rollback"
+            return RollbackExecution(
+                control_id=control.control_id,
+                host=host,
+                success=False,
+                message=(
+                    f"Rollback unsupported for control '{control.control_id}'."
+                ),
             )
 
-        change = transaction.get_change(
-            control_id=control.control_id,
-            host=host,
-        )
+        if control.rollback_capability is RollbackCapability.BEST_EFFORT:
+            allow = (
+                profile is not None
+                and getattr(profile, "allow_best_effort_rollback", False)
+            )
+            if not allow:
+                return RollbackExecution(
+                    control_id=control.control_id,
+                    host=host,
+                    success=False,
+                    message=(
+                        f"Best-effort rollback for control "
+                        f"'{control.control_id}' is denied by policy."
+                    ),
+                )
 
-        if change.status not in {
-            ChangeStatus.APPLIED,
-            ChangeStatus.VERIFIED,
-            ChangeStatus.FAILED,
-            ChangeStatus.ROLLBACK_REQUIRED,
-        }:
-            raise RollbackError(
-                f"control '{control.control_id}' on host '{host}' is in "
-                f"state '{change.status.value}' and cannot be rolled back"
+        if change.status is not ChangeStatus.SUCCESS:
+            return RollbackExecution(
+                control_id=control.control_id,
+                host=host,
+                success=False,
+                message=(
+                    f"Only successful changes can be rolled back; "
+                    f"change is in state '{change.status.value}'."
+                ),
             )
 
-        change.status = ChangeStatus.ROLLBACK_REQUIRED
+        try:
+            result = self._provider.rollback(control=control, host=host)
+        except Exception as exc:  # provider failure must not mark rolled back
+            change.status = ChangeStatus.ROLLBACK_REQUIRED
+            return RollbackExecution(
+                control_id=control.control_id,
+                host=host,
+                success=False,
+                message=str(exc),
+            )
 
-        result = self._provider.rollback(
-            control=control,
-            host=host,
-            change=change,
-        )
-
-        change.rollback_message = result.message
-
-        if result.status is ExecutionStatus.SUCCESS:
+        if result.success:
             change.status = ChangeStatus.ROLLED_BACK
         else:
             change.status = ChangeStatus.ROLLBACK_REQUIRED
 
-        return RollbackExecution(
-            control_id=control.control_id,
-            host=host,
-            result=result,
-        )
+        return result
 
     def rollback_transaction(
         self,
         *,
-        controls: dict[str, Control],
         transaction: Transaction,
+        controls: dict[str, Control],
+        profile: Profile | None = None,
     ) -> tuple[RollbackExecution, ...]:
         """
-        Roll back all applicable changes in reverse execution order.
+        Roll back all successful changes in reverse order.
 
-        Reverse order is important because later changes may depend on
-        earlier state.
-
-        The transaction is marked ROLLING_BACK before execution begins.
-        It is marked ROLLED_BACK only when every applicable change succeeds.
+        Stops early on the first failure (fail-closed).
         """
-
-        if transaction.status not in {
-            TransactionStatus.ROLLBACK_REQUIRED,
-            TransactionStatus.FAILED,
-        }:
-            raise RollbackError(
-                f"transaction '{transaction.transaction_id}' is in state "
-                f"'{transaction.status.value}' and cannot be rolled back"
-            )
-
-        transaction.status = TransactionStatus.ROLLING_BACK
-
         results: list[RollbackExecution] = []
 
         for change in reversed(transaction.changes):
-            if change.status not in {
-                ChangeStatus.APPLIED,
-                ChangeStatus.VERIFIED,
-                ChangeStatus.FAILED,
-                ChangeStatus.ROLLBACK_REQUIRED,
-            }:
+            if change.status is not ChangeStatus.SUCCESS:
                 continue
 
             control = controls.get(change.control_id)
-
             if control is None:
                 change.status = ChangeStatus.ROLLBACK_REQUIRED
-                change.rollback_message = (
-                    "Control definition is unavailable; rollback cannot "
-                    "be safely performed."
-                )
-
                 results.append(
                     RollbackExecution(
                         control_id=change.control_id,
                         host=change.host,
-                        result=ExecutionResult(
-                            control_id=change.control_id,
-                            host=change.host,
-                            status=ExecutionStatus.FAILED,
-                            changed=False,
-                            message=change.rollback_message,
+                        success=False,
+                        message=(
+                            "Control definition is missing; "
+                            "rollback cannot be performed."
                         ),
                     )
                 )
-                continue
+                # fail-closed: stop further rollbacks
+                break
 
-            try:
-                result = self.rollback_control(
-                    control=control,
-                    host=change.host,
-                    transaction=transaction,
-                )
-            except RollbackError as exc:
-                change.status = ChangeStatus.ROLLBACK_REQUIRED
-                change.rollback_message = str(exc)
-
-                result = RollbackExecution(
-                    control_id=change.control_id,
-                    host=change.host,
-                    result=ExecutionResult(
-                        control_id=change.control_id,
-                        host=change.host,
-                        status=ExecutionStatus.FAILED,
-                        changed=False,
-                        message=str(exc),
-                    ),
-                )
-
+            result = self.rollback_control(
+                control=control,
+                host=change.host,
+                transaction=transaction,
+                profile=profile,
+            )
             results.append(result)
 
-        if all(result.succeeded for result in results):
-            transaction.mark_rolled_back()
-        else:
-            transaction.status = TransactionStatus.ROLLBACK_REQUIRED
+            if not result.success:
+                break
+
+        if results and all(r.success for r in results):
+            # only mark fully rolled back when every attempted change succeeded
+            # and no successful changes remain
+            if not any(
+                c.status is ChangeStatus.SUCCESS for c in transaction.changes
+            ):
+                transaction.mark_rolled_back()
+        elif results:
+            transaction.mark_rollback_required()
 
         return tuple(results)
+
+    @staticmethod
+    def _find_change(
+        transaction: Transaction,
+        control_id: str,
+        host: str,
+    ) -> ChangeRecord:
+        for change in transaction.changes:
+            if change.control_id == control_id and change.host == host:
+                return change
+        raise RollbackError(
+            f"No change found for control '{control_id}' on host '{host}'."
+        )
