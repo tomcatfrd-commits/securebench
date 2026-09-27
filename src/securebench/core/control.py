@@ -203,7 +203,7 @@ class Control:
         self._validate_relationships()
 
         if not isinstance(self.metadata, Mapping):
-            raise ValueError(
+            raise TypeError(
                 "metadata must be a mapping"
             )
 

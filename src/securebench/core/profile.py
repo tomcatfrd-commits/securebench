@@ -22,6 +22,9 @@ from typing import Mapping
 
 from .control import SafetyClassification
 
+from securebench.core.control import Control
+from securebench.core.exceptions import ProfileError
+
 
 @dataclass(frozen=True, slots=True)
 class ProfileRule:
@@ -36,9 +39,22 @@ class ProfileRule:
     require_approval: bool = False
 
     def __post_init__(self) -> None:
+        if not isinstance(self.classification, SafetyClassification):
+            raise ProfileError(
+                "classification must be a SafetyClassification"
+            )
+
         if (
-            self.classification is SafetyClassification.APPROVAL_REQUIRED
-            and not self.require_approval
+                self.classification is SafetyClassification.INVESTIGATE
+                and self.enabled
+        ):
+            raise ValueError(
+                "investigate controls cannot be enabled for remediation"
+            )
+
+        if (
+                self.classification is SafetyClassification.APPROVAL_REQUIRED
+                and not self.require_approval
         ):
             raise ValueError(
                 "approval_required controls must have require_approval=True"
@@ -55,14 +71,6 @@ class ProfileRule:
                     "prohibited controls cannot require approval because "
                     "they cannot be remediated"
                 )
-
-        if (
-                self.classification is SafetyClassification.PROHIBITED
-                and self.enabled
-        ):
-            raise ValueError(
-                "prohibited controls cannot be enabled for remediation"
-            )
 
 
 @dataclass(frozen=True, slots=True)
