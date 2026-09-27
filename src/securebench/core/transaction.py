@@ -16,6 +16,7 @@ class ChangeStatus(StrEnum):
     PENDING = "pending"
     SUCCESS = "success"
     FAILED = "failed"
+    ROLLBACK_REQUIRED = "rollback_required"
     ROLLED_BACK = "rolled_back"
 
 
@@ -53,17 +54,36 @@ class ChangeRecord:
 
 
 class Transaction:
-    def __init__(self, transaction_id: str) -> None:
+    def __init__(
+        self,
+        transaction_id: str,
+        profile_id: str,
+        benchmark_id: str,
+    ) -> None:
         if not isinstance(transaction_id, str) or not transaction_id.strip():
             raise ValueError("transaction_id must be a non-empty string")
+        if not isinstance(profile_id, str) or not profile_id.strip():
+            raise ValueError("profile_id must be a non-empty string")
+        if not isinstance(benchmark_id, str) or not benchmark_id.strip():
+            raise ValueError("benchmark_id must be a non-empty string")
 
         self._transaction_id = transaction_id
+        self._profile_id = profile_id
+        self._benchmark_id = benchmark_id
         self._status = TransactionStatus.PENDING
         self._changes: list[ChangeRecord] = []
 
     @property
     def transaction_id(self) -> str:
         return self._transaction_id
+
+    @property
+    def profile_id(self) -> str:
+        return self._profile_id
+
+    @property
+    def benchmark_id(self) -> str:
+        return self._benchmark_id
 
     @property
     def status(self) -> TransactionStatus:
