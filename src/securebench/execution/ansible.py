@@ -29,6 +29,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Mapping, Sequence
 
 from securebench.core import (
+    ComplianceStatus,
     Control,
     ExecutionResult,
     ExecutionStatus,
@@ -310,15 +311,8 @@ class AnsibleExecutionBackend(ExecutionBackend):
         context: ExecutionContext,
         check_mode: bool | None = None,
     ) -> ExecutionResult:
-        try:
-            playbook = self._playbook_for(operation, context)
-        except ValueError as exc:
-            return ExecutionResult(
-                control_id=control.control_id,
-                host=host,
-                status=ExecutionStatus.FAILED,
-                message=str(exc),
-            )
+
+        playbook = self._playbook_for(operation, context)
 
         variables = dict(context.variables or {})
         variables.update(
@@ -333,20 +327,26 @@ class AnsibleExecutionBackend(ExecutionBackend):
             context.check_mode if check_mode is None else check_mode
         )
 
-        try:
-            result = self._executor.run(
-                playbook=playbook,
-                inventory=context.inventory,
-                extra_vars=variables,
-                check_mode=effective_check_mode,
-                limit=host,
-            )
-        except AnsibleExecutionError as exc:
+        result = self._executor.run(
+            playbook=playbook,
+            inventory=context.inventory,
+            extra_vars=variables,
+            check_mode=effective_check_mode,
+            limit=host,
+        )
+
+        if operation in {"audit", "verify"}:
             return ExecutionResult(
                 control_id=control.control_id,
                 host=host,
-                status=ExecutionStatus.FAILED,
-                message=str(exc),
+                status=ComplianceStatus.UNKNOWN,
+                changed=False,
+                message=result.stdout,
+                details={
+                    "return_code": result.return_code,
+                    "stderr": result.stderr,
+                    "operation": operation,
+                },
             )
 
         return ExecutionResult(

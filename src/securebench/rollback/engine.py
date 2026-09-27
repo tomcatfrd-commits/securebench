@@ -99,14 +99,19 @@ class RollbackEngine:
         host: str,
         transaction: Transaction,
         profile: Profile | None = None,
+        change: ChangeRecord | None = None,
     ) -> RollbackExecution:
         """
         Roll back one control within a transaction.
 
+        If a specific ChangeRecord is supplied, that exact change is rolled
+        back. Otherwise, the change is located by control ID and host.
+
         Unsupported or disallowed best-effort rollback fails closed
         without calling the provider.
         """
-        change = self._find_change(transaction, control.control_id, host)
+        if change is None:
+            change = self._find_change(transaction, control.control_id, host)
 
         if change is None:
             return RollbackExecution(
@@ -134,6 +139,7 @@ class RollbackEngine:
                 profile is not None
                 and getattr(profile, "allow_best_effort_rollback", False)
             )
+
             if not allow:
                 return RollbackExecution(
                     control_id=control.control_id,
@@ -157,9 +163,14 @@ class RollbackEngine:
             )
 
         try:
-            raw = self._call_provider(control=control, host=host, change=change)
+            raw = self._call_provider(
+                control=control,
+                host=host,
+                change=change,
+            )
         except Exception as exc:
             change.status = ChangeStatus.ROLLBACK_REQUIRED
+
             return RollbackExecution(
                 control_id=control.control_id,
                 host=host,
@@ -200,8 +211,8 @@ class RollbackEngine:
                 continue
 
             control = controls.get(change.control_id)
+
             if control is None:
-                change.status = ChangeStatus.ROLLBACK_REQUIRED
                 results.append(
                     RollbackExecution(
                         control_id=change.control_id,
@@ -220,7 +231,9 @@ class RollbackEngine:
                 host=change.host,
                 transaction=transaction,
                 profile=profile,
+                change=change,
             )
+
             results.append(result)
 
             if not result.success:
@@ -230,7 +243,8 @@ class RollbackEngine:
         overall_success = all(r.success for r in results)
 
         if overall_success and not any(
-            c.status is ChangeStatus.SUCCESS for c in transaction.changes
+            c.status is ChangeStatus.SUCCESS
+            for c in transaction.changes
         ):
             transaction.mark_rolled_back()
         elif results and not overall_success:
@@ -249,7 +263,8 @@ class RollbackEngine:
         change: ChangeRecord,
     ) -> Any:
         """
-        Call the provider with either (control, host, change) or (control, host).
+        Call the provider with either (control, host, change) or
+        (control, host).
         """
         try:
             return self._provider.rollback(
@@ -283,12 +298,21 @@ class RollbackEngine:
                 ),
             )
 
-        success = bool(getattr(raw, "success", False))
+        success = bool(
+            getattr(
+                raw,
+                "succeeded",
+                getattr(raw, "success", False),
+            )
+        )
+
         message = str(getattr(raw, "message", "") or "")
+
         if not message:
             message = (
                 "Rollback completed" if success else "Rollback failed"
             )
+
         return RollbackExecution(
             control_id=control_id,
             host=host,
@@ -305,4 +329,5 @@ class RollbackEngine:
         for change in transaction.changes:
             if change.control_id == control_id and change.host == host:
                 return change
+
         return None
