@@ -99,7 +99,7 @@ class Transaction:
 
         if any(existing.change_id == change.change_id for existing in self._changes):
             raise ValueError(
-                f"Duplicate change_id: {change.change_id!r}"
+                f"duplicate change_id: {change.change_id!r}"
             )
 
         self._changes.append(change)
