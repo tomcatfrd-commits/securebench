@@ -17,9 +17,11 @@ from enum import StrEnum
 
 from securebench.core import (
     Control,
+    Profile,
     RollbackCapability,
     SafetyClassification,
 )
+from securebench.policy.classifier import ControlClassifier
 
 
 class PolicyDecision(StrEnum):
@@ -39,6 +41,17 @@ class RuleResult:
     decision: PolicyDecision
     reason: str
 
+    @property
+    def allowed(self) -> bool:
+        """
+        Return True when the rule does not hard-deny the control.
+
+        REQUIRE_PRECHECK and REQUIRE_APPROVAL still allow the control into
+        the planning workflow; only DENY blocks it.
+        """
+
+        return self.decision is not PolicyDecision.DENY
+
 
 @dataclass(frozen=True, slots=True)
 class RollbackPolicyRule:
@@ -52,7 +65,17 @@ class RollbackPolicyRule:
 
     allow_best_effort: bool = False
 
-    def evaluate(self, control: Control) -> RuleResult:
+    def evaluate(
+        self,
+        control: Control,
+        profile: Profile | None = None,
+    ) -> RuleResult:
+        allow_best_effort = self.allow_best_effort
+        if profile is not None:
+            allow_best_effort = bool(
+                getattr(profile, "allow_best_effort_rollback", allow_best_effort)
+            )
+
         if control.rollback_capability is RollbackCapability.GUARANTEED:
             return RuleResult(
                 rule_name="rollback-capability",
@@ -61,7 +84,7 @@ class RollbackPolicyRule:
             )
 
         if control.rollback_capability is RollbackCapability.BEST_EFFORT:
-            if self.allow_best_effort:
+            if allow_best_effort:
                 return RuleResult(
                     rule_name="rollback-capability",
                     decision=PolicyDecision.ALLOW,
@@ -98,8 +121,28 @@ class ClassificationPolicyRule:
 
     def evaluate(
         self,
-        classification: SafetyClassification,
+        control_or_classification: Control | SafetyClassification,
+        profile: Profile | None = None,
     ) -> RuleResult:
+        """
+        Evaluate classification policy.
+
+        Accepts either:
+          - (classification,) – legacy / internal
+          - (control, profile) – unit-test / public API
+        """
+        if isinstance(control_or_classification, SafetyClassification):
+            classification = control_or_classification
+        else:
+            if profile is None:
+                raise TypeError(
+                    "profile is required when evaluate() is called with a Control"
+                )
+            classification = ControlClassifier().classify(
+                control_or_classification,
+                profile,
+            ).classification
+
         if classification is SafetyClassification.SAFE:
             return RuleResult(
                 rule_name="safety-classification",
