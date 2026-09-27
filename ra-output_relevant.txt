@@ -1,4 +1,4 @@
-FFFFFFFFFF.F..FFFFF....F.....FFFFF.....FF..........                      [100%]
+FFFFFFFFFF.F..FFFFF..........FFFFF.....FF..........                      [100%]
 ================================== FAILURES ===================================
 ___________ test_approval_required_control_never_becomes_remediate ____________
 
@@ -20,7 +20,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -62,7 +62,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -104,7 +104,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -146,7 +146,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...n.DENY: 'deny'>, allowed=False, reason="Control classification 'investigate' does not permit automatic remediation."),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...n.DENY: 'deny'>, allowed=False, reason="Control classification 'investigate' does not permit automatic remediation."),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -188,7 +188,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...on.DENY: 'deny'>, allowed=False, reason="Control classification 'prohibited' does not permit automatic remediation."),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...on.DENY: 'deny'>, allowed=False, reason="Control classification 'prohibited' does not permit automatic remediation."),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -230,7 +230,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -279,7 +279,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -333,7 +333,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -387,7 +387,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -441,7 +441,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -514,7 +514,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -575,7 +575,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -641,7 +641,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='A', classification=ClassificationResult(control_id='A', classification=<SafetyClassifica...')), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'))
+evaluations = (PolicyEvaluation(control=Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test ...')), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'))
 
     @staticmethod
     def _controls_from_evaluations(
@@ -750,7 +750,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='B', classification=ClassificationResult(control_id='B', classification=<SafetyClassifica...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='B', benchmark_id='test-benchmark', title='Control B', description='Test ...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -801,7 +801,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='A', classification=ClassificationResult(control_id='A', classification=<SafetyClassifica...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test ...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -823,28 +823,6 @@ evaluations = (PolicyEvaluation(control_id='A', classification=ClassificationRes
 E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
 
 src\securebench\remediation\planner.py:328: PlanningError
-______________ test_safe_with_precheck_is_not_approval_required _______________
-
-    def test_safe_with_precheck_is_not_approval_required() -> None:
-        control = make_control()
-
-        profile = make_profile(
-            control.control_id,
-            classification=SafetyClassification.SAFE_WITH_PRECHECK,
-        )
-
-        evaluation = make_engine().evaluate(
-            control=control,
-            profile=profile,
-        )
-
-        assert evaluation.requires_approval is False
-        assert evaluation.requires_precheck is True
->       assert evaluation.can_execute_without_approval is False
-E       AssertionError: assert True is False
-E        +  where True = PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<SafetyC...K: 'require_precheck'>, allowed=True, reason='Control is allowed only after required host-specific prechecks succeed.').can_execute_without_approval
-
-tests\safety\test_policy_approval_boundary.py:145: AssertionError
 ______________ test_safe_control_can_enter_remediation_workflow _______________
 
     def test_safe_control_can_enter_remediation_workflow() -> None:
@@ -878,7 +856,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descriptio...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -933,7 +911,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety... 'require_precheck'>, allowed=True, reason='Control is allowed only after required host-specific prechecks succeed.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descriptio... 'require_precheck'>, allowed=True, reason='Control is allowed only after required host-specific prechecks succeed.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -989,7 +967,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descriptio...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -1045,7 +1023,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...n.DENY: 'deny'>, allowed=False, reason="Control classification 'investigate' does not permit automatic remediation."),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descriptio...n.DENY: 'deny'>, allowed=False, reason="Control classification 'investigate' does not permit automatic remediation."),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -1101,7 +1079,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...on.DENY: 'deny'>, allowed=False, reason="Control classification 'prohibited' does not permit automatic remediation."),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descriptio...on.DENY: 'deny'>, allowed=False, reason="Control classification 'prohibited' does not permit automatic remediation."),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -1160,7 +1138,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descriptio...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -1219,7 +1197,7 @@ src\securebench\remediation\planner.py:221: in plan
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control_id='TEST-1', classification=ClassificationResult(control_id='TEST-1', classification=<Safety...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
+evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descriptio...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
 
     @staticmethod
     def _controls_from_evaluations(
@@ -1258,7 +1236,6 @@ FAILED tests/safety/test_plan_integrity.py::test_plan_does_not_mutate_control
 FAILED tests/safety/test_dependency_conflict_planning.py::test_planner_rejects_conflicting_requested_controls
 FAILED tests/safety/test_dependency_conflict_planning.py::test_planner_includes_dependencies_before_requested_control
 FAILED tests/safety/test_dependency_conflict_planning.py::test_planner_does_not_execute_remediation
-FAILED tests/safety/test_policy_approval_boundary.py::test_safe_with_precheck_is_not_approval_required
 FAILED tests/safety/test_policy_execution_boundary.py::test_safe_control_can_enter_remediation_workflow
 FAILED tests/safety/test_policy_execution_boundary.py::test_safe_with_precheck_never_becomes_direct_remediation
 FAILED tests/safety/test_policy_execution_boundary.py::test_approval_required_control_never_becomes_direct_remediation
@@ -1266,4 +1243,4 @@ FAILED tests/safety/test_policy_execution_boundary.py::test_investigate_control_
 FAILED tests/safety/test_policy_execution_boundary.py::test_prohibited_control_cannot_enter_remediation
 FAILED tests/safety/test_policy_execution_boundary.py::test_compliant_control_never_enters_remediation
 FAILED tests/safety/test_policy_execution_boundary.py::test_unknown_audit_status_does_not_enter_remediation
-24 failed, 27 passed in 0.50s
+23 failed, 28 passed in 0.51s

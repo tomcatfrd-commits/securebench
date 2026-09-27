@@ -21,11 +21,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from securebench.core import (
-    Control,
-    Profile,
-    SafetyClassification,
-)
+from securebench.core import Control, Profile
 from .classifier import ClassificationResult, ControlClassifier
 from .rules import (
     ClassificationPolicyRule,
@@ -40,6 +36,11 @@ class PolicyEvaluation:
     """
     Complete policy evaluation for one control.
 
+    ``control`` is the exact immutable Control object that was evaluated.
+    Keeping it here allows downstream planning stages to preserve the
+    domain object rather than attempting to reconstruct a Control from
+    its identifier.
+
     ``allowed`` means the control passed the policy gate sufficiently to
     continue through the planning workflow.
 
@@ -52,6 +53,7 @@ class PolicyEvaluation:
         DENY               -> blocked
     """
 
+    control: Control
     control_id: str
     classification: ClassificationResult
     rule_results: tuple[RuleResult, ...]
@@ -74,15 +76,14 @@ class PolicyEvaluation:
     @property
     def can_execute_without_approval(self) -> bool:
         """
-        Return whether the policy allows execution without approval.
+        Return whether the policy permits immediate execution.
 
-        This is intentionally narrower than ``allowed``.
+        A precheck requirement is an execution gate, not permission to
+        execute immediately. Therefore only an explicit ALLOW decision
+        can execute without approval or an additional policy gate.
         """
 
-        return self.decision in {
-            PolicyDecision.ALLOW,
-            PolicyDecision.REQUIRE_PRECHECK,
-        }
+        return self.decision is PolicyDecision.ALLOW
 
 
 class PolicyEngine:
@@ -150,6 +151,7 @@ class PolicyEngine:
         )
 
         return PolicyEvaluation(
+            control=control,
             control_id=control.control_id,
             classification=classification,
             rule_results=rule_results,
