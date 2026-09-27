@@ -9,6 +9,7 @@ from securebench.core.exceptions import PlanningError
 from securebench.core.profile import Profile
 from securebench.core.result import AuditResult, ComplianceStatus
 from securebench.policy.engine import PolicyEngine, PolicyEvaluation
+
 from .conflict import ConflictResolver
 from .dependency import DependencyResolver
 
@@ -85,7 +86,6 @@ class RemediationPlanner:
     Planning is deliberately separated from execution.
 
     Workflow:
-
         controls + audit results + profile
                     |
                     v
@@ -119,7 +119,6 @@ class RemediationPlanner:
         accidentally bypass the policy gate by constructing plan items
         directly.
         """
-
         normalized_controls = self._normalize_controls(controls)
         normalized_audits = self._normalize_audits(audits)
 
@@ -148,6 +147,7 @@ class RemediationPlanner:
             )
 
         evaluations: dict[str, PolicyEvaluation] = {}
+
         for control in normalized_controls:
             evaluations[control.control_id] = self._policy_engine.evaluate(
                 control,
@@ -165,6 +165,8 @@ class RemediationPlanner:
                 evaluation=evaluations[control.control_id],
             )
             for control in ordered_controls
+            if audits_by_id[control.control_id].status
+            is ComplianceStatus.FAIL
         )
 
         return RemediationPlan(items=items)
@@ -182,7 +184,6 @@ class RemediationPlanner:
         ``create_plan`` is retained as the descriptive workflow API used by
         integration callers.
         """
-
         return self.build(
             controls=controls,
             audits=audit_results,
@@ -202,11 +203,10 @@ class RemediationPlanner:
         it.
 
         Controls introduced only because they are dependencies may not have
-        their own audit result. Such controls are represented with an
-        UNKNOWN audit result so they can never become automatically
-        remediable without explicit audit evidence.
+        their own audit result. Such controls are represented with an UNKNOWN
+        audit result so they can never become automatically remediable without
+        explicit audit evidence.
         """
-
         audit_by_control = self._index_audits(audits)
         evaluation_by_control = self._index_evaluations(evaluations)
 
@@ -257,6 +257,9 @@ class RemediationPlanner:
                 evaluation=evaluation_by_control[control.control_id],
             )
             for control in ordered_controls
+            if audit_by_control.get(control.control_id) is not None
+            and audit_by_control[control.control_id].status
+            is ComplianceStatus.FAIL
         )
 
         return RemediationPlan(items=items)
@@ -358,7 +361,6 @@ class RemediationPlanner:
         The identity is intentionally preserved. The planner must not create
         a reconstructed or partially populated Control object.
         """
-
         result: dict[str, Control] = {}
 
         for evaluation in evaluations:
@@ -396,7 +398,6 @@ class RemediationPlanner:
         A compatibility plan is normally constructed from audit results for
         one target host. Reject an empty host rather than inventing one.
         """
-
         if not audits:
             raise PlanningError(
                 "Cannot construct dependency audit results without a host."
@@ -428,7 +429,6 @@ class RemediationPlanner:
 
         Without a graph, sort by control ID to guarantee deterministic plans.
         """
-
         if self._graph is None:
             return tuple(
                 sorted(
@@ -489,8 +489,11 @@ class RemediationPlanner:
 
         Compliance is checked before policy because a passing control must
         never enter remediation merely because its policy permits changes.
-        """
 
+        This method still understands PASS and UNKNOWN for defensive
+        compatibility, but the public planning paths exclude those statuses
+        before constructing plan items.
+        """
         if audit.status is ComplianceStatus.PASS:
             return RemediationPlanItem(
                 control=control,
