@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from securebench.core.control import Control
 from securebench.core.control_graph import ControlGraph
 from securebench.core.exceptions import PlanningError
 
@@ -33,10 +32,6 @@ class ConflictResolution:
 class ConflictResolver:
     """
     Detect conflicting controls before remediation execution.
-
-    Conflict detection is deliberately separate from remediation. A conflict
-    must be discovered during planning so that no remediation task is started
-    before the complete requested set has been evaluated.
     """
 
     def __init__(self, graph: ControlGraph) -> None:
@@ -94,8 +89,7 @@ class ConflictResolver:
         seen: set[tuple[str, str]] = set()
 
         for control_id in control_ids:
-            control = self._graph.get_control(control_id)
-            for other_id in getattr(control, "conflicts", ()) or ():
+            for other_id in self._graph.conflicts_for(control_id):
                 if other_id not in requested:
                     continue
                 pair = tuple(sorted((control_id, other_id)))
