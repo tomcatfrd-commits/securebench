@@ -1,602 +1,5 @@
-FFFFFFFFFF.F..FFFFF..........FFFFF.....FF..........                      [100%]
+FFF...........................FF                                         [100%]
 ================================== FAILURES ===================================
-___________ test_approval_required_control_never_becomes_remediate ____________
-
-    def test_approval_required_control_never_becomes_remediate() -> None:
-        control = make_control()
-
->       plan = make_plan(
-            control,
-            classification=SafetyClassification.APPROVAL_REQUIRED,
-            require_approval=True,
-        )
-
-tests\safety\test_approval_boundary.py:96:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-tests\safety\test_approval_boundary.py:87: in make_plan
-    return planner.plan(
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-______________ test_approval_required_control_is_not_executable _______________
-
-    def test_approval_required_control_is_not_executable() -> None:
-        control = make_control()
-
->       plan = make_plan(
-            control,
-            classification=SafetyClassification.APPROVAL_REQUIRED,
-            require_approval=True,
-        )
-
-tests\safety\test_approval_boundary.py:110:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-tests\safety\test_approval_boundary.py:87: in make_plan
-    return planner.plan(
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-_____________ test_approval_required_control_is_explicitly_listed _____________
-
-    def test_approval_required_control_is_explicitly_listed() -> None:
-        control = make_control()
-
->       plan = make_plan(
-            control,
-            classification=SafetyClassification.APPROVAL_REQUIRED,
-            require_approval=True,
-        )
-
-tests\safety\test_approval_boundary.py:122:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-tests\safety\test_approval_boundary.py:87: in make_plan
-    return planner.plan(
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-_______________ test_investigate_control_cannot_bypass_approval _______________
-
-    def test_investigate_control_cannot_bypass_approval() -> None:
-        control = make_control()
-
->       plan = make_plan(
-            control,
-            classification=SafetyClassification.INVESTIGATE,
-            require_approval=False,
-        )
-
-tests\safety\test_approval_boundary.py:134:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-tests\safety\test_approval_boundary.py:87: in make_plan
-    return planner.plan(
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...n.DENY: 'deny'>, allowed=False, reason="Control classification 'investigate' does not permit automatic remediation."),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-____________ test_prohibited_control_cannot_bypass_safety_boundary ____________
-
-    def test_prohibited_control_cannot_bypass_safety_boundary() -> None:
-        control = make_control()
-
->       plan = make_plan(
-            control,
-            classification=SafetyClassification.PROHIBITED,
-            require_approval=False,
-        )
-
-tests\safety\test_approval_boundary.py:148:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-tests\safety\test_approval_boundary.py:87: in make_plan
-    return planner.plan(
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...on.DENY: 'deny'>, allowed=False, reason="Control classification 'prohibited' does not permit automatic remediation."),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-______________ test_safe_control_without_approval_is_remediable _______________
-
-    def test_safe_control_without_approval_is_remediable() -> None:
-        control = make_control()
-
->       plan = make_plan(
-            control,
-            classification=SafetyClassification.SAFE,
-            require_approval=False,
-        )
-
-tests\safety\test_approval_boundary.py:162:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-tests\safety\test_approval_boundary.py:87: in make_plan
-    return planner.plan(
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-_______________ test_approval_boundary_does_not_modify_control ________________
-
-    def test_approval_boundary_does_not_modify_control() -> None:
-        control = make_control()
-
-        original = (
-            control.control_id,
-            control.dependencies,
-            control.conflicts,
-            control.rollback_capability,
-        )
-
->       make_plan(
-            control,
-            classification=SafetyClassification.APPROVAL_REQUIRED,
-            require_approval=True,
-        )
-
-tests\safety\test_approval_boundary.py:183:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-tests\safety\test_approval_boundary.py:87: in make_plan
-    return planner.plan(
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-____________ test_passed_control_is_never_planned_for_remediation _____________
-
-    def test_passed_control_is_never_planned_for_remediation() -> None:
-        control = make_control()
-
-        audit = AuditResult(
-            control_id=control.control_id,
-            host="production-01",
-            status=ComplianceStatus.PASS,
-        )
-
-        evaluation = make_policy_engine().evaluate(
-            control=control,
-            profile=make_profile(control.control_id),
-        )
-
-        planner = RemediationPlanner(
-            policy_engine=make_policy_engine(),
-        )
-
->       plan = planner.plan(
-            audits=(audit,),
-            evaluations=(evaluation,),
-        )
-
-tests\safety\test_plan_integrity.py:79:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-______________ test_failed_safe_control_enters_remediation_plan _______________
-
-    def test_failed_safe_control_enters_remediation_plan() -> None:
-        control = make_control()
-
-        audit = AuditResult(
-            control_id=control.control_id,
-            host="production-01",
-            status=ComplianceStatus.FAIL,
-        )
-
-        evaluation = make_policy_engine().evaluate(
-            control=control,
-            profile=make_profile(control.control_id),
-        )
-
-        planner = RemediationPlanner(
-            policy_engine=make_policy_engine(),
-        )
-
->       plan = planner.plan(
-            audits=(audit,),
-            evaluations=(evaluation,),
-        )
-
-tests\safety\test_plan_integrity.py:105:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-____________ test_unknown_audit_status_does_not_enter_remediation _____________
-
-    def test_unknown_audit_status_does_not_enter_remediation() -> None:
-        control = make_control()
-
-        audit = AuditResult(
-            control_id=control.control_id,
-            host="production-01",
-            status=ComplianceStatus.UNKNOWN,
-        )
-
-        evaluation = make_policy_engine().evaluate(
-            control=control,
-            profile=make_profile(control.control_id),
-        )
-
-        planner = RemediationPlanner(
-            policy_engine=make_policy_engine(),
-        )
-
->       plan = planner.plan(
-            audits=(audit,),
-            evaluations=(evaluation,),
-        )
-
-tests\safety\test_plan_integrity.py:133:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-___________________ test_missing_audit_result_fails_closed ____________________
-
-    def test_missing_audit_result_fails_closed() -> None:
-        control = make_control()
-
-        evaluation = make_policy_engine().evaluate(
-            control=control,
-            profile=make_profile(control.control_id),
-        )
-
-        planner = RemediationPlanner(
-            policy_engine=make_policy_engine(),
-        )
-
->       with pytest.raises(Exception):
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-E       Failed: DID NOT RAISE Exception
-
-tests\safety\test_plan_integrity.py:173: Failed
-________________________ test_plan_items_are_immutable ________________________
-
-    def test_plan_items_are_immutable() -> None:
-        control = make_control()
-
-        audit = AuditResult(
-            control_id=control.control_id,
-            host="production-01",
-            status=ComplianceStatus.FAIL,
-        )
-
-        evaluation = make_policy_engine().evaluate(
-            control=control,
-            profile=make_profile(control.control_id),
-        )
-
-        planner = RemediationPlanner(
-            policy_engine=make_policy_engine(),
-        )
-
->       plan = planner.plan(
-            audits=(audit,),
-            evaluations=(evaluation,),
-        )
-
-tests\safety\test_plan_integrity.py:248:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-______________________ test_plan_does_not_mutate_control ______________________
-
-    def test_plan_does_not_mutate_control() -> None:
-        control = make_control()
-
-        original = (
-            control.control_id,
-            control.dependencies,
-            control.conflicts,
-            control.metadata,
-        )
-
-        audit = AuditResult(
-            control_id=control.control_id,
-            host="production-01",
-            status=ComplianceStatus.FAIL,
-        )
-
-        evaluation = make_policy_engine().evaluate(
-            control=control,
-            profile=make_profile(control.control_id),
-        )
-
-        planner = RemediationPlanner(
-            policy_engine=make_policy_engine(),
-        )
-
->       planner.plan(
-            audits=(audit,),
-            evaluations=(evaluation,),
-        )
-
-tests\safety\test_plan_integrity.py:284:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descript...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
 _____________ test_planner_rejects_conflicting_requested_controls _____________
 
     def test_planner_rejects_conflicting_requested_controls() -> None:
@@ -636,76 +39,41 @@ _____________ test_planner_rejects_conflicting_requested_controls _____________
 
 tests\safety\test_dependency_conflict_planning.py:137:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\securebench\remediation\planner.py:236: in plan
+    ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control=Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test ...')), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'))
+self = <securebench.remediation.planner.RemediationPlanner object at 0x0000015920A71E80>
+controls = (Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test control.', platform='ubun...ck_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})))
 
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
+    def _resolve_order(
+        self,
+        controls: tuple[Control, ...],
+    ) -> tuple[Control, ...]:
         """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
+        Resolve dependencies/conflicts when a control graph is configured.
 
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
+        Without a graph, sort by control ID to guarantee deterministic plans.
         """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
+        if self._graph is None:
+            return tuple(
+                sorted(
+                    controls,
+                    key=lambda control: control.control_id,
+                )
+            )
 
-src\securebench\remediation\planner.py:328: PlanningError
-
-During handling of the above exception, another exception occurred:
-
-    def test_planner_rejects_conflicting_requested_controls() -> None:
-        control_a = make_control(
-            "A",
-            conflicts=("B",),
-        )
-        control_b = make_control("B")
-
-        benchmark = make_benchmark(
-            control_a,
-            control_b,
+        requested_ids = tuple(
+            control.control_id
+            for control in controls
         )
 
-        graph = ControlGraph.from_benchmark(benchmark)
+        conflict_resolver = ConflictResolver(self._graph)
+>       conflicts = conflict_resolver.find_conflicts(requested_ids)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ConflictResolver' object has no attribute 'find_conflicts'
 
-        planner = RemediationPlanner(
-            policy_engine=PolicyEngine(
-                classification_rule=ClassificationPolicyRule(),
-                rollback_rule=RollbackPolicyRule(),
-            ),
-            graph=graph,
-        )
-
-        audits = (
-            make_audit(control_a),
-            make_audit(control_b),
-        )
-
-        evaluations = (
-            make_policy_evaluation(control_a),
-            make_policy_evaluation(control_b),
-        )
-
-        try:
-            planner.plan(audits, evaluations)
-        except PlanningError as exc:
->           assert "Conflicting controls" in str(exc)
-E           AssertionError: assert 'Conflicting controls' in 'The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.'
-E            +  where 'The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.' = str(PlanningError('The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.'))
-
-tests\safety\test_dependency_conflict_planning.py:139: AssertionError
+src\securebench\remediation\planner.py:446: AttributeError
 _________ test_planner_includes_dependencies_before_requested_control _________
 
     def test_planner_includes_dependencies_before_requested_control() -> None:
@@ -745,33 +113,41 @@ _________ test_planner_includes_dependencies_before_requested_control _________
 
 tests\safety\test_dependency_conflict_planning.py:176:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\securebench\remediation\planner.py:236: in plan
+    ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control=Control(control_id='B', benchmark_id='test-benchmark', title='Control B', description='Test ...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
+self = <securebench.remediation.planner.RemediationPlanner object at 0x0000015920892AD0>
+controls = (Control(control_id='B', benchmark_id='test-benchmark', title='Control B', description='Test control.', platform='ubun...pability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=('A',), conflicts=(), metadata=mappingproxy({})),)
 
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
+    def _resolve_order(
+        self,
+        controls: tuple[Control, ...],
+    ) -> tuple[Control, ...]:
         """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
+        Resolve dependencies/conflicts when a control graph is configured.
 
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
+        Without a graph, sort by control ID to guarantee deterministic plans.
         """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
+        if self._graph is None:
+            return tuple(
+                sorted(
+                    controls,
+                    key=lambda control: control.control_id,
+                )
+            )
+
+        requested_ids = tuple(
+            control.control_id
+            for control in controls
         )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
 
-src\securebench\remediation\planner.py:328: PlanningError
+        conflict_resolver = ConflictResolver(self._graph)
+>       conflicts = conflict_resolver.find_conflicts(requested_ids)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ConflictResolver' object has no attribute 'find_conflicts'
+
+src\securebench\remediation\planner.py:446: AttributeError
 __________________ test_planner_does_not_execute_remediation __________________
 
     def test_planner_does_not_execute_remediation() -> None:
@@ -796,311 +172,41 @@ __________________ test_planner_does_not_execute_remediation __________________
 
 tests\safety\test_dependency_conflict_planning.py:205:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\securebench\remediation\planner.py:236: in plan
+    ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-evaluations = (PolicyEvaluation(control=Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test ...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
+self = <securebench.remediation.planner.RemediationPlanner object at 0x0000015920893110>
+controls = (Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test control.', platform='ubun...k_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})),)
 
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
+    def _resolve_order(
+        self,
+        controls: tuple[Control, ...],
+    ) -> tuple[Control, ...]:
         """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
+        Resolve dependencies/conflicts when a control graph is configured.
 
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
+        Without a graph, sort by control ID to guarantee deterministic plans.
         """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
+        if self._graph is None:
+            return tuple(
+                sorted(
+                    controls,
+                    key=lambda control: control.control_id,
+                )
+            )
 
-src\securebench\remediation\planner.py:328: PlanningError
-______________ test_safe_control_can_enter_remediation_workflow _______________
-
-    def test_safe_control_can_enter_remediation_workflow() -> None:
-        control = make_control()
-        profile = make_profile(SafetyClassification.SAFE)
-
-        classifier = ControlClassifier()
-        policy_engine = PolicyEngine()
-        planner = RemediationPlanner(
-            policy_engine=policy_engine,
+        requested_ids = tuple(
+            control.control_id
+            for control in controls
         )
 
-        classification = classifier.classify(control, profile)
-        evaluation = policy_engine.evaluate(
-            control,
-            profile,
-        )
->       plan = planner.plan(
-            (
-                make_failed_audit(),
-            ),
-            (
-                evaluation,
-            ),
-        )
+        conflict_resolver = ConflictResolver(self._graph)
+>       conflicts = conflict_resolver.find_conflicts(requested_ids)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ConflictResolver' object has no attribute 'find_conflicts'
 
-tests\safety\test_policy_execution_boundary.py:89:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descriptio...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-__________ test_safe_with_precheck_never_becomes_direct_remediation ___________
-
-    def test_safe_with_precheck_never_becomes_direct_remediation() -> None:
-        control = make_control()
-        profile = make_profile(
-            SafetyClassification.SAFE_WITH_PRECHECK,
-        )
-
-        policy_engine = PolicyEngine()
-        planner = RemediationPlanner(
-            policy_engine=policy_engine,
-        )
-
-        evaluation = policy_engine.evaluate(
-            control,
-            profile,
-        )
->       plan = planner.plan(
-            (
-                make_failed_audit(),
-            ),
-            (
-                evaluation,
-            ),
-        )
-
-tests\safety\test_policy_execution_boundary.py:118:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descriptio... 'require_precheck'>, allowed=True, reason='Control is allowed only after required host-specific prechecks succeed.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-_______ test_approval_required_control_never_becomes_direct_remediation _______
-
-    def test_approval_required_control_never_becomes_direct_remediation() -> None:
-        control = make_control()
-        profile = make_profile(
-            SafetyClassification.APPROVAL_REQUIRED,
-            require_approval=True,
-        )
-
-        policy_engine = PolicyEngine()
-        planner = RemediationPlanner(
-            policy_engine=policy_engine,
-        )
-
-        evaluation = policy_engine.evaluate(
-            control,
-            profile,
-        )
->       plan = planner.plan(
-            (
-                make_failed_audit(),
-            ),
-            (
-                evaluation,
-            ),
-        )
-
-tests\safety\test_policy_execution_boundary.py:148:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descriptio...on=<PolicyDecision.REQUIRE_APPROVAL: 'require_approval'>, allowed=True, reason='Control requires explicit approval.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-______________ test_investigate_control_cannot_enter_remediation ______________
-
-    def test_investigate_control_cannot_enter_remediation() -> None:
-        control = make_control()
-        profile = make_profile(
-            SafetyClassification.INVESTIGATE,
-            enabled=False,
-        )
-
-        policy_engine = PolicyEngine()
-        planner = RemediationPlanner(
-            policy_engine=policy_engine,
-        )
-
-        evaluation = policy_engine.evaluate(
-            control,
-            profile,
-        )
->       plan = planner.plan(
-            (
-                make_failed_audit(),
-            ),
-            (
-                evaluation,
-            ),
-        )
-
-tests\safety\test_policy_execution_boundary.py:178:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descriptio...n.DENY: 'deny'>, allowed=False, reason="Control classification 'investigate' does not permit automatic remediation."),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
-______________ test_prohibited_control_cannot_enter_remediation _______________
-
-    def test_prohibited_control_cannot_enter_remediation() -> None:
-        control = make_control()
-        profile = make_profile(
-            SafetyClassification.PROHIBITED,
-            enabled=False,
-        )
-
-        policy_engine = PolicyEngine()
-        planner = RemediationPlanner(
-            policy_engine=policy_engine,
-        )
-
-        evaluation = policy_engine.evaluate(
-            control,
-            profile,
-        )
->       plan = planner.plan(
-            (
-                make_failed_audit(),
-            ),
-            (
-                evaluation,
-            ),
-        )
-
-tests\safety\test_policy_execution_boundary.py:208:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descriptio...on.DENY: 'deny'>, allowed=False, reason="Control classification 'prohibited' does not permit automatic remediation."),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
+src\securebench\remediation\planner.py:446: AttributeError
 _______________ test_compliant_control_never_enters_remediation _______________
 
     def test_compliant_control_never_enters_remediation() -> None:
@@ -1126,40 +232,16 @@ _______________ test_compliant_control_never_enters_remediation _______________
             evidence=(),
         )
 
->       plan = planner.plan(
+        plan = planner.plan(
             (compliant_audit,),
             (evaluation,),
         )
 
-tests\safety\test_policy_execution_boundary.py:328:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+>       assert plan.items[0].action is PlanAction.SKIP
+               ^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
 
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descriptio...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
+tests\safety\test_policy_execution_boundary.py:333: IndexError
 ____________ test_unknown_audit_status_does_not_enter_remediation _____________
 
     def test_unknown_audit_status_does_not_enter_remediation() -> None:
@@ -1185,344 +267,20 @@ ____________ test_unknown_audit_status_does_not_enter_remediation _____________
             evidence=(),
         )
 
->       plan = planner.plan(
+        plan = planner.plan(
             (unknown_audit,),
             (evaluation,),
         )
 
-tests\safety\test_policy_execution_boundary.py:360:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:221: in plan
-    controls = self._controls_from_evaluations(evaluations)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+>       assert plan.items[0].action is PlanAction.INVESTIGATE
+               ^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
 
-evaluations = (PolicyEvaluation(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', descriptio...)), decision=<PolicyDecision.ALLOW: 'allow'>, allowed=True, reason='All applicable policy rules permit remediation.'),)
-
-    @staticmethod
-    def _controls_from_evaluations(
-        evaluations: tuple[PolicyEvaluation, ...],
-    ) -> dict[str, Control]:
-        """
-        Recover Control definitions from PolicyEvaluation objects when using
-        the compatibility plan() API.
-
-        Current PolicyEvaluation does not carry the Control object, so this
-        compatibility path cannot safely reconstruct one. Fail closed.
-        """
->       raise PlanningError(
-            "The legacy plan(audits, evaluations) API requires policy "
-            "evaluations to carry their Control definitions. Use "
-            "build(controls=..., audits=..., profile=...) or "
-            "create_plan(...) instead."
-        )
-E       securebench.core.exceptions.PlanningError: The legacy plan(audits, evaluations) API requires policy evaluations to carry their Control definitions. Use build(controls=..., audits=..., profile=...) or create_plan(...) instead.
-
-src\securebench\remediation\planner.py:328: PlanningError
+tests\safety\test_policy_execution_boundary.py:365: IndexError
 =========================== short test summary info ===========================
-FAILED tests/safety/test_approval_boundary.py::test_approval_required_control_never_becomes_remediate
-FAILED tests/safety/test_approval_boundary.py::test_approval_required_control_is_not_executable
-FAILED tests/safety/test_approval_boundary.py::test_approval_required_control_is_explicitly_listed
-FAILED tests/safety/test_approval_boundary.py::test_investigate_control_cannot_bypass_approval
-FAILED tests/safety/test_approval_boundary.py::test_prohibited_control_cannot_bypass_safety_boundary
-FAILED tests/safety/test_approval_boundary.py::test_safe_control_without_approval_is_remediable
-FAILED tests/safety/test_approval_boundary.py::test_approval_boundary_does_not_modify_control
-FAILED tests/safety/test_plan_integrity.py::test_passed_control_is_never_planned_for_remediation
-FAILED tests/safety/test_plan_integrity.py::test_failed_safe_control_enters_remediation_plan
-FAILED tests/safety/test_plan_integrity.py::test_unknown_audit_status_does_not_enter_remediation
-FAILED tests/safety/test_plan_integrity.py::test_missing_audit_result_fails_closed
-FAILED tests/safety/test_plan_integrity.py::test_plan_items_are_immutable - s...
-FAILED tests/safety/test_plan_integrity.py::test_plan_does_not_mutate_control
 FAILED tests/safety/test_dependency_conflict_planning.py::test_planner_rejects_conflicting_requested_controls
 FAILED tests/safety/test_dependency_conflict_planning.py::test_planner_includes_dependencies_before_requested_control
 FAILED tests/safety/test_dependency_conflict_planning.py::test_planner_does_not_execute_remediation
-FAILED tests/safety/test_policy_execution_boundary.py::test_safe_control_can_enter_remediation_workflow
-FAILED tests/safety/test_policy_execution_boundary.py::test_safe_with_precheck_never_becomes_direct_remediation
-FAILED tests/safety/test_policy_execution_boundary.py::test_approval_required_control_never_becomes_direct_remediation
-FAILED tests/safety/test_policy_execution_boundary.py::test_investigate_control_cannot_enter_remediation
-FAILED tests/safety/test_policy_execution_boundary.py::test_prohibited_control_cannot_enter_remediation
 FAILED tests/safety/test_policy_execution_boundary.py::test_compliant_control_never_enters_remediation
 FAILED tests/safety/test_policy_execution_boundary.py::test_unknown_audit_status_does_not_enter_remediation
-23 failed, 28 passed in 0.51sF.F......FFF.............................                                [100%]
-================================== FAILURES ===================================
-____________ test_passed_control_is_never_planned_for_remediation _____________
-
-    def test_passed_control_is_never_planned_for_remediation() -> None:
-        control = make_control()
-
-        audit = AuditResult(
-            control_id=control.control_id,
-            host="production-01",
-            status=ComplianceStatus.PASS,
-        )
-
-        evaluation = make_policy_engine().evaluate(
-            control=control,
-            profile=make_profile(control.control_id),
-        )
-
-        planner = RemediationPlanner(
-            policy_engine=make_policy_engine(),
-        )
-
-        plan = planner.plan(
-            audits=(audit,),
-            evaluations=(evaluation,),
-        )
-
->       assert plan.items == ()
-E       AssertionError: assert (RemediationP...roval=False),) == ()
-E
-E         Left contains one more item: RemediationPlanItem(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descri...owed=True, reason='All applicable policy rules permit remediation.'), requires_precheck=False, requires_approval=False)
-E         Use -v to get more diff
-
-tests\safety\test_plan_integrity.py:84: AssertionError
-____________ test_unknown_audit_status_does_not_enter_remediation _____________
-
-    def test_unknown_audit_status_does_not_enter_remediation() -> None:
-        control = make_control()
-
-        audit = AuditResult(
-            control_id=control.control_id,
-            host="production-01",
-            status=ComplianceStatus.UNKNOWN,
-        )
-
-        evaluation = make_policy_engine().evaluate(
-            control=control,
-            profile=make_profile(control.control_id),
-        )
-
-        planner = RemediationPlanner(
-            policy_engine=make_policy_engine(),
-        )
-
-        plan = planner.plan(
-            audits=(audit,),
-            evaluations=(evaluation,),
-        )
-
->       assert plan.items == ()
-E       AssertionError: assert (RemediationP...roval=False),) == ()
-E
-E         Left contains one more item: RemediationPlanItem(control=Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Control TEST-1', descri...owed=True, reason='All applicable policy rules permit remediation.'), requires_precheck=False, requires_approval=False)
-E         Use -v to get more diff
-
-tests\safety\test_plan_integrity.py:138: AssertionError
-_____________ test_planner_rejects_conflicting_requested_controls _____________
-
-    def test_planner_rejects_conflicting_requested_controls() -> None:
-        control_a = make_control(
-            "A",
-            conflicts=("B",),
-        )
-        control_b = make_control("B")
-
-        benchmark = make_benchmark(
-            control_a,
-            control_b,
-        )
-
-        graph = ControlGraph.from_benchmark(benchmark)
-
-        planner = RemediationPlanner(
-            policy_engine=PolicyEngine(
-                classification_rule=ClassificationPolicyRule(),
-                rollback_rule=RollbackPolicyRule(),
-            ),
-            graph=graph,
-        )
-
-        audits = (
-            make_audit(control_a),
-            make_audit(control_b),
-        )
-
-        evaluations = (
-            make_policy_evaluation(control_a),
-            make_policy_evaluation(control_b),
-        )
-
-        try:
->           planner.plan(audits, evaluations)
-
-tests\safety\test_dependency_conflict_planning.py:137:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:236: in plan
-    ordered_controls = self._resolve_order(
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.remediation.planner.RemediationPlanner object at 0x0000025D706BB450>
-controls = (Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test control.', platform='ubun...ck_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})))
-
-    def _resolve_order(
-        self,
-        controls: tuple[Control, ...],
-    ) -> tuple[Control, ...]:
-        """
-        Resolve dependencies/conflicts when a control graph is configured.
-
-        Without a graph, sort by control ID to guarantee deterministic plans.
-        """
-
-        if self._graph is None:
-            return tuple(
-                sorted(
-                    controls,
-                    key=lambda control: control.control_id,
-                )
-            )
-
-        requested_ids = tuple(
-            control.control_id
-            for control in controls
-        )
-
-        conflict_resolver = ConflictResolver(self._graph)
->       conflicts = conflict_resolver.find_conflicts(requested_ids)
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       AttributeError: 'ConflictResolver' object has no attribute 'find_conflicts'
-
-src\securebench\remediation\planner.py:446: AttributeError
-_________ test_planner_includes_dependencies_before_requested_control _________
-
-    def test_planner_includes_dependencies_before_requested_control() -> None:
-        dependency = make_control("A")
-        requested = make_control(
-            "B",
-            dependencies=("A",),
-        )
-
-        benchmark = make_benchmark(
-            dependency,
-            requested,
-        )
-
-        graph = ControlGraph.from_benchmark(benchmark)
-
-        planner = RemediationPlanner(
-            policy_engine=PolicyEngine(
-                classification_rule=ClassificationPolicyRule(),
-                rollback_rule=RollbackPolicyRule(),
-            ),
-            graph=graph,
-        )
-
-        audits = (
-            make_audit(requested),
-        )
-
-        evaluations = (
-            make_policy_evaluation(requested),
-        )
-
->       plan = planner.plan(
-            audits,
-            evaluations,
-        )
-
-tests\safety\test_dependency_conflict_planning.py:176:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:236: in plan
-    ordered_controls = self._resolve_order(
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.remediation.planner.RemediationPlanner object at 0x0000025D706CBB60>
-controls = (Control(control_id='B', benchmark_id='test-benchmark', title='Control B', description='Test control.', platform='ubun...pability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=('A',), conflicts=(), metadata=mappingproxy({})),)
-
-    def _resolve_order(
-        self,
-        controls: tuple[Control, ...],
-    ) -> tuple[Control, ...]:
-        """
-        Resolve dependencies/conflicts when a control graph is configured.
-
-        Without a graph, sort by control ID to guarantee deterministic plans.
-        """
-
-        if self._graph is None:
-            return tuple(
-                sorted(
-                    controls,
-                    key=lambda control: control.control_id,
-                )
-            )
-
-        requested_ids = tuple(
-            control.control_id
-            for control in controls
-        )
-
-        conflict_resolver = ConflictResolver(self._graph)
->       conflicts = conflict_resolver.find_conflicts(requested_ids)
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       AttributeError: 'ConflictResolver' object has no attribute 'find_conflicts'
-
-src\securebench\remediation\planner.py:446: AttributeError
-__________________ test_planner_does_not_execute_remediation __________________
-
-    def test_planner_does_not_execute_remediation() -> None:
-        control = make_control("A")
-
-        benchmark = make_benchmark(control)
-
-        graph = ControlGraph.from_benchmark(benchmark)
-
-        planner = RemediationPlanner(
-            policy_engine=PolicyEngine(
-                classification_rule=ClassificationPolicyRule(),
-                rollback_rule=RollbackPolicyRule(),
-            ),
-            graph=graph,
-        )
-
->       plan = planner.plan(
-            (make_audit(control),),
-            (make_policy_evaluation(control),),
-        )
-
-tests\safety\test_dependency_conflict_planning.py:205:
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-src\securebench\remediation\planner.py:236: in plan
-    ordered_controls = self._resolve_order(
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = <securebench.remediation.planner.RemediationPlanner object at 0x0000025D706C9C70>
-controls = (Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test control.', platform='ubun...k_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})),)
-
-    def _resolve_order(
-        self,
-        controls: tuple[Control, ...],
-    ) -> tuple[Control, ...]:
-        """
-        Resolve dependencies/conflicts when a control graph is configured.
-
-        Without a graph, sort by control ID to guarantee deterministic plans.
-        """
-
-        if self._graph is None:
-            return tuple(
-                sorted(
-                    controls,
-                    key=lambda control: control.control_id,
-                )
-            )
-
-        requested_ids = tuple(
-            control.control_id
-            for control in controls
-        )
-
-        conflict_resolver = ConflictResolver(self._graph)
->       conflicts = conflict_resolver.find_conflicts(requested_ids)
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       AttributeError: 'ConflictResolver' object has no attribute 'find_conflicts'
-
-src\securebench\remediation\planner.py:446: AttributeError
-=========================== short test summary info ===========================
-FAILED tests/safety/test_plan_integrity.py::test_passed_control_is_never_planned_for_remediation
-FAILED tests/safety/test_plan_integrity.py::test_unknown_audit_status_does_not_enter_remediation
-FAILED tests/safety/test_dependency_conflict_planning.py::test_planner_rejects_conflicting_requested_controls
-FAILED tests/safety/test_dependency_conflict_planning.py::test_planner_includes_dependencies_before_requested_control
-FAILED tests/safety/test_dependency_conflict_planning.py::test_planner_does_not_execute_remediation
-5 failed, 36 passed in 0.28s
+5 failed, 27 passed in 0.26s
