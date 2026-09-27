@@ -45,11 +45,11 @@ tests\unit\test_planner.py .............FF                               [ 74%]
 tests\unit\test_policy.py .....FFFFFFFFFF.F.........                     [ 78%]
 tests\unit\test_profile.py ........................                      [ 82%]
 tests\unit\test_remediation.py FFFFFFFFFFFFF                             [ 84%]
-tests\unit\test_reporting.py FFFFFFFFFFFFFFFFFFFF                        [ 88%]
+tests\unit\test_reporting.py ....FFFFFFFFFFF.FF..                        [ 88%]
 tests\unit\test_rollback.py ..............                               [ 90%]
 tests\unit\test_rollback_transaction.py FFFFFF....                       [ 92%]
 tests\unit\test_snapshot.py ............                                 [ 94%]
-tests\unit\test_transaction.py ..................                        [ 97%]
+tests\unit\test_transaction.py ................F.                        [ 97%]
 tests\unit\test_verification.py ...............                          [100%]
 
 ================================== FAILURES ===================================
@@ -85,75 +85,197 @@ ____ test_failed_audit_flows_through_precheck_remediation_and_verification ____
         remediation_provider = FakeRemediationProvider()
         remediation_engine = RemediationEngine(remediation_provider)
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-integration-001",
             host=host,
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\integration\test_remediation_verification_flow.py:156: TypeError
+>       remediation_result = remediation_engine.execute(
+            plan=plan,
+            transaction=transaction,
+        )
+E       TypeError: RemediationEngine.execute() got an unexpected keyword argument 'plan'
+
+tests\integration\test_remediation_verification_flow.py:161: TypeError
 _______ test_transaction_can_record_successful_remediation_and_rollback _______
 
     def test_transaction_can_record_successful_remediation_and_rollback() -> None:
         control = _load_control()
         host = "ubuntu-production-01"
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-integration-001",
             host=host,
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\integration\test_transaction_flow.py:68: TypeError
+>       change = _successful_change(
+            control_id=control.control_id,
+            host=host,
+            change_id="change-001",
+        )
+
+tests\integration\test_transaction_flow.py:73:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'CIS-1.1.1.1', host = 'ubuntu-production-01'
+change_id = 'change-001'
+
+    def _successful_change(
+        *,
+        control_id: str,
+        host: str,
+        change_id: str,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=ChangeStatus.SUCCESS,
+            message="Remediation completed.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\integration\test_transaction_flow.py:55: TypeError
 ____________________ test_failed_change_is_not_rolled_back ____________________
 
     def test_failed_change_is_not_rolled_back() -> None:
         control = _load_control()
         host = "ubuntu-production-01"
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-integration-002",
             host=host,
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\integration\test_transaction_flow.py:107: TypeError
+>       successful = _successful_change(
+            control_id=control.control_id,
+            host=host,
+            change_id="change-success",
+        )
+
+tests\integration\test_transaction_flow.py:112:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'CIS-1.1.1.1', host = 'ubuntu-production-01'
+change_id = 'change-success'
+
+    def _successful_change(
+        *,
+        control_id: str,
+        host: str,
+        change_id: str,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=ChangeStatus.SUCCESS,
+            message="Remediation completed.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\integration\test_transaction_flow.py:55: TypeError
 ___________________ test_rollback_uses_reverse_change_order ___________________
 
     def test_rollback_uses_reverse_change_order() -> None:
         control = _load_control()
         host = "ubuntu-production-01"
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-integration-003",
             host=host,
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\integration\test_transaction_flow.py:153: TypeError
+>       first = _successful_change(
+            control_id=control.control_id,
+            host=host,
+            change_id="change-001",
+        )
+
+tests\integration\test_transaction_flow.py:158:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'CIS-1.1.1.1', host = 'ubuntu-production-01'
+change_id = 'change-001'
+
+    def _successful_change(
+        *,
+        control_id: str,
+        host: str,
+        change_id: str,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=ChangeStatus.SUCCESS,
+            message="Remediation completed.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\integration\test_transaction_flow.py:55: TypeError
 ______________________ test_missing_control_fails_closed ______________________
 
     def test_missing_control_fails_closed() -> None:
         control = _load_control()
         host = "ubuntu-production-01"
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-integration-004",
             host=host,
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\integration\test_transaction_flow.py:199: TypeError
+>       change = _successful_change(
+            control_id=control.control_id,
+            host=host,
+            change_id="change-001",
+        )
+
+tests\integration\test_transaction_flow.py:204:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'CIS-1.1.1.1', host = 'ubuntu-production-01'
+change_id = 'change-001'
+
+    def _successful_change(
+        *,
+        control_id: str,
+        host: str,
+        change_id: str,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=ChangeStatus.SUCCESS,
+            message="Remediation completed.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\integration\test_transaction_flow.py:55: TypeError
 __________________ test_empty_transaction_can_be_rolled_back __________________
 
     def test_empty_transaction_can_be_rolled_back() -> None:
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-integration-005",
             host="ubuntu-production-01",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\integration\test_transaction_flow.py:228: TypeError
+        transaction.mark_rollback_required()
+
+        provider = FakeRollbackProvider()
+        engine = RollbackEngine(provider)
+
+        result = engine.rollback_transaction(
+            transaction=transaction,
+            controls={},
+        )
+
+>       assert result.success is True
+E       assert False is True
+E        +  where False = TransactionRollbackResult(success=False, executions=()).success
+
+tests\integration\test_transaction_flow.py:243: AssertionError
 _________________ test_ansible_executor_rejects_empty_command _________________
 
     def test_ansible_executor_rejects_empty_command() -> None:
@@ -345,7 +467,7 @@ _________________________ test_audit_stores_evidence __________________________
 
         assert len(evidence) == 1
 >       assert evidence[0] is result.evidence[0]
-E       AssertionError: assert EvidenceRecord(evidence_id='TEST-1:production-01:recording-audit-provider', evidence=Evidence(control_id='TEST-1', hos...collected_at=datetime.datetime(2026, 9, 27, 10, 26, 3, 426597, tzinfo=datetime.timezone.utc), details={}), metadata={}) is Evidence(control_id='TEST-1', host='production-01', source='recording-audit-provider', observed={'compliant': True}, e...iant': True}, collected_at=datetime.datetime(2026, 9, 27, 10, 26, 3, 426597, tzinfo=datetime.timezone.utc), details={})
+E       AssertionError: assert EvidenceRecord(evidence_id='TEST-1:production-01:recording-audit-provider', evidence=Evidence(control_id='TEST-1', hos...ollected_at=datetime.datetime(2026, 9, 27, 10, 29, 49, 254332, tzinfo=datetime.timezone.utc), details={}), metadata={}) is Evidence(control_id='TEST-1', host='production-01', source='recording-audit-provider', observed={'compliant': True}, e...ant': True}, collected_at=datetime.datetime(2026, 9, 27, 10, 29, 49, 254332, tzinfo=datetime.timezone.utc), details={})
 
 tests\safety\test_audit_boundary.py:132: AssertionError
 ___________ test_benchmark_rejects_control_from_different_benchmark ___________
@@ -406,7 +528,7 @@ src\securebench\remediation\planner.py:236: in plan
     ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.remediation.planner.RemediationPlanner object at 0x000002510FD0E300>
+self = <securebench.remediation.planner.RemediationPlanner object at 0x000001E8D110DA90>
 controls = (Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test control.', platform='ubun...ck_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})))
 
     def _resolve_order(
@@ -480,7 +602,7 @@ src\securebench\remediation\planner.py:236: in plan
     ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.remediation.planner.RemediationPlanner object at 0x000002510FE1BD90>
+self = <securebench.remediation.planner.RemediationPlanner object at 0x000001E8D120F4D0>
 controls = (Control(control_id='B', benchmark_id='test-benchmark', title='Control B', description='Test control.', platform='ubun...pability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=('A',), conflicts=(), metadata=mappingproxy({})),)
 
     def _resolve_order(
@@ -539,7 +661,7 @@ src\securebench\remediation\planner.py:236: in plan
     ordered_controls = self._resolve_order(
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <securebench.remediation.planner.RemediationPlanner object at 0x000002510FE18750>
+self = <securebench.remediation.planner.RemediationPlanner object at 0x000001E8D120D2B0>
 controls = (Control(control_id='A', benchmark_id='test-benchmark', title='Control A', description='Test control.', platform='ubun...k_capability=<RollbackCapability.GUARANTEED: 'guaranteed'>, dependencies=(), conflicts=(), metadata=mappingproxy({})),)
 
     def _resolve_order(
@@ -712,7 +834,7 @@ E         Use -v to get more diff
 tests\safety\test_plan_integrity.py:138: AssertionError
 _______ test_production_safe_profile_requires_investigation_by_default ________
 
-loader = <securebench.core.loader.ConfigurationLoader object at 0x00000251100073E0>
+loader = <securebench.core.loader.ConfigurationLoader object at 0x000001E8D1453160>
 
     def test_production_safe_profile_requires_investigation_by_default(
         loader: ConfigurationLoader,
@@ -1162,10 +1284,28 @@ __________________ test_json_reporter_preserves_audit_status __________________
         reporter = JsonReporter()
 
 >       rendered = reporter.render_audit(make_audit_result())
-                   ^^^^^^^^^^^^^^^^^^^^^
-E       AttributeError: 'JsonReporter' object has no attribute 'render_audit'
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests\safety\test_reporting_boundary.py:59: AttributeError
+tests\safety\test_reporting_boundary.py:59:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <securebench.reporting.json.JsonReporter object at 0x000001E8D12CD2B0>
+results = AuditResult(control_id='TEST-1', host='production-01', status=<ComplianceStatus.FAIL: 'fail'>, evidence=(Evidence(cont...tails={}),), message='', collected_at=datetime.datetime(2026, 9, 27, 10, 29, 49, 690230, tzinfo=datetime.timezone.utc))
+indent = 2
+
+    def render_audit(
+        self,
+        results: Iterable[AuditResult],
+        *,
+        indent: int = 2,
+    ) -> str:
+        """Return a list of audit results as JSON."""
+
+>       return self._dump(list(results), indent=indent)
+                          ^^^^^^^^^^^^^
+E       TypeError: 'AuditResult' object is not iterable
+
+src\securebench\reporting\json.py:37: TypeError
 ________________ test_json_reporter_preserves_execution_status ________________
 
     def test_json_reporter_preserves_execution_status() -> None:
@@ -1194,10 +1334,28 @@ ____________________ test_json_reporter_preserves_evidence ____________________
         reporter = JsonReporter()
 
 >       rendered = reporter.render_audit(make_audit_result())
-                   ^^^^^^^^^^^^^^^^^^^^^
-E       AttributeError: 'JsonReporter' object has no attribute 'render_audit'
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests\safety\test_reporting_boundary.py:92: AttributeError
+tests\safety\test_reporting_boundary.py:92:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <securebench.reporting.json.JsonReporter object at 0x000001E8D13EED70>
+results = AuditResult(control_id='TEST-1', host='production-01', status=<ComplianceStatus.FAIL: 'fail'>, evidence=(Evidence(cont...tails={}),), message='', collected_at=datetime.datetime(2026, 9, 27, 10, 29, 49, 703944, tzinfo=datetime.timezone.utc))
+indent = 2
+
+    def render_audit(
+        self,
+        results: Iterable[AuditResult],
+        *,
+        indent: int = 2,
+    ) -> str:
+        """Return a list of audit results as JSON."""
+
+>       return self._dump(list(results), indent=indent)
+                          ^^^^^^^^^^^^^
+E       TypeError: 'AuditResult' object is not iterable
+
+src\securebench\reporting\json.py:37: TypeError
 _______________ test_json_reporter_does_not_change_input_result _______________
 
     def test_json_reporter_does_not_change_input_result() -> None:
@@ -1206,10 +1364,27 @@ _______________ test_json_reporter_does_not_change_input_result _______________
         original_evidence = result.evidence
 
 >       JsonReporter().render_audit(result)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       AttributeError: 'JsonReporter' object has no attribute 'render_audit'
 
-tests\safety\test_reporting_boundary.py:105: AttributeError
+tests\safety\test_reporting_boundary.py:105:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <securebench.reporting.json.JsonReporter object at 0x000001E8D13EF100>
+results = AuditResult(control_id='TEST-1', host='production-01', status=<ComplianceStatus.FAIL: 'fail'>, evidence=(Evidence(cont...tails={}),), message='', collected_at=datetime.datetime(2026, 9, 27, 10, 29, 49, 709593, tzinfo=datetime.timezone.utc))
+indent = 2
+
+    def render_audit(
+        self,
+        results: Iterable[AuditResult],
+        *,
+        indent: int = 2,
+    ) -> str:
+        """Return a list of audit results as JSON."""
+
+>       return self._dump(list(results), indent=indent)
+                          ^^^^^^^^^^^^^
+E       TypeError: 'AuditResult' object is not iterable
+
+src\securebench\reporting\json.py:37: TypeError
 ____________ test_csv_reporter_contains_audit_identity_and_status _____________
 
     def test_csv_reporter_contains_audit_identity_and_status() -> None:
@@ -1303,47 +1478,138 @@ ______ test_reporting_unknown_or_failed_status_is_not_silently_converted ______
 
         json_document = json.loads(
 >           JsonReporter().render_audit(result)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
         )
-E       AttributeError: 'JsonReporter' object has no attribute 'render_audit'
 
-tests\safety\test_reporting_boundary.py:202: AttributeError
+tests\safety\test_reporting_boundary.py:202:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <securebench.reporting.json.JsonReporter object at 0x000001E8D1501250>
+results = AuditResult(control_id='TEST-UNKNOWN', host='production-01', status=<ComplianceStatus.UNKNOWN: 'unknown'>, evidence=(), message='', collected_at=datetime.datetime(2026, 9, 27, 10, 29, 49, 737284, tzinfo=datetime.timezone.utc))
+indent = 2
+
+    def render_audit(
+        self,
+        results: Iterable[AuditResult],
+        *,
+        indent: int = 2,
+    ) -> str:
+        """Return a list of audit results as JSON."""
+
+>       return self._dump(list(results), indent=indent)
+                          ^^^^^^^^^^^^^
+E       TypeError: 'AuditResult' object is not iterable
+
+src\securebench\reporting\json.py:37: TypeError
 ________________ test_rollback_only_targets_successful_changes ________________
 
     def test_rollback_only_targets_successful_changes() -> None:
         control = make_control()
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-001",
             host="test-host",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\safety\test_rollback_boundary.py:98: TypeError
+>       successful = make_change(
+            change_id="change-success",
+            status=ChangeStatus.SUCCESS,
+        )
+
+tests\safety\test_rollback_boundary.py:103:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'TEST-1', host = 'test-host', change_id = 'change-success'
+status = <ChangeStatus.SUCCESS: 'success'>
+
+    def make_change(
+        *,
+        control_id: str = "TEST-1",
+        host: str = "test-host",
+        change_id: str = "change-001",
+        status: ChangeStatus = ChangeStatus.SUCCESS,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=status,
+            message="Test change.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\safety\test_rollback_boundary.py:45: TypeError
 ______________________ test_rollback_uses_reverse_order _______________________
 
     def test_rollback_uses_reverse_order() -> None:
         control = make_control()
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-002",
             host="test-host",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\safety\test_rollback_boundary.py:142: TypeError
+>       first = make_change(change_id="change-001")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\safety\test_rollback_boundary.py:147:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'TEST-1', host = 'test-host', change_id = 'change-001'
+status = <ChangeStatus.SUCCESS: 'success'>
+
+    def make_change(
+        *,
+        control_id: str = "TEST-1",
+        host: str = "test-host",
+        change_id: str = "change-001",
+        status: ChangeStatus = ChangeStatus.SUCCESS,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=status,
+            message="Test change.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\safety\test_rollback_boundary.py:45: TypeError
 _________________ test_failed_rollback_stops_further_rollback _________________
 
     def test_failed_rollback_stops_further_rollback() -> None:
         control = make_control()
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-003",
             host="test-host",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\safety\test_rollback_boundary.py:176: TypeError
+>       first = make_change(change_id="change-001")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\safety\test_rollback_boundary.py:181:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'TEST-1', host = 'test-host', change_id = 'change-001'
+status = <ChangeStatus.SUCCESS: 'success'>
+
+    def make_change(
+        *,
+        control_id: str = "TEST-1",
+        host: str = "test-host",
+        change_id: str = "change-001",
+        status: ChangeStatus = ChangeStatus.SUCCESS,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=status,
+            message="Test change.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\safety\test_rollback_boundary.py:45: TypeError
 _____________________ test_unsupported_rollback_is_denied _____________________
 
     def test_unsupported_rollback_is_denied() -> None:
@@ -1351,45 +1617,130 @@ _____________________ test_unsupported_rollback_is_denied _____________________
             rollback_capability=RollbackCapability.UNSUPPORTED,
         )
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-004",
             host="test-host",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\safety\test_rollback_boundary.py:248: TypeError
+>       change = make_change()
+                 ^^^^^^^^^^^^^
+
+tests\safety\test_rollback_boundary.py:253:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'TEST-1', host = 'test-host', change_id = 'change-001'
+status = <ChangeStatus.SUCCESS: 'success'>
+
+    def make_change(
+        *,
+        control_id: str = "TEST-1",
+        host: str = "test-host",
+        change_id: str = "change-001",
+        status: ChangeStatus = ChangeStatus.SUCCESS,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=status,
+            message="Test change.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\safety\test_rollback_boundary.py:45: TypeError
 ______________________ test_missing_control_fails_closed ______________________
 
     def test_missing_control_fails_closed() -> None:
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-005",
             host="test-host",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\safety\test_rollback_boundary.py:272: TypeError
+>       change = make_change()
+                 ^^^^^^^^^^^^^
+
+tests\safety\test_rollback_boundary.py:277:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'TEST-1', host = 'test-host', change_id = 'change-001'
+status = <ChangeStatus.SUCCESS: 'success'>
+
+    def make_change(
+        *,
+        control_id: str = "TEST-1",
+        host: str = "test-host",
+        change_id: str = "change-001",
+        status: ChangeStatus = ChangeStatus.SUCCESS,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=status,
+            message="Test change.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\safety\test_rollback_boundary.py:45: TypeError
 _______________ test_empty_transaction_does_not_invoke_provider _______________
 
     def test_empty_transaction_does_not_invoke_provider() -> None:
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-006",
             host="test-host",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\safety\test_rollback_boundary.py:296: TypeError
+        transaction.mark_rollback_required()
+
+        provider = RecordingRollbackProvider()
+        engine = RollbackEngine(provider)
+
+        result = engine.rollback_transaction(
+            transaction=transaction,
+            controls={},
+        )
+
+>       assert result.success is True
+E       assert False is True
+E        +  where False = TransactionRollbackResult(success=False, executions=()).success
+
+tests\safety\test_rollback_boundary.py:311: AssertionError
 ______________ test_rollback_does_not_modify_control_definition _______________
 
     def test_rollback_does_not_modify_control_definition() -> None:
         control = make_control()
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-007",
             host="test-host",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\safety\test_rollback_boundary.py:319: TypeError
+>       change = make_change()
+                 ^^^^^^^^^^^^^
+
+tests\safety\test_rollback_boundary.py:324:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'TEST-1', host = 'test-host', change_id = 'change-001'
+status = <ChangeStatus.SUCCESS: 'success'>
+
+    def make_change(
+        *,
+        control_id: str = "TEST-1",
+        host: str = "test-host",
+        change_id: str = "change-001",
+        status: ChangeStatus = ChangeStatus.SUCCESS,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=status,
+            message="Test change.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\safety\test_rollback_boundary.py:45: TypeError
 _______________________ test_snapshot_requires_identity _______________________
 
     def test_snapshot_requires_identity() -> None:
@@ -1546,37 +1897,111 @@ ________________ test_rollback_only_targets_successful_changes ________________
     def test_rollback_only_targets_successful_changes() -> None:
         control = make_control()
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-001",
             host="test-host",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\safety\test_transaction_invariants.py:98: TypeError
+>       successful = make_change(
+            change_id="change-success",
+            status=ChangeStatus.SUCCESS,
+        )
+
+tests\safety\test_transaction_invariants.py:103:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'TEST-1', host = 'test-host', change_id = 'change-success'
+status = <ChangeStatus.SUCCESS: 'success'>
+
+    def make_change(
+        *,
+        control_id: str = "TEST-1",
+        host: str = "test-host",
+        change_id: str = "change-001",
+        status: ChangeStatus = ChangeStatus.SUCCESS,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=status,
+            message="Test change.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\safety\test_transaction_invariants.py:45: TypeError
 ______________________ test_rollback_uses_reverse_order _______________________
 
     def test_rollback_uses_reverse_order() -> None:
         control = make_control()
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-002",
             host="test-host",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\safety\test_transaction_invariants.py:142: TypeError
+>       first = make_change(change_id="change-001")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\safety\test_transaction_invariants.py:147:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'TEST-1', host = 'test-host', change_id = 'change-001'
+status = <ChangeStatus.SUCCESS: 'success'>
+
+    def make_change(
+        *,
+        control_id: str = "TEST-1",
+        host: str = "test-host",
+        change_id: str = "change-001",
+        status: ChangeStatus = ChangeStatus.SUCCESS,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=status,
+            message="Test change.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\safety\test_transaction_invariants.py:45: TypeError
 _________________ test_failed_rollback_stops_further_rollback _________________
 
     def test_failed_rollback_stops_further_rollback() -> None:
         control = make_control()
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-003",
             host="test-host",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\safety\test_transaction_invariants.py:176: TypeError
+>       first = make_change(change_id="change-001")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\safety\test_transaction_invariants.py:181:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'TEST-1', host = 'test-host', change_id = 'change-001'
+status = <ChangeStatus.SUCCESS: 'success'>
+
+    def make_change(
+        *,
+        control_id: str = "TEST-1",
+        host: str = "test-host",
+        change_id: str = "change-001",
+        status: ChangeStatus = ChangeStatus.SUCCESS,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=status,
+            message="Test change.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\safety\test_transaction_invariants.py:45: TypeError
 _____________________ test_unsupported_rollback_is_denied _____________________
 
     def test_unsupported_rollback_is_denied() -> None:
@@ -1584,45 +2009,130 @@ _____________________ test_unsupported_rollback_is_denied _____________________
             rollback_capability=RollbackCapability.UNSUPPORTED,
         )
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-004",
             host="test-host",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\safety\test_transaction_invariants.py:248: TypeError
+>       change = make_change()
+                 ^^^^^^^^^^^^^
+
+tests\safety\test_transaction_invariants.py:253:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'TEST-1', host = 'test-host', change_id = 'change-001'
+status = <ChangeStatus.SUCCESS: 'success'>
+
+    def make_change(
+        *,
+        control_id: str = "TEST-1",
+        host: str = "test-host",
+        change_id: str = "change-001",
+        status: ChangeStatus = ChangeStatus.SUCCESS,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=status,
+            message="Test change.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\safety\test_transaction_invariants.py:45: TypeError
 ______________________ test_missing_control_fails_closed ______________________
 
     def test_missing_control_fails_closed() -> None:
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-005",
             host="test-host",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\safety\test_transaction_invariants.py:272: TypeError
+>       change = make_change()
+                 ^^^^^^^^^^^^^
+
+tests\safety\test_transaction_invariants.py:277:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'TEST-1', host = 'test-host', change_id = 'change-001'
+status = <ChangeStatus.SUCCESS: 'success'>
+
+    def make_change(
+        *,
+        control_id: str = "TEST-1",
+        host: str = "test-host",
+        change_id: str = "change-001",
+        status: ChangeStatus = ChangeStatus.SUCCESS,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=status,
+            message="Test change.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\safety\test_transaction_invariants.py:45: TypeError
 _______________ test_empty_transaction_does_not_invoke_provider _______________
 
     def test_empty_transaction_does_not_invoke_provider() -> None:
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-006",
             host="test-host",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\safety\test_transaction_invariants.py:296: TypeError
+        transaction.mark_rollback_required()
+
+        provider = RecordingRollbackProvider()
+        engine = RollbackEngine(provider)
+
+        result = engine.rollback_transaction(
+            transaction=transaction,
+            controls={},
+        )
+
+>       assert result.success is True
+E       assert False is True
+E        +  where False = TransactionRollbackResult(success=False, executions=()).success
+
+tests\safety\test_transaction_invariants.py:311: AssertionError
 ______________ test_rollback_does_not_modify_control_definition _______________
 
     def test_rollback_does_not_modify_control_definition() -> None:
         control = make_control()
 
->       transaction = Transaction(
+        transaction = Transaction(
             transaction_id="txn-007",
             host="test-host",
         )
-E       TypeError: Transaction.__init__() got an unexpected keyword argument 'host'
 
-tests\safety\test_transaction_invariants.py:319: TypeError
+>       change = make_change()
+                 ^^^^^^^^^^^^^
+
+tests\safety\test_transaction_invariants.py:324:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+control_id = 'TEST-1', host = 'test-host', change_id = 'change-001'
+status = <ChangeStatus.SUCCESS: 'success'>
+
+    def make_change(
+        *,
+        control_id: str = "TEST-1",
+        host: str = "test-host",
+        change_id: str = "change-001",
+        status: ChangeStatus = ChangeStatus.SUCCESS,
+    ) -> ChangeRecord:
+>       return ChangeRecord(
+            change_id=change_id,
+            control_id=control_id,
+            host=host,
+            status=status,
+            message="Test change.",
+        )
+E       TypeError: ChangeRecord.__init__() got an unexpected keyword argument 'message'
+
+tests\safety\test_transaction_invariants.py:45: TypeError
 _________________ test_ansible_executor_builds_basic_command __________________
 
     def test_ansible_executor_builds_basic_command() -> None:
@@ -1756,7 +2266,7 @@ E       TypeError: AnsibleExecutor.__init__() got an unexpected keyword argument
 tests\unit\test_ansible_execution.py:295: TypeError
 __________________ test_backend_audit_selects_audit_playbook __________________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_audit_selects_aud0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-14/test_backend_audit_selects_aud0')
 
     def test_backend_audit_selects_audit_playbook(tmp_path: Path) -> None:
         executor = FakeExecutor()
@@ -1773,7 +2283,7 @@ E       TypeError: AnsibleExecutionBackend.audit() takes 1 positional argument b
 tests\unit\test_ansible_execution.py:312: TypeError
 _______________ test_backend_precheck_selects_precheck_playbook _______________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_precheck_selects_0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-14/test_backend_precheck_selects_0')
 
     def test_backend_precheck_selects_precheck_playbook(
         tmp_path: Path,
@@ -1792,7 +2302,7 @@ E       TypeError: AnsibleExecutionBackend.precheck() takes 1 positional argumen
 tests\unit\test_ansible_execution.py:341: TypeError
 _____________ test_backend_remediate_selects_remediation_playbook _____________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_remediate_selects0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-14/test_backend_remediate_selects0')
 
     def test_backend_remediate_selects_remediation_playbook(
         tmp_path: Path,
@@ -1811,7 +2321,7 @@ E       TypeError: AnsibleExecutionBackend.remediate() takes 1 positional argume
 tests\unit\test_ansible_execution.py:362: TypeError
 _______________ test_backend_rollback_selects_rollback_playbook _______________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_rollback_selects_0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-14/test_backend_rollback_selects_0')
 
     def test_backend_rollback_selects_rollback_playbook(
         tmp_path: Path,
@@ -1845,7 +2355,7 @@ E       TypeError: AnsibleExecutionBackend.rollback() takes 1 positional argumen
 tests\unit\test_ansible_execution.py:397: TypeError
 ______________ test_backend_verify_selects_verification_playbook ______________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_verify_selects_ve0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-14/test_backend_verify_selects_ve0')
 
     def test_backend_verify_selects_verification_playbook(
         tmp_path: Path,
@@ -1864,7 +2374,7 @@ E       TypeError: AnsibleExecutionBackend.verify() takes 1 positional argument 
 tests\unit\test_ansible_execution.py:419: TypeError
 ______________ test_backend_passes_control_id_host_and_operation ______________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_passes_control_id0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-14/test_backend_passes_control_id0')
 
     def test_backend_passes_control_id_host_and_operation(
         tmp_path: Path,
@@ -1883,7 +2393,7 @@ E       TypeError: AnsibleExecutionBackend.audit() takes 1 positional argument b
 tests\unit\test_ansible_execution.py:445: TypeError
 ____________________ test_backend_passes_context_variables ____________________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_passes_context_va0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-14/test_backend_passes_context_va0')
 
     def test_backend_passes_context_variables(
         tmp_path: Path,
@@ -1918,7 +2428,7 @@ E       TypeError: AnsibleExecutionBackend.audit() takes 1 positional argument b
 tests\unit\test_ansible_execution.py:481: TypeError
 _____________ test_backend_fails_when_playbook_mapping_is_missing _____________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_fails_when_playbo0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-14/test_backend_fails_when_playbo0')
 
     def test_backend_fails_when_playbook_mapping_is_missing(
         tmp_path: Path,
@@ -1945,7 +2455,7 @@ E           TypeError: AnsibleExecutionBackend.audit() takes 1 positional argume
 tests\unit\test_ansible_execution.py:508: TypeError
 __________ test_backend_fails_when_playbook_configuration_is_missing __________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_fails_when_playbo1')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-14/test_backend_fails_when_playbo1')
 
     def test_backend_fails_when_playbook_configuration_is_missing(
         tmp_path: Path,
@@ -1970,7 +2480,7 @@ E           TypeError: AnsibleExecutionBackend.audit() takes 1 positional argume
 tests\unit\test_ansible_execution.py:530: TypeError
 ___________ test_backend_remediation_failure_is_reported_as_failed ____________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_remediation_failu0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-14/test_backend_remediation_failu0')
 
     def test_backend_remediation_failure_is_reported_as_failed(
         tmp_path: Path,
@@ -1994,7 +2504,7 @@ E       TypeError: AnsibleExecutionBackend.remediate() takes 1 positional argume
 tests\unit\test_ansible_execution.py:551: TypeError
 _____________ test_backend_rollback_failure_is_reported_as_failed _____________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_backend_rollback_failure_0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-14/test_backend_rollback_failure_0')
 
     def test_backend_rollback_failure_is_reported_as_failed(
         tmp_path: Path,
@@ -2033,7 +2543,7 @@ E       TypeError: AnsibleExecutionBackend.rollback() takes 1 positional argumen
 tests\unit\test_ansible_execution.py:587: TypeError
 ____ TestControl.test_control_rejects_invalid_enum_types[severity-medium] _____
 
-self = <test_core_models.TestControl object at 0x000002510FE015B0>
+self = <test_core_models.TestControl object at 0x000001E8D121D400>
 field = 'severity', value = 'medium'
 
     @pytest.mark.parametrize(
@@ -2092,7 +2602,7 @@ E           ValueError: severity must be a ControlSeverity
 src\securebench\core\control.py:191: ValueError
 _ TestControl.test_control_rejects_invalid_enum_types[rollback_capability-guaranteed] _
 
-self = <test_core_models.TestControl object at 0x000002510FE39950>
+self = <test_core_models.TestControl object at 0x000001E8D1239B50>
 field = 'rollback_capability', value = 'guaranteed'
 
     @pytest.mark.parametrize(
@@ -2159,7 +2669,7 @@ E           ValueError: rollback_capability must be a RollbackCapability
 src\securebench\core\control.py:199: ValueError
 _________ TestControl.test_control_rejects_invalid_dependencies_type __________
 
-self = <test_core_models.TestControl object at 0x000002510FE39CD0>
+self = <test_core_models.TestControl object at 0x000001E8D1239ED0>
 
     def test_control_rejects_invalid_dependencies_type(self) -> None:
         with pytest.raises(TypeError):
@@ -2194,7 +2704,7 @@ E               ValueError: dependencys must be a tuple
 src\securebench\core\control.py:224: ValueError
 ___________ TestControl.test_control_rejects_invalid_conflicts_type ___________
 
-self = <test_core_models.TestControl object at 0x000002510FE4C9F0>
+self = <test_core_models.TestControl object at 0x000001E8D124C750>
 
     def test_control_rejects_invalid_conflicts_type(self) -> None:
         with pytest.raises(TypeError):
@@ -2229,7 +2739,7 @@ E               ValueError: conflicts must be a tuple
 src\securebench\core\control.py:224: ValueError
 ______________ TestControl.test_control_rejects_self_dependency _______________
 
-self = <test_core_models.TestControl object at 0x000002510FDFEC90>
+self = <test_core_models.TestControl object at 0x000001E8D11EB050>
 
     def test_control_rejects_self_dependency(self) -> None:
 >       with pytest.raises(ValueError, match="cannot depend on itself"):
@@ -2241,7 +2751,7 @@ E         Actual message: "control 'A' cannot dependency itself"
 tests\unit\test_core_models.py:128: AssertionError
 _______________ TestControl.test_control_rejects_self_conflict ________________
 
-self = <test_core_models.TestControl object at 0x000002510FE29D60>
+self = <test_core_models.TestControl object at 0x000001E8D1229F40>
 
     def test_control_rejects_self_conflict(self) -> None:
 >       with pytest.raises(ValueError, match="cannot conflict with itself"):
@@ -2253,7 +2763,7 @@ E         Actual message: "control 'A' cannot conflict itself"
 tests\unit\test_core_models.py:132: AssertionError
 _______________ TestControl.test_invalid_safety_metadata_raises _______________
 
-self = <test_core_models.TestControl object at 0x000002510FE2A530>
+self = <test_core_models.TestControl object at 0x000001E8D122A710>
 
     def test_invalid_safety_metadata_raises(self) -> None:
         control = make_control(metadata={"safety": "invalid"})
@@ -2288,7 +2798,7 @@ E           ValueError: control 'TEST-001' has invalid safety metadata
 src\securebench\core\control.py:270: ValueError
 ____________ TestControl.test_invalid_requirements_metadata_raises ____________
 
-self = <test_core_models.TestControl object at 0x000002510FE2A670>
+self = <test_core_models.TestControl object at 0x000001E8D122A850>
 
     def test_invalid_requirements_metadata_raises(self) -> None:
         control = make_control(metadata={"requirements": "invalid"})
@@ -2322,7 +2832,7 @@ E           ValueError: control 'TEST-001' has invalid requirements metadata
 src\securebench\core\control.py:288: ValueError
 ________ TestConfigurationLoader.test_loads_real_cis_control_metadata _________
 
-self = <test_loader.TestConfigurationLoader object at 0x000002510FDB5810>
+self = <test_loader.TestConfigurationLoader object at 0x000001E8D11B9810>
 
     def test_loads_real_cis_control_metadata(self) -> None:
         loader = ConfigurationLoader()
@@ -2336,7 +2846,7 @@ E       AssertionError: assert ('L1', 'Server', 'Workstation') == 'L1'
 tests\unit\test_loader.py:44: AssertionError
 __________ TestConfigurationLoader.test_unknown_control_fails_closed __________
 
-self = <test_loader.TestConfigurationLoader object at 0x000002510FE48C00>
+self = <test_loader.TestConfigurationLoader object at 0x000001E8D123CD10>
 
     def test_unknown_control_fails_closed(self) -> None:
         loader = ConfigurationLoader()
@@ -2352,7 +2862,7 @@ E        +  where False = ProfileRule(classification=<SafetyClassification.APPRO
 tests\unit\test_loader.py:106: AssertionError
 _________ TestRemediationPlanner.test_plan_item_requires_valid_action _________
 
-self = <test_planner.TestRemediationPlanner object at 0x000002510FD32EA0>
+self = <test_planner.TestRemediationPlanner object at 0x000001E8D11272B0>
 
     def test_plan_item_requires_valid_action(self) -> None:
 >       item = RemediationPlanItem(
@@ -2366,7 +2876,7 @@ E       TypeError: RemediationPlanItem.__init__() missing 1 required positional 
 tests\unit\test_planner.py:356: TypeError
 _____________ TestRemediationPlanner.test_plan_item_is_immutable ______________
 
-self = <test_planner.TestRemediationPlanner object at 0x000002510FD868D0>
+self = <test_planner.TestRemediationPlanner object at 0x000001E8D118E810>
 
     def test_plan_item_is_immutable(self) -> None:
 >       item = RemediationPlanItem(
@@ -2380,7 +2890,7 @@ E       TypeError: RemediationPlanItem.__init__() missing 1 required positional 
 tests\unit\test_planner.py:368: TypeError
 _ TestControlClassifier.test_disabled_safe_control_is_not_automatically_remediable _
 
-self = <test_policy.TestControlClassifier object at 0x000002510FE49590>
+self = <test_policy.TestControlClassifier object at 0x000001E8D123D6A0>
 
     def test_disabled_safe_control_is_not_automatically_remediable(self) -> None:
         control = make_control()
@@ -2395,14 +2905,14 @@ self = <test_policy.TestControlClassifier object at 0x000002510FE49590>
         assert result.automatically_remediable is False
 >       assert "disabled" in result.reason.lower()
 E       AssertionError: assert 'disabled' in 'control is classified as safe by the selected profile.'
-E        +  where 'control is classified as safe by the selected profile.' = <built-in method lower of str object at 0x000002510FB4DB30>()
-E        +    where <built-in method lower of str object at 0x000002510FB4DB30> = 'Control is classified as safe by the selected profile.'.lower
+E        +  where 'control is classified as safe by the selected profile.' = <built-in method lower of str object at 0x000001E8D0F5DD10>()
+E        +    where <built-in method lower of str object at 0x000001E8D0F5DD10> = 'Control is classified as safe by the selected profile.'.lower
 E        +      where 'Control is classified as safe by the selected profile.' = ClassificationResult(control_id='TEST-001', classification=<SafetyClassification.SAFE: 'safe'>, enabled=False, requires_precheck=False, requires_approval=False, reason='Control is classified as safe by the selected profile.').reason
 
 tests\unit\test_policy.py:147: AssertionError
 __________ TestClassificationPolicyRule.test_safe_allows_remediation __________
 
-self = <test_policy.TestClassificationPolicyRule object at 0x000002510FDB6350>
+self = <test_policy.TestClassificationPolicyRule object at 0x000001E8D11BA350>
 
     def test_safe_allows_remediation(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2416,7 +2926,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:152: TypeError
 ___ TestClassificationPolicyRule.test_safe_with_precheck_requires_precheck ____
 
-self = <test_policy.TestClassificationPolicyRule object at 0x000002510FDB6490>
+self = <test_policy.TestClassificationPolicyRule object at 0x000001E8D11BA490>
 
     def test_safe_with_precheck_requires_precheck(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2430,7 +2940,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:165: TypeError
 ____ TestClassificationPolicyRule.test_approval_required_requires_approval ____
 
-self = <test_policy.TestClassificationPolicyRule object at 0x000002510FDAE650>
+self = <test_policy.TestClassificationPolicyRule object at 0x000001E8D11DE2C0>
 
     def test_approval_required_requires_approval(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2445,7 +2955,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:178: TypeError
 ____________ TestClassificationPolicyRule.test_investigate_denies _____________
 
-self = <test_policy.TestClassificationPolicyRule object at 0x000002510FDAE780>
+self = <test_policy.TestClassificationPolicyRule object at 0x000001E8D11DE3F0>
 
     def test_investigate_denies(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2459,7 +2969,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:191: TypeError
 _____________ TestClassificationPolicyRule.test_prohibited_denies _____________
 
-self = <test_policy.TestClassificationPolicyRule object at 0x000002510FBE6E70>
+self = <test_policy.TestClassificationPolicyRule object at 0x000001E8D0FE6F90>
 
     def test_prohibited_denies(self) -> None:
 >       result = ClassificationPolicyRule().evaluate(
@@ -2474,7 +2984,7 @@ E       TypeError: ClassificationPolicyRule.evaluate() takes 2 positional argume
 tests\unit\test_policy.py:202: TypeError
 ______ TestRollbackPolicyRule.test_guaranteed_rollback_is_always_allowed ______
 
-self = <test_policy.TestRollbackPolicyRule object at 0x000002510FDB65D0>
+self = <test_policy.TestRollbackPolicyRule object at 0x000001E8D11BA5D0>
 
     def test_guaranteed_rollback_is_always_allowed(self) -> None:
         rule = RollbackPolicyRule()
@@ -2490,7 +3000,7 @@ E       TypeError: RollbackPolicyRule.evaluate() takes 2 positional arguments bu
 tests\unit\test_policy.py:218: TypeError
 ____ TestRollbackPolicyRule.test_best_effort_rollback_is_denied_by_default ____
 
-self = <test_policy.TestRollbackPolicyRule object at 0x000002510FDB6710>
+self = <test_policy.TestRollbackPolicyRule object at 0x000001E8D11BA710>
 
     def test_best_effort_rollback_is_denied_by_default(self) -> None:
         rule = RollbackPolicyRule()
@@ -2508,7 +3018,7 @@ E       TypeError: RollbackPolicyRule.evaluate() takes 2 positional arguments bu
 tests\unit\test_policy.py:231: TypeError
 _ TestRollbackPolicyRule.test_best_effort_rollback_can_be_allowed_by_profile __
 
-self = <test_policy.TestRollbackPolicyRule object at 0x000002510FDAE8B0>
+self = <test_policy.TestRollbackPolicyRule object at 0x000001E8D11DE520>
 
     def test_best_effort_rollback_can_be_allowed_by_profile(self) -> None:
         rule = RollbackPolicyRule()
@@ -2526,7 +3036,7 @@ E       TypeError: RollbackPolicyRule.evaluate() takes 2 positional arguments bu
 tests\unit\test_policy.py:246: TypeError
 ______ TestRollbackPolicyRule.test_unsupported_rollback_is_always_denied ______
 
-self = <test_policy.TestRollbackPolicyRule object at 0x000002510FDAE9E0>
+self = <test_policy.TestRollbackPolicyRule object at 0x000001E8D11DE650>
 
     def test_unsupported_rollback_is_always_denied(self) -> None:
         rule = RollbackPolicyRule()
@@ -2544,7 +3054,7 @@ E       TypeError: RollbackPolicyRule.evaluate() takes 2 positional arguments bu
 tests\unit\test_policy.py:261: TypeError
 _________ TestPolicyEngine.test_safe_with_precheck_requires_precheck __________
 
-self = <test_policy.TestPolicyEngine object at 0x000002510FDB6850>
+self = <test_policy.TestPolicyEngine object at 0x000001E8D11BA850>
 
     def test_safe_with_precheck_requires_precheck(self) -> None:
         control = make_control(
@@ -2855,11 +3365,15 @@ _____________________ test_empty_plan_produces_no_results _____________________
         provider = FakeRemediationProvider()
         engine = RemediationEngine(provider=provider)
 
->       transaction = Transaction(transaction_id="tx-006")
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: Transaction.__init__() missing 2 required positional arguments: 'profile_id' and 'benchmark_id'
+        transaction = Transaction(transaction_id="tx-006")
 
-tests\unit\test_remediation.py:250: TypeError
+>       results = engine.execute(
+            make_plan(),
+            transaction,
+        )
+E       TypeError: RemediationEngine.execute() takes 1 positional argument but 3 were given
+
+tests\unit\test_remediation.py:252: TypeError
 ____________________ test_remediation_preserves_plan_order ____________________
 
     def test_remediation_preserves_plan_order() -> None:
@@ -3048,75 +3562,6 @@ action = <PlanAction.REMEDIATE: 'remediate'>, host = 'server01'
 E       TypeError: RemediationPlanItem.__init__() missing 1 required positional argument: 'control_id'
 
 tests\unit\test_remediation.py:87: TypeError
-____________________ test_json_reporter_returns_valid_json ____________________
-
-    def test_json_reporter_returns_valid_json() -> None:
-        reporter = JsonReporter()
-
->       output = reporter.render_audit(
-                 ^^^^^^^^^^^^^^^^^^^^^
-            [make_audit_result()]
-        )
-E       AttributeError: 'JsonReporter' object has no attribute 'render_audit'
-
-tests\unit\test_reporting.py:91: AttributeError
-_____________ test_json_reporter_serializes_multiple_report_types _____________
-
-    def test_json_reporter_serializes_multiple_report_types() -> None:
-        reporter = JsonReporter()
-
->       output = reporter.render(
-                 ^^^^^^^^^^^^^^^
-            audits=[make_audit_result()],
-            executions=[make_execution_result()],
-            verifications=[make_verification_result()],
-            transaction=make_transaction(),
-        )
-E       AttributeError: 'JsonReporter' object has no attribute 'render'
-
-tests\unit\test_reporting.py:107: AttributeError
-________________ test_json_reporter_preserves_failure_statuses ________________
-
-    def test_json_reporter_preserves_failure_statuses() -> None:
-        reporter = JsonReporter()
-
->       output = reporter.render(
-                 ^^^^^^^^^^^^^^^
-            audits=[
-                make_audit_result(
-                    status=ComplianceStatus.FAIL
-                )
-            ],
-            executions=[
-                make_execution_result(
-                    status=ExecutionStatus.FAILED
-                )
-            ],
-            verifications=[
-                make_verification_result(
-                    status=ComplianceStatus.FAIL
-                )
-            ],
-        )
-E       AttributeError: 'JsonReporter' object has no attribute 'render'
-
-tests\unit\test_reporting.py:132: AttributeError
-____________________ test_json_reporter_can_write_to_file _____________________
-
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_json_reporter_can_write_t0')
-
-    def test_json_reporter_can_write_to_file(tmp_path: Path) -> None:
-        reporter = JsonReporter()
-        output_path = tmp_path / "report.json"
-
->       reporter.write_audit(
-        ^^^^^^^^^^^^^^^^^^^^
-            [make_audit_result()],
-            output_path,
-        )
-E       AttributeError: 'JsonReporter' object has no attribute 'write_audit'
-
-tests\unit\test_reporting.py:164: AttributeError
 _____________________ test_csv_reporter_returns_valid_csv _____________________
 
     def test_csv_reporter_returns_valid_csv() -> None:
@@ -3151,7 +3596,7 @@ E       AttributeError: 'CsvReporter' object has no attribute 'render_audit'
 tests\unit\test_reporting.py:206: AttributeError
 ______________________ test_csv_reporter_writes_to_file _______________________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_csv_reporter_writes_to_fi0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-14/test_csv_reporter_writes_to_fi0')
 
     def test_csv_reporter_writes_to_file(tmp_path: Path) -> None:
         reporter = CsvReporter()
@@ -3275,7 +3720,7 @@ E       AttributeError: 'HtmlReporter' object has no attribute 'render_verificat
 tests\unit\test_reporting.py:347: AttributeError
 ____________________ test_html_reporter_can_write_to_file _____________________
 
-tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-13/test_html_reporter_can_write_t0')
+tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pytest-14/test_html_reporter_can_write_t0')
 
     def test_html_reporter_can_write_to_file(tmp_path: Path) -> None:
         reporter = HtmlReporter()
@@ -3289,16 +3734,6 @@ tmp_path = WindowsPath('C:/Users/A-S-01/AppData/Local/Temp/pytest-of-A-S-01/pyte
 E       AttributeError: 'HtmlReporter' object has no attribute 'write_audit'
 
 tests\unit\test_reporting.py:360: AttributeError
-____________________ test_empty_audit_report_is_valid_json ____________________
-
-    def test_empty_audit_report_is_valid_json() -> None:
-        reporter = JsonReporter()
-
->       output = reporter.render_audit([])
-                 ^^^^^^^^^^^^^^^^^^^^^
-E       AttributeError: 'JsonReporter' object has no attribute 'render_audit'
-
-tests\unit\test_reporting.py:376: AttributeError
 ____________________ test_empty_audit_report_is_valid_csv _____________________
 
     def test_empty_audit_report_is_valid_csv() -> None:
@@ -3319,30 +3754,6 @@ ____________________ test_empty_audit_report_is_valid_html ____________________
 E       AttributeError: 'HtmlReporter' object has no attribute 'render_audit'
 
 tests\unit\test_reporting.py:392: AttributeError
-____________________ test_transaction_status_is_serialized ____________________
-
-    def test_transaction_status_is_serialized() -> None:
-        reporter = JsonReporter()
-
->       output = reporter.render(
-                 ^^^^^^^^^^^^^^^
-            transaction=make_transaction()
-        )
-E       AttributeError: 'JsonReporter' object has no attribute 'render'
-
-tests\unit\test_reporting.py:401: AttributeError
-________________ test_transaction_change_status_is_serialized _________________
-
-    def test_transaction_change_status_is_serialized() -> None:
-        reporter = JsonReporter()
-
->       output = reporter.render(
-                 ^^^^^^^^^^^^^^^
-            transaction=make_transaction()
-        )
-E       AttributeError: 'JsonReporter' object has no attribute 'render'
-
-tests\unit\test_reporting.py:416: AttributeError
 __________ test_coordinator_rolls_back_transaction_in_reverse_order ___________
 
     def test_coordinator_rolls_back_transaction_in_reverse_order() -> None:
@@ -3352,11 +3763,67 @@ __________ test_coordinator_rolls_back_transaction_in_reverse_order ___________
             rollback_engine=engine,
         )
 
->       transaction = Transaction(transaction_id="tx-001")
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: Transaction.__init__() missing 2 required positional arguments: 'profile_id' and 'benchmark_id'
+        transaction = Transaction(transaction_id="tx-001")
 
-tests\unit\test_rollback_transaction.py:122: TypeError
+        transaction.add_change(
+            make_change("change-001", "TEST-1")
+        )
+        transaction.add_change(
+            make_change("change-002", "TEST-2")
+        )
+        transaction.add_change(
+            make_change("change-003", "TEST-3")
+        )
+
+        controls = {
+            "TEST-1": make_control("TEST-1"),
+            "TEST-2": make_control("TEST-2"),
+            "TEST-3": make_control("TEST-3"),
+        }
+
+>       result = coordinator.rollback(
+            transaction=transaction,
+            controls=controls,
+        )
+
+tests\unit\test_rollback_transaction.py:140:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <securebench.rollback.transaction.TransactionRollbackCoordinator object at 0x000001E8D12CE660>
+transaction = <securebench.core.transaction.Transaction object at 0x000001E8D15418D0>
+controls = {'TEST-1': Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', description='Test control...'safety': mappingproxy({'default': 'safe', 'prechecks': ()}), 'requirements': mappingproxy({'setting': 'expected'})}))}
+snapshot = None
+
+    def rollback(
+        self,
+        *,
+        transaction: Transaction,
+        controls: dict[str, object],
+        snapshot: Snapshot | None = None,
+    ) -> TransactionRollbackResult:
+        """
+        Roll back a transaction.
+
+        ``controls`` is intentionally accepted as a mapping whose values are
+        validated at runtime by RollbackEngine. This keeps this coordinator
+        independent of benchmark loading details while allowing the existing
+        rollback engine to remain authoritative.
+
+        If a snapshot is supplied, it is restored only after control-level
+        rollback has been attempted successfully.
+
+        The coordinator fails closed when snapshot restoration is requested
+        but no snapshot provider is configured.
+        """
+
+        if transaction.status not in {
+            TransactionStatus.ROLLBACK_REQUIRED,
+>           TransactionStatus.FAILED,
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+        }:
+E       AttributeError: type object 'TransactionStatus' has no attribute 'FAILED'
+
+src\securebench\rollback\transaction.py:105: AttributeError
 _____________ test_coordinator_rolls_back_only_successful_changes _____________
 
     def test_coordinator_rolls_back_only_successful_changes() -> None:
@@ -3366,11 +3833,71 @@ _____________ test_coordinator_rolls_back_only_successful_changes _____________
             rollback_engine=engine,
         )
 
->       transaction = Transaction(transaction_id="tx-002")
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: Transaction.__init__() missing 2 required positional arguments: 'profile_id' and 'benchmark_id'
+        transaction = Transaction(transaction_id="tx-002")
 
-tests\unit\test_rollback_transaction.py:163: TypeError
+        transaction.add_change(
+            make_change(
+                "change-001",
+                "TEST-1",
+                status=ChangeStatus.SUCCESS,
+            )
+        )
+        transaction.add_change(
+            make_change(
+                "change-002",
+                "TEST-2",
+                status=ChangeStatus.FAILED,
+            )
+        )
+
+        controls = {
+            "TEST-1": make_control("TEST-1"),
+            "TEST-2": make_control("TEST-2"),
+        }
+
+>       result = coordinator.rollback(
+            transaction=transaction,
+            controls=controls,
+        )
+
+tests\unit\test_rollback_transaction.py:185:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <securebench.rollback.transaction.TransactionRollbackCoordinator object at 0x000001E8D139F750>
+transaction = <securebench.core.transaction.Transaction object at 0x000001E8D14FDE50>
+controls = {'TEST-1': Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', description='Test control...'safety': mappingproxy({'default': 'safe', 'prechecks': ()}), 'requirements': mappingproxy({'setting': 'expected'})}))}
+snapshot = None
+
+    def rollback(
+        self,
+        *,
+        transaction: Transaction,
+        controls: dict[str, object],
+        snapshot: Snapshot | None = None,
+    ) -> TransactionRollbackResult:
+        """
+        Roll back a transaction.
+
+        ``controls`` is intentionally accepted as a mapping whose values are
+        validated at runtime by RollbackEngine. This keeps this coordinator
+        independent of benchmark loading details while allowing the existing
+        rollback engine to remain authoritative.
+
+        If a snapshot is supplied, it is restored only after control-level
+        rollback has been attempted successfully.
+
+        The coordinator fails closed when snapshot restoration is requested
+        but no snapshot provider is configured.
+        """
+
+        if transaction.status not in {
+            TransactionStatus.ROLLBACK_REQUIRED,
+>           TransactionStatus.FAILED,
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+        }:
+E       AttributeError: type object 'TransactionStatus' has no attribute 'FAILED'
+
+src\securebench\rollback\transaction.py:105: AttributeError
 _________________ test_coordinator_stops_when_rollback_fails __________________
 
     def test_coordinator_stops_when_rollback_fails() -> None:
@@ -3380,11 +3907,63 @@ _________________ test_coordinator_stops_when_rollback_fails __________________
             rollback_engine=engine,
         )
 
->       transaction = Transaction(transaction_id="tx-003")
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: Transaction.__init__() missing 2 required positional arguments: 'profile_id' and 'benchmark_id'
+        transaction = Transaction(transaction_id="tx-003")
 
-tests\unit\test_rollback_transaction.py:203: TypeError
+        transaction.add_change(
+            make_change("change-001", "TEST-1")
+        )
+        transaction.add_change(
+            make_change("change-002", "TEST-2")
+        )
+
+        controls = {
+            "TEST-1": make_control("TEST-1"),
+            "TEST-2": make_control("TEST-2"),
+        }
+
+>       result = coordinator.rollback(
+            transaction=transaction,
+            controls=controls,
+        )
+
+tests\unit\test_rollback_transaction.py:217:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <securebench.rollback.transaction.TransactionRollbackCoordinator object at 0x000001E8D139F9D0>
+transaction = <securebench.core.transaction.Transaction object at 0x000001E8D14FDC50>
+controls = {'TEST-1': Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', description='Test control...'safety': mappingproxy({'default': 'safe', 'prechecks': ()}), 'requirements': mappingproxy({'setting': 'expected'})}))}
+snapshot = None
+
+    def rollback(
+        self,
+        *,
+        transaction: Transaction,
+        controls: dict[str, object],
+        snapshot: Snapshot | None = None,
+    ) -> TransactionRollbackResult:
+        """
+        Roll back a transaction.
+
+        ``controls`` is intentionally accepted as a mapping whose values are
+        validated at runtime by RollbackEngine. This keeps this coordinator
+        independent of benchmark loading details while allowing the existing
+        rollback engine to remain authoritative.
+
+        If a snapshot is supplied, it is restored only after control-level
+        rollback has been attempted successfully.
+
+        The coordinator fails closed when snapshot restoration is requested
+        but no snapshot provider is configured.
+        """
+
+        if transaction.status not in {
+            TransactionStatus.ROLLBACK_REQUIRED,
+>           TransactionStatus.FAILED,
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+        }:
+E       AttributeError: type object 'TransactionStatus' has no attribute 'FAILED'
+
+src\securebench\rollback\transaction.py:105: AttributeError
 ______________ test_coordinator_fails_closed_for_missing_control ______________
 
     def test_coordinator_fails_closed_for_missing_control() -> None:
@@ -3394,11 +3973,55 @@ ______________ test_coordinator_fails_closed_for_missing_control ______________
             rollback_engine=engine,
         )
 
->       transaction = Transaction(transaction_id="tx-004")
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: Transaction.__init__() missing 2 required positional arguments: 'profile_id' and 'benchmark_id'
+        transaction = Transaction(transaction_id="tx-004")
 
-tests\unit\test_rollback_transaction.py:237: TypeError
+        transaction.add_change(
+            make_change("change-001", "UNKNOWN-CONTROL")
+        )
+
+        with pytest.raises(KeyError):
+>           coordinator.rollback(
+                transaction=transaction,
+                controls={},
+            )
+
+tests\unit\test_rollback_transaction.py:244:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <securebench.rollback.transaction.TransactionRollbackCoordinator object at 0x000001E8D13C3BB0>
+transaction = <securebench.core.transaction.Transaction object at 0x000001E8D14FDAD0>
+controls = {}, snapshot = None
+
+    def rollback(
+        self,
+        *,
+        transaction: Transaction,
+        controls: dict[str, object],
+        snapshot: Snapshot | None = None,
+    ) -> TransactionRollbackResult:
+        """
+        Roll back a transaction.
+
+        ``controls`` is intentionally accepted as a mapping whose values are
+        validated at runtime by RollbackEngine. This keeps this coordinator
+        independent of benchmark loading details while allowing the existing
+        rollback engine to remain authoritative.
+
+        If a snapshot is supplied, it is restored only after control-level
+        rollback has been attempted successfully.
+
+        The coordinator fails closed when snapshot restoration is requested
+        but no snapshot provider is configured.
+        """
+
+        if transaction.status not in {
+            TransactionStatus.ROLLBACK_REQUIRED,
+>           TransactionStatus.FAILED,
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+        }:
+E       AttributeError: type object 'TransactionStatus' has no attribute 'FAILED'
+
+src\securebench\rollback\transaction.py:105: AttributeError
 _________________ test_coordinator_handles_empty_transaction __________________
 
     def test_coordinator_handles_empty_transaction() -> None:
@@ -3408,11 +4031,50 @@ _________________ test_coordinator_handles_empty_transaction __________________
             rollback_engine=engine,
         )
 
->       transaction = Transaction(transaction_id="tx-005")
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: Transaction.__init__() missing 2 required positional arguments: 'profile_id' and 'benchmark_id'
+        transaction = Transaction(transaction_id="tx-005")
 
-tests\unit\test_rollback_transaction.py:259: TypeError
+>       result = coordinator.rollback(
+            transaction=transaction,
+            controls={},
+        )
+
+tests\unit\test_rollback_transaction.py:261:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <securebench.rollback.transaction.TransactionRollbackCoordinator object at 0x000001E8D13C3950>
+transaction = <securebench.core.transaction.Transaction object at 0x000001E8D155F9D0>
+controls = {}, snapshot = None
+
+    def rollback(
+        self,
+        *,
+        transaction: Transaction,
+        controls: dict[str, object],
+        snapshot: Snapshot | None = None,
+    ) -> TransactionRollbackResult:
+        """
+        Roll back a transaction.
+
+        ``controls`` is intentionally accepted as a mapping whose values are
+        validated at runtime by RollbackEngine. This keeps this coordinator
+        independent of benchmark loading details while allowing the existing
+        rollback engine to remain authoritative.
+
+        If a snapshot is supplied, it is restored only after control-level
+        rollback has been attempted successfully.
+
+        The coordinator fails closed when snapshot restoration is requested
+        but no snapshot provider is configured.
+        """
+
+        if transaction.status not in {
+            TransactionStatus.ROLLBACK_REQUIRED,
+>           TransactionStatus.FAILED,
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+        }:
+E       AttributeError: type object 'TransactionStatus' has no attribute 'FAILED'
+
+src\securebench\rollback\transaction.py:105: AttributeError
 ___________ test_coordinator_does_not_rollback_unsupported_control ____________
 
     def test_coordinator_does_not_rollback_unsupported_control() -> None:
@@ -3422,11 +4084,79 @@ ___________ test_coordinator_does_not_rollback_unsupported_control ____________
             rollback_engine=engine,
         )
 
->       transaction = Transaction(transaction_id="tx-006")
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: Transaction.__init__() missing 2 required positional arguments: 'profile_id' and 'benchmark_id'
+        transaction = Transaction(transaction_id="tx-006")
 
-tests\unit\test_rollback_transaction.py:277: TypeError
+        transaction.add_change(
+            make_change("change-001", "TEST-1")
+        )
+
+        controls = {
+            "TEST-1": make_control(
+                "TEST-1",
+                rollback_capability=RollbackCapability.UNSUPPORTED,
+            ),
+        }
+
+>       result = coordinator.rollback(
+            transaction=transaction,
+            controls=controls,
+        )
+
+tests\unit\test_rollback_transaction.py:290:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <securebench.rollback.transaction.TransactionRollbackCoordinator object at 0x000001E8D15017F0>
+transaction = <securebench.core.transaction.Transaction object at 0x000001E8D13B5A50>
+controls = {'TEST-1': Control(control_id='TEST-1', benchmark_id='test-benchmark', title='Test control', description='Test control...'safety': mappingproxy({'default': 'safe', 'prechecks': ()}), 'requirements': mappingproxy({'setting': 'expected'})}))}
+snapshot = None
+
+    def rollback(
+        self,
+        *,
+        transaction: Transaction,
+        controls: dict[str, object],
+        snapshot: Snapshot | None = None,
+    ) -> TransactionRollbackResult:
+        """
+        Roll back a transaction.
+
+        ``controls`` is intentionally accepted as a mapping whose values are
+        validated at runtime by RollbackEngine. This keeps this coordinator
+        independent of benchmark loading details while allowing the existing
+        rollback engine to remain authoritative.
+
+        If a snapshot is supplied, it is restored only after control-level
+        rollback has been attempted successfully.
+
+        The coordinator fails closed when snapshot restoration is requested
+        but no snapshot provider is configured.
+        """
+
+        if transaction.status not in {
+            TransactionStatus.ROLLBACK_REQUIRED,
+>           TransactionStatus.FAILED,
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+        }:
+E       AttributeError: type object 'TransactionStatus' has no attribute 'FAILED'
+
+src\securebench\rollback\transaction.py:105: AttributeError
+______ TestTransaction.test_transaction_identity_fields_cannot_be_empty _______
+
+self = <test_transaction.TestTransaction object at 0x000001E8D1245C80>
+
+    def test_transaction_identity_fields_cannot_be_empty(self) -> None:
+        with pytest.raises(ValueError):
+            Transaction(
+                transaction_id="",
+                profile_id="production-safe",
+                benchmark_id="cis-ubuntu-24.04",
+            )
+
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\unit\test_transaction.py:238: Failed
 =========================== short test summary info ===========================
 FAILED tests/integration/test_remediation_verification_flow.py::test_failed_audit_flows_through_precheck_remediation_and_verification
 FAILED tests/integration/test_transaction_flow.py::test_transaction_can_record_successful_remediation_and_rollback
@@ -3561,10 +4291,6 @@ FAILED tests/unit/test_remediation.py::test_precheck_is_not_remediation_when_pre
 FAILED tests/unit/test_remediation.py::test_remediation_failure_does_not_report_success
 FAILED tests/unit/test_remediation.py::test_transaction_receives_change_record_for_successful_remediation
 FAILED tests/unit/test_remediation.py::test_remediation_engine_does_not_modify_control
-FAILED tests/unit/test_reporting.py::test_json_reporter_returns_valid_json - ...
-FAILED tests/unit/test_reporting.py::test_json_reporter_serializes_multiple_report_types
-FAILED tests/unit/test_reporting.py::test_json_reporter_preserves_failure_statuses
-FAILED tests/unit/test_reporting.py::test_json_reporter_can_write_to_file - A...
 FAILED tests/unit/test_reporting.py::test_csv_reporter_returns_valid_csv - At...
 FAILED tests/unit/test_reporting.py::test_csv_reporter_serializes_multiple_audit_results
 FAILED tests/unit/test_reporting.py::test_csv_reporter_writes_to_file - Attri...
@@ -3576,15 +4302,13 @@ FAILED tests/unit/test_reporting.py::test_html_reporter_escapes_control_data
 FAILED tests/unit/test_reporting.py::test_html_reporter_renders_execution_results
 FAILED tests/unit/test_reporting.py::test_html_reporter_renders_verification_results
 FAILED tests/unit/test_reporting.py::test_html_reporter_can_write_to_file - A...
-FAILED tests/unit/test_reporting.py::test_empty_audit_report_is_valid_json - ...
 FAILED tests/unit/test_reporting.py::test_empty_audit_report_is_valid_csv - A...
 FAILED tests/unit/test_reporting.py::test_empty_audit_report_is_valid_html - ...
-FAILED tests/unit/test_reporting.py::test_transaction_status_is_serialized - ...
-FAILED tests/unit/test_reporting.py::test_transaction_change_status_is_serialized
 FAILED tests/unit/test_rollback_transaction.py::test_coordinator_rolls_back_transaction_in_reverse_order
 FAILED tests/unit/test_rollback_transaction.py::test_coordinator_rolls_back_only_successful_changes
 FAILED tests/unit/test_rollback_transaction.py::test_coordinator_stops_when_rollback_fails
 FAILED tests/unit/test_rollback_transaction.py::test_coordinator_fails_closed_for_missing_control
 FAILED tests/unit/test_rollback_transaction.py::test_coordinator_handles_empty_transaction
 FAILED tests/unit/test_rollback_transaction.py::test_coordinator_does_not_rollback_unsupported_control
-======================= 159 failed, 432 passed in 2.26s =======================
+FAILED tests/unit/test_transaction.py::TestTransaction::test_transaction_identity_fields_cannot_be_empty
+======================= 153 failed, 438 passed in 2.29s =======================
