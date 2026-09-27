@@ -450,7 +450,7 @@ class RemediationPlanner:
 
         if conflicts:
             raise PlanningError(
-                "Requested controls contain conflicts: "
+                "Conflicting controls cannot be remediated together: "
                 + ", ".join(sorted(conflicts))
             )
 
