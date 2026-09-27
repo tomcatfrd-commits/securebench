@@ -43,14 +43,17 @@ class RuleResult:
 
     @property
     def allowed(self) -> bool:
-        """
-        Return True when the rule does not hard-deny the control.
-
-        REQUIRE_PRECHECK and REQUIRE_APPROVAL still allow the control into
-        the planning workflow; only DENY blocks it.
-        """
+        """True when the rule does not hard-deny the control."""
 
         return self.decision is not PolicyDecision.DENY
+
+    @property
+    def requires_precheck(self) -> bool:
+        return self.decision is PolicyDecision.REQUIRE_PRECHECK
+
+    @property
+    def requires_approval(self) -> bool:
+        return self.decision is PolicyDecision.REQUIRE_APPROVAL
 
 
 @dataclass(frozen=True, slots=True)

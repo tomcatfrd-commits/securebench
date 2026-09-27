@@ -113,13 +113,21 @@ class ControlClassifier:
         classification = rule.classification
 
         if classification is SafetyClassification.SAFE:
+            reason = (
+                "Control is classified as safe by the selected profile."
+            )
+            if not rule.enabled:
+                reason = (
+                    "Control is classified as safe but is disabled by "
+                    "the selected profile."
+                )
             return ClassificationResult(
                 control_id=control.control_id,
                 classification=classification,
                 enabled=rule.enabled,
                 requires_precheck=False,
                 requires_approval=rule.require_approval,
-                reason="Control is classified as safe by the selected profile.",
+                reason=reason,
             )
 
         if classification is SafetyClassification.SAFE_WITH_PRECHECK:
