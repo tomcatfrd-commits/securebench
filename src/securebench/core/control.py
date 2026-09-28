@@ -221,7 +221,7 @@ class Control:
             ("conflict", self.conflicts),
         ):
             if not isinstance(relationships, tuple):
-                raise ValueError(
+                raise TypeError(
                     f"{relationship_name}s must be a tuple"
                 )
 
@@ -273,7 +273,7 @@ class Control:
         value = self.metadata.get("safety", {})
 
         if not isinstance(value, Mapping):
-            raise ValueError(
+            raise TypeError(
                 f"control '{self.control_id}' has invalid safety metadata"
             )
 
@@ -291,7 +291,7 @@ class Control:
         value = self.metadata.get("requirements", {})
 
         if not isinstance(value, Mapping):
-            raise ValueError(
+            raise TypeError(
                 f"control '{self.control_id}' has invalid requirements metadata"
             )
 
