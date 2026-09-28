@@ -188,15 +188,15 @@ class Control:
                 )
 
         if not isinstance(self.severity, ControlSeverity):
-            raise ValueError(
+            raise TypeError(
                 "severity must be a ControlSeverity"
             )
 
         if not isinstance(
-            self.rollback_capability,
-            RollbackCapability,
+                self.rollback_capability,
+                RollbackCapability,
         ):
-            raise ValueError(
+            raise TypeError(
                 "rollback_capability must be a RollbackCapability"
             )
 
@@ -249,10 +249,16 @@ class Control:
                 seen.add(related_control_id)
 
                 if related_control_id == self.control_id:
-                    raise ValueError(
-                        f"control '{self.control_id}' cannot "
-                        f"{relationship_name} itself"
-                    )
+                    if relationship_name == "dependency":
+                        raise ValueError(
+                            f"control '{self.control_id}' cannot "
+                            "depend on itself"
+                        )
+                    else:
+                        raise ValueError(
+                            f"control '{self.control_id}' cannot "
+                            "conflict with itself"
+                        )
 
     @property
     def safety_metadata(self) -> Mapping[str, object]:
