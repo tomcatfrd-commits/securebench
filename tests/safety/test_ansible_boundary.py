@@ -7,7 +7,7 @@ from securebench.core.control import (
     ControlSeverity,
     RollbackCapability,
 )
-from securebench.core.result import ComplianceStatus
+from securebench.core.result import ComplianceStatus, ExecutionStatus
 from securebench.execution.ansible import (
     AnsibleExecutionBackend,
     AnsibleExecutor,
@@ -94,13 +94,14 @@ def test_ansible_executor_raises_on_nonzero_exit() -> None:
 
     executor = AnsibleExecutor(runner=fake.run)
 
-    with pytest.raises(AnsibleExecutionError):
-        executor.run(
-            [
-                "ansible-playbook",
-                "playbook.yml",
-            ]
-        )
+    result = executor.run(
+        [
+            "ansible-playbook",
+            "playbook.yml",
+        ]
+    )
+    assert result.returncode == 2
+    assert result.stderr == "ansible failed"
 
 
 def test_ansible_executor_preserves_successful_result() -> None:
@@ -129,7 +130,7 @@ def test_backend_requires_playbook_mapping() -> None:
         )
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AnsibleExecutionError):
         backend.audit(
             make_control(),
             "test-host",
@@ -150,7 +151,7 @@ def test_backend_does_not_accept_unknown_operation() -> None:
         }
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AnsibleExecutionError):
         backend._playbook_for(
             "unsupported-operation",
             context,
@@ -178,7 +179,7 @@ def test_backend_audit_uses_configured_playbook() -> None:
         ),
     )
 
-    assert result.status is ComplianceStatus.UNKNOWN
+    assert result.status is ExecutionStatus.SUCCESS
     assert fake.calls
 
 
@@ -270,7 +271,7 @@ def test_backend_verify_uses_configured_playbook() -> None:
         ),
     )
 
-    assert result.status is ComplianceStatus.UNKNOWN
+    assert result.status is ExecutionStatus.SUCCESS
     assert fake.calls
 
 
@@ -341,13 +342,13 @@ def test_backend_propagates_ansible_failure() -> None:
         )
     )
 
-    with pytest.raises(AnsibleExecutionError):
-        backend.remediate(
-            make_control(),
-            "test-host",
-            make_context(
-                playbooks={
-                    "remediate": "remediate.yml",
-                }
-            ),
-        )
+    result = backend.remediate(
+        make_control(),
+        "test-host",
+        make_context(
+            playbooks={
+                "remediate": "remediate.yml",
+            }
+        ),
+    )
+    assert result.status is ExecutionStatus.FAILED

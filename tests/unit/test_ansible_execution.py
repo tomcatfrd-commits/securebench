@@ -315,12 +315,7 @@ def test_backend_audit_selects_audit_playbook(tmp_path: Path) -> None:
         context,
     )
 
-    assert result.status in {
-        ComplianceStatus.PASS,
-        ComplianceStatus.UNKNOWN,
-        ComplianceStatus.FAIL,
-        ComplianceStatus.ERROR,
-    }
+    assert result.status is ExecutionStatus.SUCCESS
 
     assert len(executor.calls) == 1
     assert executor.calls[0]["playbook"] == str(
@@ -344,7 +339,7 @@ def test_backend_precheck_selects_precheck_playbook(
         context,
     )
 
-    assert result is True
+    assert result.status is ExecutionStatus.SUCCESS
 
     assert len(executor.calls) == 1
     assert executor.calls[0]["playbook"] == str(
@@ -422,12 +417,7 @@ def test_backend_verify_selects_verification_playbook(
         context,
     )
 
-    assert result.status in {
-        ComplianceStatus.PASS,
-        ComplianceStatus.UNKNOWN,
-        ComplianceStatus.FAIL,
-        ComplianceStatus.ERROR,
-    }
+    assert result.status is ExecutionStatus.SUCCESS
 
     assert len(executor.calls) == 1
     assert executor.calls[0]["playbook"] == str(
