@@ -125,6 +125,7 @@ class RollbackEngine:
             )
 
         if control.rollback_capability is RollbackCapability.UNSUPPORTED:
+            change.status = ChangeStatus.ROLLBACK_REQUIRED
             return RollbackExecution(
                 control_id=control.control_id,
                 host=host,
@@ -213,6 +214,7 @@ class RollbackEngine:
             control = controls.get(change.control_id)
 
             if control is None:
+                change.status = ChangeStatus.ROLLBACK_REQUIRED
                 results.append(
                     RollbackExecution(
                         control_id=change.control_id,

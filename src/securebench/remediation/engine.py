@@ -142,7 +142,7 @@ class RemediationEngine:
         transaction: Transaction,
     ) -> RemediationResult:
         try:
-            ok = bool(self._provider.precheck(control, host))
+            raw = self._provider.precheck(control, host)
         except Exception as exc:
             return RemediationResult(
                 control_id=control_id,
@@ -150,6 +150,11 @@ class RemediationEngine:
                 status=ExecutionStatus.FAILED,
                 message=f"Precheck raised: {exc}",
             )
+
+        if isinstance(raw, ExecutionResult):
+            ok = raw.status is ExecutionStatus.SUCCESS
+        else:
+            ok = bool(raw)
 
         if not ok:
             return RemediationResult(

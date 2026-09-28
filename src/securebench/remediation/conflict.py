@@ -123,3 +123,10 @@ class ConflictResolver:
             f"Conflicting controls cannot be remediated together: "
             f"{descriptions}"
         )
+
+    def validate_or_raise(
+        self,
+        control_ids: tuple[str, ...],
+    ) -> None:
+        """Alias for ensure_conflict_free."""
+        self.ensure_conflict_free(control_ids)
