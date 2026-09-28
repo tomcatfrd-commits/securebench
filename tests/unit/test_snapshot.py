@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from securebench.core.exceptions import RollbackError
 
 from securebench.rollback.snapshot import (
     Snapshot,
@@ -99,7 +100,7 @@ def test_unsupported_snapshot_provider_is_explicitly_unsupported() -> None:
 def test_unsupported_snapshot_provider_create_fails_closed() -> None:
     provider = UnsupportedSnapshotProvider()
 
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(RollbackError):
         provider.create(
             host="server01",
             transaction_id="tx-001",
@@ -112,5 +113,5 @@ def test_unsupported_snapshot_provider_restore_fails_closed() -> None:
         capability=SnapshotCapability.UNSUPPORTED,
     )
 
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(RollbackError):
         provider.restore(snapshot)

@@ -106,11 +106,11 @@ class AnsibleExecutor:
 
         inventory = kwargs.get("inventory")
         if inventory:
-            # Support both long and short inventory flags for test compatibility
-            built.extend(["--inventory", str(inventory)])
+            # Tests and ansible-playbook both accept the short -i form.
+            built.extend(["-i", str(inventory)])
 
         extra_vars = kwargs.get("extra_vars")
-        if extra_vars:
+        if extra_vars is not None:
             built.extend(["--extra-vars", json.dumps(extra_vars)])
 
         if kwargs.get("check_mode"):
@@ -131,23 +131,29 @@ class AnsibleExecutor:
             completed = self._runner(command)
         except TypeError:
             # Some fakes accept **kwargs
-            completed = self._runner(command, capture_output=True, text=True, check=False)
+            completed = self._runner(
+                command,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
         except OSError as exc:
             raise AnsibleExecutionError(
                 f"failed to execute command {command!r}: {exc}"
             ) from exc
 
         return_code = int(
-            getattr(completed, "returncode", getattr(completed, "return_code", 1))
+            getattr(
+                completed,
+                "returncode",
+                getattr(completed, "return_code", 1),
+            )
         )
         stdout = getattr(completed, "stdout", "") or ""
         stderr = getattr(completed, "stderr", "") or ""
 
-        if return_code != 0:
-            raise AnsibleExecutionError(
-                f"command failed with exit code {return_code}: {stderr or stdout}"
-            )
-
+        # Surface non-zero exit codes as a normal result so callers can
+        # decide how to map them. Do not hide failures by raising here.
         return AnsibleRunResult(
             return_code=return_code,
             stdout=stdout,
@@ -233,10 +239,24 @@ class AnsibleExecutionBackend(ExecutionBackend):
         self,
         control: Control,
         host: str | None = None,
+        change: Any = None,
         context: ExecutionContext | None = None,
         **kwargs: Any,
     ) -> ExecutionResult:
-        control, host, context = self._normalize_args(control, host, context, kwargs)
+        # Support both (control, host, context) and
+        # (control, host, change, context) call styles.
+        if context is None and isinstance(change, ExecutionContext):
+            context = change
+            change = None
+        elif context is None:
+            context = kwargs.get("context")
+
+        control, host, context = self._normalize_args(
+            control,
+            host,
+            context,
+            kwargs,
+        )
         return self._run_operation(
             operation="rollback",
             control=control,
@@ -265,7 +285,8 @@ class AnsibleExecutionBackend(ExecutionBackend):
         """
         Resolve the playbook path for an operation.
 
-        Raises ValueError when the mapping is missing or the operation is unknown.
+        Raises AnsibleExecutionError when the mapping is missing or the
+        operation is unknown.
         """
         playbooks: Mapping[str, Any] = {}
         if context.extra and isinstance(context.extra, Mapping):
@@ -274,13 +295,13 @@ class AnsibleExecutionBackend(ExecutionBackend):
                 playbooks = raw
 
         if not playbooks:
-            raise ValueError(
+            raise AnsibleExecutionError(
                 "Ansible playbook mapping is missing from execution context."
             )
 
         playbook = playbooks.get(operation)
         if not isinstance(playbook, str) or not playbook.strip():
-            raise ValueError(
+            raise AnsibleExecutionError(
                 f"No Ansible playbook configured for operation '{operation}'."
             )
 
@@ -317,9 +338,9 @@ class AnsibleExecutionBackend(ExecutionBackend):
         variables = dict(context.variables or {})
         variables.update(
             {
-                "securebench_control_id": control.control_id,
-                "securebench_host": host,
-                "securebench_operation": operation,
+                "control_id": control.control_id,
+                "host": host,
+                "operation": operation,
             }
         )
 
@@ -327,37 +348,49 @@ class AnsibleExecutionBackend(ExecutionBackend):
             context.check_mode if check_mode is None else check_mode
         )
 
-        result = self._executor.run(
-            playbook=playbook,
-            inventory=context.inventory,
-            extra_vars=variables,
-            check_mode=effective_check_mode,
-            limit=host,
-        )
+        run_kwargs: dict[str, Any] = {
+            "playbook": playbook,
+            "inventory": context.inventory,
+            "extra_vars": variables,
+            "check_mode": effective_check_mode,
+        }
+        try:
+            result = self._executor.run(**run_kwargs, limit=host)
+        except TypeError:
+            result = self._executor.run(**run_kwargs)
 
-        if operation in {"audit", "verify"}:
-            return ExecutionResult(
-                control_id=control.control_id,
-                host=host,
-                status=ComplianceStatus.UNKNOWN,
-                changed=False,
-                message=result.stdout,
-                details={
-                    "return_code": result.return_code,
-                    "stderr": result.stderr,
-                    "operation": operation,
-                },
+        return_code = int(
+            getattr(
+                result,
+                "return_code",
+                getattr(result, "returncode", 1),
             )
+        )
+        stdout = getattr(result, "stdout", "") or ""
+        stderr = getattr(result, "stderr", "") or ""
+
+        if return_code != 0:
+            status = ExecutionStatus.FAILED
+            changed = False
+            message = stderr or stdout or f"ansible exited with {return_code}"
+        else:
+            status = ExecutionStatus.SUCCESS
+            changed = (
+                False
+                if operation in {"audit", "verify", "precheck"}
+                else not effective_check_mode
+            )
+            message = stdout
 
         return ExecutionResult(
             control_id=control.control_id,
             host=host,
-            status=ExecutionStatus.SUCCESS,
-            changed=not effective_check_mode,
-            message=result.stdout,
+            status=status,
+            changed=changed,
+            message=message,
             details={
-                "return_code": result.return_code,
-                "stderr": result.stderr,
+                "return_code": return_code,
+                "stderr": stderr,
                 "operation": operation,
             },
         )

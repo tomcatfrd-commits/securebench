@@ -21,6 +21,17 @@ from securebench.core import (
 )
 
 
+def _as_sequence(value: Any) -> list[Any]:
+    """Normalize a single domain object or an iterable into a list."""
+    if isinstance(value, (AuditResult, ExecutionResult, VerificationResult)):
+        return [value]
+    if isinstance(value, (str, bytes)):
+        raise TypeError(
+            f"expected result object or iterable, got {type(value).__name__}"
+        )
+    return list(value)
+
+
 class JsonReporter:
     """
     Serialize SecureBench results and transactions as JSON.
@@ -28,13 +39,43 @@ class JsonReporter:
 
     def render_audit(
         self,
-        results: Iterable[AuditResult],
+        results: AuditResult | Iterable[AuditResult],
         *,
         indent: int = 2,
     ) -> str:
-        """Return a list of audit results as JSON."""
+        """Return audit result(s) as JSON.
 
-        return self._dump(list(results), indent=indent)
+        A single ``AuditResult`` is serialized as one object. An iterable of
+        results is serialized as a JSON array.
+        """
+        items = _as_sequence(results)
+        if isinstance(results, AuditResult):
+            return self._dump(items[0], indent=indent)
+        return self._dump(items, indent=indent)
+
+    def render_execution(
+        self,
+        results: ExecutionResult | Iterable[ExecutionResult],
+        *,
+        indent: int = 2,
+    ) -> str:
+        """Return execution result(s) as JSON."""
+        items = _as_sequence(results)
+        if isinstance(results, ExecutionResult):
+            return self._dump(items[0], indent=indent)
+        return self._dump(items, indent=indent)
+
+    def render_verification(
+        self,
+        results: VerificationResult | Iterable[VerificationResult],
+        *,
+        indent: int = 2,
+    ) -> str:
+        """Return verification result(s) as JSON."""
+        items = _as_sequence(results)
+        if isinstance(results, VerificationResult):
+            return self._dump(items[0], indent=indent)
+        return self._dump(items, indent=indent)
 
     def render(
         self,
@@ -60,7 +101,7 @@ class JsonReporter:
 
     def write_audit(
         self,
-        results: Iterable[AuditResult],
+        results: AuditResult | Iterable[AuditResult],
         path: str | Path,
         *,
         indent: int = 2,
@@ -148,7 +189,4 @@ class JsonReporter:
                 if not key.startswith("_")
             }
 
-        raise TypeError(
-            f"unsupported value for JSON serialization: "
-            f"{type(value).__name__}"
-        )
+        raise
