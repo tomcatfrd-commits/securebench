@@ -1,0 +1,82 @@
+control:
+  id: CIS-2.1.17
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure samba file server services are not in use
+  description: The Samba daemon allows system administrators to configure their Linux systems to share
+    file systems and directories with Windows desktops. Samba will advertise the file systems and directories
+    via the Server Message Block (SMB) protocol. Windows desktop users will be able to mount these directories
+    and file systems as letter drives on their systems.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_1_17.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_1_17.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_1_17.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_1_17.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.1.17
+      url: https://workbench.cisecurity.org/sections/4177245/recommendations/7047641
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-6
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1005
+      - T1005.000
+      - T1039
+      - T1039.000
+      - T1083
+      - T1083.000
+      - T1135
+      - T1135.000
+      - T1203
+      - T1203.000
+      - T1210
+      - T1210.000
+      - T1543
+      - T1543.002
+      mitre_tactics:
+      - TA0008
+      mitre_mitigations: []
+    parent: CIS _2_Configure Server Services Main | 2.1.17-Ensure samba file server services are not in
+      use
+    rationale: If there is no need to mount directories and file systems to Windows systems, then this
+      service should be deleted to reduce the potential attack surface.
+    impact: "There may be packages that are dependent on the `samba` package.  If the `samba` package\
+      \ is removed, these dependent packages will be removed as well. Before removing the `samba` package,\
+      \ review any dependent packages to determine if they are required on the system.\r\n\r\n**- IF -**\
+      \ a dependent package is required: stop and mask the `smbd.service`  leaving the `samba` package\
+      \ installed."
+    audit_guidance: "Run the following command to verify `samba` is not installed:\r\n\r\n```\r\n# dpkg-query\
+      \ -s samba &>/dev/null && echo \"samba is installed\"\r\n```\r\n\r\nNothing should be returned.\r\
+      \n\r\n**- OR -** \r\n\r\n**- IF -** the package is required for dependencies:\r\n\r\nRun the following\
+      \ command to verify `smbd.service` is not enabled:\r\n\r\n```\r\n# systemctl is-enabled smbd.service\
+      \ 2>/dev/null | grep 'enabled'\r\n\r\nNothing should be returned\r\n```\r\n\r\nRun the following\
+      \ command to verify the `smbd.service` is not active:\r\n\r\n```\r\n# systemctl is-active smbd.service\
+      \ 2>/dev/null | grep '^active'\r\n\r\nNothing should be returned\r\n```"
+    remediation_guidance: "Run the following commands to stop `smbd.service` and remove `samba` package:\r\
+      \n\r\n```\r\n# systemctl stop smbd.service\r\n# apt purge samba\r\n```\r\n\r\n**- OR -**\r\n\r\n\
+      **- IF -** the `samba` package is required as a dependency:\r\n\r\nRun the following commands to\
+      \ stop and mask the `smbd.service`:\r\n\r\n```\r\n# systemctl stop smbd.service\r\n# systemctl mask\
+      \ smbd.service\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,60 @@
+control:
+  id: CIS-1.1.2.2.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure noexec option set on /dev/shm partition
+  description: The `noexec` mount option specifies that the filesystem cannot contain executable binaries.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_1_2_2_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_1_2_2_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_1_2_2_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_1_2_2_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.1.2.2.4
+      url: https://workbench.cisecurity.org/sections/4177254/recommendations/7047544
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7 (2)
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1204
+      - T1204.002
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1022
+    parent: CIS _1_Configure Filesystem Partitions Main | 1.1.2.4-Ensure noexec option set on /dev/shm
+      partition
+    rationale: Setting this option on a file system prevents users from executing programs from shared
+      memory. This deters users from introducing potentially malicious software on the system.
+    impact: ''
+    audit_guidance: "**- IF -** a separate partition exists for `/dev/shm`, verify that the `noexec` option\
+      \ is set.\r\n\r\n```\r\n# findmnt -kn /dev/shm | grep -v 'noexec'\r\n\r\nNothing should be returned\r\
+      \n```"
+    remediation_guidance: "**- IF -** a separate partition exists for `/dev/shm`.\r\n\r\nEdit the `/etc/fstab`\
+      \ file and add `noexec` to the fourth field (mounting options) for the `/dev/shm` partition.\r\n\
+      \r\n_Example:_\r\n\r\n```\r\ntmpfs /dev/shm    tmpfs     defaults,rw,nosuid,nodev,noexec,relatime\
+      \  0 0\r\n```\r\n\r\nRun the following command to remount `/dev/shm` with the configured options:\r\
+      \n\r\n```\r\n# mount -o remount /dev/shm\r\n```\r\n\r\n**Note:** It is recommended to use `tmpfs`\
+      \ as the device/filesystem type as `/dev/shm` is used as shared memory space by applications."
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

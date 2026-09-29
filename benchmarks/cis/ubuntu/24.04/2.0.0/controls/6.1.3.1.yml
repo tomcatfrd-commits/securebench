@@ -1,0 +1,137 @@
+control:
+  id: CIS-6.1.3.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to all logfiles has been configured
+  description: "Log files contain information from many services on the the local system, or in the event\
+    \ of a centralized log server, others systems logs as well. \r\n\r\nIn general log files are found\
+    \ in `/var/log/`, although application can be configured to store logs elsewhere. Should your application\
+    \ store logs in another, ensure to run the same test on that location."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_1_3_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_1_3_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_1_3_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_1_3_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.1.3.1
+      url: https://workbench.cisecurity.org/sections/4177260/recommendations/7047589
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      - MP-2
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      - T1083
+      - T1083.000
+      mitre_tactics:
+      - TA0007
+      mitre_mitigations:
+      - M1028
+    parent: CIS _6_System Logging Main | 2.2.3.1-Ensure access to all logfiles has been configured
+    rationale: It is important that log files have the correct permissions to ensure that sensitive data
+      is protected and that only the appropriate users / groups have access to them.
+    impact: ''
+    audit_guidance: "Run the following script to verify that files in `/var/log/` have appropriate permissions\
+      \ and ownership:\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   a_output=(); a_output2=()\r\n\
+      \   f_file_test_chk()\r\n   {\r\n      a_out2=() \r\n      maxperm=\"$( printf '%o' $(( 0777 & ~$perm_mask))\
+      \ )\"\r\n      [ $(( $l_mode & $perm_mask )) -gt 0 ] && \\\r\n         a_out2+=(\"   o Mode: \\\"\
+      $l_mode\\\" should be \\\"$maxperm\\\" or more restrictive\")\r\n      [[ ! \"$l_user\" =~ $l_auser\
+      \ ]] && \\\r\n         a_out2+=(\"   o Owned by: \\\"$l_user\\\" and should be owned by \\\"${l_auser//|/\
+      \ or }\\\"\")\r\n      [[ ! \"$l_group\" =~ $l_agroup ]] && \\\r\n         a_out2+=(\"   o Group\
+      \ owned by: \\\"$l_group\\\" and should be group owned by \\\"${l_agroup//|/ or }\\\"\")\r\n   \
+      \   [ \"${#a_out2[@]}\" -gt 0 ] && a_output2+=(\" - File: \\\"$l_fname\\\" is:\" \"${a_out2[@]}\"\
+      )\r\n   }\r\n   while IFS= read -r -d $'\\0' l_file; do\r\n      while IFS=: read -r l_fname l_mode\
+      \ l_user l_group; do\r\n         if grep -Pq -- '\\/(apt)\\h*$' <<< \"$(dirname \"$l_fname\")\"\
+      ; then\r\n            perm_mask='0133' l_auser=\"root\" l_agroup=\"(root|adm)\"; f_file_test_chk\r\
+      \n         else\r\n            case \"$(basename \"$l_fname\")\" in\r\n               lastlog |\
+      \ lastlog.* | wtmp | wtmp.* | wtmp-* | btmp | btmp.* | btmp-* | README)\r\n                  perm_mask='0113'\
+      \ l_auser=\"root\" l_agroup=\"(root|utmp)\"\r\n                  f_file_test_chk ;;\r\n        \
+      \       cloud-init.log* | localmessages* | waagent.log*)\r\n                  perm_mask='0133' l_auser=\"\
+      (root|syslog)\" l_agroup=\"(root|adm)\"\r\n                  f_file_test_chk ;;\r\n            \
+      \   secure{,*.*,.*,-*} | auth.log | syslog | messages)\r\n                  perm_mask='0137' l_auser=\"\
+      (root|syslog)\" l_agroup=\"(root|adm)\"\r\n                  f_file_test_chk ;;\r\n            \
+      \   SSSD | sssd)\r\n                  perm_mask='0117' l_auser=\"(root|SSSD)\" l_agroup=\"(root|SSSD)\"\
+      \r\n                  f_file_test_chk ;;\r\n               gdm | gdm3)\r\n                  perm_mask='0117'\
+      \ l_auser=\"root\" l_agroup=\"(root|gdm|gdm3)\"\r\n                  f_file_test_chk ;;\r\n    \
+      \           *.journal | *.journal~)\r\n                  perm_mask='0137' l_auser=\"root\" l_agroup=\"\
+      (root|systemd-journal)\"\r\n                  f_file_test_chk ;;\r\n               *)\r\n      \
+      \            perm_mask='0137' l_auser=\"(root|syslog)\" l_agroup=\"(root|adm)\"\r\n            \
+      \      if [ \"$l_user\" = \"root\" ] || ! grep -Pq -- \"^\\h*$(awk -F: '$1==\"'\"$l_user\"'\" {print\
+      \ $7}' /etc/passwd)\\b\" /etc/shells; then\r\n                     ! grep -Pq -- \"$l_auser\" <<<\
+      \ \"$l_user\" && l_auser=\"(root|syslog|$l_user)\"\r\n                     ! grep -Pq -- \"$l_agroup\"\
+      \ <<< \"$l_group\" && l_agroup=\"(root|adm|$l_group)\"\r\n                  fi\r\n             \
+      \     f_file_test_chk ;;\r\n            esac\r\n         fi\r\n      done < <(stat -Lc '%n:%#a:%U:%G'\
+      \ \"$l_file\")\r\n   done < <(find -L /var/log -type f \\( -perm /0137 -o ! -user root -o ! -group\
+      \ root \\) -print0)\r\n   if [ \"${#a_output2[@]}\" -le 0 ]; then\r\n      a_output+=(\"  - All\
+      \ files in \\\"/var/log/\\\" have appropriate permissions and ownership\")\r\n      printf '\\n%s'\
+      \ \"- Audit Result:\" \"  ** PASS **\" \"${a_output[@]}\" \"\"\r\n   else\r\n      printf '\\n%s'\
+      \ \"- Audit Result:\" \"  ** FAIL **\" \" - Reason(s) for audit failure:\" \"${a_output2[@]}\" \"\
+      \"\r\n   fi\r\n}\r\n```"
+    remediation_guidance: "Run the following script to update permissions and ownership on files in `/var/log`.\
+      \ \r\n\r\nAlthough the script is not destructive, ensure that the output is captured in the event\
+      \ that the remediation causes issues.\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   a_output2=()\r\
+      \n   f_file_test_fix()\r\n   {\r\n      a_out2=()\r\n      maxperm=\"$( printf '%o' $(( 0777 & ~$perm_mask))\
+      \ )\"\r\n      if [ $(( $l_mode & $perm_mask )) -gt 0 ]; then\r\n         a_out2+=(\"   o Mode:\
+      \ \\\"$l_mode\\\" should be \\\"$maxperm\\\" or more restrictive\" \"     x Removing excess permissions\"\
+      )\r\n         chmod \"$l_rperms\" \"$l_fname\"\r\n      fi\r\n      if [[ ! \"$l_user\" =~ $l_auser\
+      \ ]]; then\r\n         a_out2+=(\"   o Owned by: \\\"$l_user\\\" and should be owned by \\\"${l_auser//|/\
+      \ or }\\\"\" \"     x Changing ownership to: \\\"$l_fix_account\\\"\")\r\n         chown \"$l_fix_account\"\
+      \ \"$l_fname\"\r\n      fi\r\n      if [[ ! \"$l_group\" =~ $l_agroup ]]; then\r\n         a_out2+=(\"\
+      \   o Group owned by: \\\"$l_group\\\" and should be group owned by \\\"${l_agroup//|/ or }\\\"\"\
+      \ \"     x Changing group ownership to: \\\"$l_fix_account\\\"\")\r\n         chgrp \"$l_fix_account\"\
+      \ \"$l_fname\"\r\n      fi\r\n      [ \"${#a_out2[@]}\" -gt 0 ] && a_output2+=(\" - File: \\\"$l_fname\\\
+      \" is:\" \"${a_out2[@]}\")\r\n   }\r\n   l_fix_account='root'\r\n   while IFS= read -r -d $'\\0'\
+      \ l_file; do\r\n      while IFS=: read -r l_fname l_mode l_user l_group; do\r\n         if grep\
+      \ -Pq -- '\\/(apt)\\h*$' <<< \"$(dirname \"$l_fname\")\"; then\r\n            perm_mask='0133' l_rperms=\"\
+      u-x,go-wx\" l_auser=\"root\" l_agroup=\"(root|adm)\"; f_file_test_fix\r\n         else\r\n     \
+      \       case \"$(basename \"$l_fname\")\" in\r\n               lastlog | lastlog.* | wtmp | wtmp.*\
+      \ | wtmp-* | btmp | btmp.* | btmp-* | README)\r\n                  perm_mask='0113' l_rperms=\"\
+      ug-x,o-wx\" l_auser=\"root\" l_agroup=\"(root|utmp)\"\r\n                  f_file_test_fix ;;\r\n\
+      \               cloud-init.log* | localmessages* | waagent.log*)\r\n                  perm_mask='0133'\
+      \ l_rperms=\"u-x,go-wx\" l_auser=\"(root|syslog)\" l_agroup=\"(root|adm)\"\r\n                 \
+      \ f_file_test_fix ;;\r\n               secure | auth.log | syslog | messages)\r\n              \
+      \    perm_mask='0137' l_rperms=\"u-x,g-wx,o-rwx\" l_auser=\"(root|syslog)\" l_agroup=\"(root|adm)\"\
+      \r\n                  f_file_test_fix ;;\r\n               SSSD | sssd)\r\n                  perm_mask='0117'\
+      \ l_rperms=\"ug-x,o-rwx\" l_auser=\"(root|SSSD)\" l_agroup=\"(root|SSSD)\"\r\n                 \
+      \ f_file_test_fix ;;\r\n               gdm | gdm3)\r\n                  perm_mask='0117' l_rperms=\"\
+      ug-x,o-rwx\" l_auser=\"root\" l_agroup=\"(root|gdm|gdm3)\"\r\n                  f_file_test_fix\
+      \ ;;\r\n               *.journal | *.journal~)\r\n                  perm_mask='0137' l_rperms=\"\
+      u-x,g-wx,o-rwx\" l_auser=\"root\" l_agroup=\"(root|systemd-journal)\"       \r\n               \
+      \   f_file_test_fix ;;\r\n               *)\r\n                  perm_mask='0137' l_rperms=\"u-x,g-wx,o-rwx\"\
+      \ l_auser=\"(root|syslog)\" l_agroup=\"(root|adm)\"\r\n                  if [ \"$l_user\" = \"root\"\
+      \ ] || ! grep -Pq -- \"^\\h*$(awk -F: '$1==\"'\"$l_user\"'\" {print $7}' /etc/passwd)\\b\" /etc/shells;\
+      \ then\r\n                     ! grep -Pq -- \"$l_auser\" <<< \"$l_user\" && l_auser=\"(root|syslog|$l_user)\"\
+      \r\n                     ! grep -Pq -- \"$l_agroup\" <<< \"$l_group\" && l_agroup=\"(root|adm|$l_group)\"\
+      \r\n                  fi\r\n                  f_file_test_fix ;;\r\n            esac\r\n       \
+      \  fi\r\n      done < <(stat -Lc '%n:%#a:%U:%G' \"$l_file\")\r\n   done < <(find -L /var/log -type\
+      \ f \\( -perm /0137 -o ! -user root -o ! -group root \\) -print0)\r\n   if [ \"${#a_output2[@]}\"\
+      \ -le 0 ]; then # If all files passed, then we report no changes\r\n      a_output+=(\"  - All files\
+      \ in \\\"/var/log/\\\" have appropriate permissions and ownership\")\r\n      printf '\\n%s' \"\
+      - All files in \\\"/var/log/\\\" have appropriate permissions and ownership\" \"  o No changes required\"\
+      \ \"\"\r\n   else\r\n      printf '\\n%s' \"${a_output2[@]}\" \"\"\r\n   fi\r\n}\r\n```\r\n\r\n\
+      **Note:** You may also need to change the configuration for your logging software or services for\
+      \ any logs that had incorrect permissions.\r\n\r\nIf there are services that log to other locations,\
+      \ ensure that those log files have the appropriate access configured."
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

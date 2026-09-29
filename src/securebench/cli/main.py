@@ -12,8 +12,10 @@ from __future__ import annotations
 import argparse
 import sys
 from collections.abc import Sequence
+from pathlib import Path
 
 from securebench import __version__
+from securebench.core import BenchmarkCatalog, BenchmarkError
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -83,6 +85,11 @@ def _add_benchmark_parser(
         "action",
         choices=("list",),
         help="Benchmark operation.",
+    )
+    parser.add_argument(
+        "--catalog",
+        default="benchmarks/index.yml",
+        help="Path to the versioned benchmark catalog.",
     )
 
 
@@ -234,7 +241,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _not_implemented("inventory")
 
     if args.command == "benchmark":
-        return _not_implemented("benchmark")
+        return _benchmark_command(args)
 
     if args.command == "profile":
         return _not_implemented("profile")
@@ -272,6 +279,29 @@ def _not_implemented(command: str) -> int:
     )
 
     return 2
+
+
+def _benchmark_command(args: argparse.Namespace) -> int:
+    if args.action != "list":
+        return _not_implemented("benchmark")
+    try:
+        catalog = BenchmarkCatalog(Path(args.catalog))
+    except BenchmarkError as exc:
+        print(f"securebench: {exc}", file=sys.stderr)
+        return 2
+
+    for reference in catalog.references:
+        print(
+            "\t".join(
+                (
+                    reference.benchmark_id,
+                    reference.version,
+                    reference.platform,
+                    str(reference.path),
+                )
+            )
+        )
+    return 0
 
 
 if __name__ == "__main__":

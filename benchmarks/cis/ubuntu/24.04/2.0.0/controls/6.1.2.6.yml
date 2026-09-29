@@ -1,0 +1,72 @@
+control:
+  id: CIS-6.1.2.6
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure rsyslog is not configured to receive logs from a remote client
+  description: '`rsyslog` supports the ability to receive messages from remote hosts, thus acting as a
+    log server. Clients should not receive data from other hosts.'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_1_2_6.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_1_2_6.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_1_2_6.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_1_2_6.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.1.2.6
+      url: https://workbench.cisecurity.org/sections/4177249/recommendations/7047533
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AU-12
+      - AU-2
+      - AU-7
+      - CM-6
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      - T1562
+      - T1562.006
+      mitre_tactics:
+      - TA0005
+      - TA0040
+      mitre_mitigations:
+      - M1029
+    parent: CIS _6_System Logging Main | 2.2.2.6-Ensure rsyslog is not configured to receive logs from
+      a remote client
+    rationale: If a client is configured to also receive data, thus turning it into a server, the client
+      system is acting outside its operational boundary.
+    impact: ''
+    audit_guidance: "Review the `/etc/rsyslog.conf` and `/etc/rsyslog.d/*.conf` files and verify that\
+      \ the system is not configured to accept incoming logs.\r\n\r\n**advanced format**\r\n\r\n```\r\n\
+      # grep -Psi -- '^\\h*module\\(load=\\\"?imtcp\\\"?\\)' /etc/rsyslog.conf /etc/rsyslog.d/*.conf\r\
+      \n# grep -Psi -- '^\\h*input\\(type=\\\"?imtcp\\\"?\\b' /etc/rsyslog.conf /etc/rsyslog.d/*.conf\r\
+      \n```\r\n\r\nNothing should be returned\r\n\r\n\r\n**obsolete legacy format**\r\n\r\n```\r\n# grep\
+      \ -Psi -- '^\\h*\\$ModLoad\\h+imtcp\\b' /etc/rsyslog.conf /etc/rsyslog.d/*.conf\r\n# grep -Psi --\
+      \ '^\\h*\\$InputTCPServerRun\\b' /etc/rsyslog.conf /etc/rsyslog.d/*.conf\r\n```\r\n\r\nNothing should\
+      \ be returned"
+    remediation_guidance: "Should there be any active log server configuration found in the auditing section,\
+      \ modify those files and remove the specific lines highlighted by the audit. Verify none of the\
+      \ following entries are present in any of `/etc/rsyslog.conf` or `/etc/rsyslog.d/*.conf`.\r\n\r\n\
+      **advanced format**\r\n\r\n```\r\nmodule(load=\"imtcp\")\r\ninput(type=\"imtcp\" port=\"514\")\r\
+      \n```\r\n\r\n**deprecated legacy format**\r\n\r\n```\r\n$ModLoad imtcp\r\n$InputTCPServerRun\r\n\
+      ```\r\n\r\nRestart the service:\r\n\r\n```\r\n# systemctl restart rsyslog\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 8
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

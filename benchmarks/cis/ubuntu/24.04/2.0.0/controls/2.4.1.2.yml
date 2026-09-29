@@ -1,0 +1,63 @@
+control:
+  id: CIS-2.4.1.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to /etc/crontab is configured
+  description: The `/etc/crontab` file is used by `cron` to control its own jobs. The commands in this
+    item make sure that root is the user and group owner of the file and that only the owner can access
+    the file.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_4_1_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_4_1_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_4_1_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_4_1_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.4.1.2
+      url: https://workbench.cisecurity.org/sections/4177287/recommendations/7047725
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      - MP-2
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1053
+      - T1053.003
+      mitre_tactics:
+      - TA0002
+      - TA0007
+      mitre_mitigations:
+      - M1018
+    parent: CIS _2_Configure cron Main | 1.1.2.2-Ensure access to /etc/crontab is configured
+    rationale: This file contains information on what system jobs are run by cron. Write access to these
+      files could provide unprivileged users with the ability to elevate their privileges. Read access
+      to these files could provide users with the ability to gain insight on system jobs that run on the
+      system and could provide them a way to gain unauthorized privileged access.
+    impact: ''
+    audit_guidance: "**- IF -** cron is installed on the system:\r\n\r\nRun the following command and\
+      \ verify `Uid` and `Gid` are both `0/root`  and `Access` does not grant permissions to `group` or\
+      \ `other` :\r\n\r\n```\r\n# stat -Lc 'Access: (%a/%A) Uid: ( %u/ %U) Gid: ( %g/ %G)' /etc/crontab\r\
+      \n\r\nAccess: (600/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)\r\n```"
+    remediation_guidance: "**- IF -** cron is installed on the system:\r\n\r\nRun the following commands\
+      \ to set ownership and permissions on `/etc/crontab`:\r\n\r\n```\r\n# chown root:root /etc/crontab\r\
+      \n# chmod og-rwx /etc/crontab\r\n```"
+    additional_information: ''
+    default_value: 'Access: (644/-rw-r--r--) Uid: ( 0/ root) Gid: ( 0/ root)'
+    artifacts_count: 5
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

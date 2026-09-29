@@ -1,0 +1,64 @@
+control:
+  id: CIS-5.2.6
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure sudo timestamp_timeout is configured
+  description: sudo `timestamp_timeout` controls how long a user's sudo privileges remain active after
+    the initial password entry.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_2_6.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_2_6.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_2_6.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_2_6.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.2.6
+      url: https://workbench.cisecurity.org/sections/4177269/recommendations/7047663
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-6
+      cis_v8:
+      - '5.4'
+      cis_v7:
+      - '4.3'
+      mitre_techniques:
+      - T1548
+      mitre_tactics:
+      - TA0004
+      mitre_mitigations:
+      - M1026
+    parent: CIS _5_Configure privilege escalation Main | 2.1.6-Ensure sudo timestamp_timeout is configured
+    rationale: A timeout value reduces the window of opportunity for unauthorized privileged sudo access.
+    impact: ''
+    audit_guidance: "Ensure that the caching timeout is not disabled and greater than 15 minutes.\r\n\r\
+      \nRun the following command:\r\n\r\n```\r\n# grep -roP \"timestamp_timeout=\\K[0-9]*\" /etc/sudoers*\r\
+      \n```\r\n\r\nIf there is no `timestamp_timeout` configured in `/etc/sudoers*` then the default of\
+      \ 5 minutes is being used. \r\n\r\nIf the default value is being used, run the following command\
+      \ to verify the default is not disabled or greater than 15 minutes:\r\n\r\n```\r\n# sudo -V | grep\
+      \ -Psi -- 'timestamp\\h+timeout\\b'\r\n```\r\n\r\n_Example output:_\r\n\r\n```\r\nAuthentication\
+      \ timestamp timeout: 15.0 minutes\r\n```\r\n\r\nVerify `Authentication timestamp timeout`:\r\n-\
+      \ Is not a negative number (disabled).\r\n- Is not greater than `15` minutes, and follows local\
+      \ site policy.\r\n- Follows local site policy"
+    remediation_guidance: "Edit the file listed in the audit section with `visudo -f ` and modify the\
+      \ entry `timestamp_timeout=` to 15 minutes or less as per your site policy. The value is in minutes.\
+      \ This particular entry may appear on its own, or on the same line as `env_reset`. See the following\
+      \ two examples:\r\n\r\n_Example 1:_\r\n\r\n```\r\nDefaults    env_reset, timestamp_timeout=15\r\n\
+      ```\r\n\r\n_Example 2:_\r\n\r\n```\r\nDefaults    timestamp_timeout=15\r\nDefaults    env_reset\r\
+      \n```"
+    additional_information: ''
+    default_value: timestamp_timeout=15
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

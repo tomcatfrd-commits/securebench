@@ -1,0 +1,64 @@
+control:
+  id: CIS-1.1.2.2.3
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure nosuid option set on /dev/shm partition
+  description: The `nosuid` mount option specifies that the filesystem cannot contain `setuid`  files.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_1_2_2_3.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_1_2_2_3.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_1_2_2_3.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_1_2_2_3.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.1.2.2.3
+      url: https://workbench.cisecurity.org/sections/4177254/recommendations/7047539
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7 (2)
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1548
+      - T1548.001
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1038
+    parent: CIS _1_Configure Filesystem Partitions Main | 1.1.2.3-Ensure nosuid option set on /dev/shm
+      partition
+    rationale: Setting this option on a file system prevents users from introducing privileged programs
+      onto the system and allowing non-root users to execute them.
+    impact: ''
+    audit_guidance: "**- IF -** a separate partition exists for `/dev/shm`, verify that the `nosuid` option\
+      \ is set.\r\n\r\n```\r\n# findmnt -kn /dev/shm | grep -v 'nosuid'\r\n\r\nNothing should be returned\r\
+      \n```"
+    remediation_guidance: "**- IF -** a separate partition exists for `/dev/shm`.\r\n\r\nEdit the `/etc/fstab`\
+      \ file and add `nosuid` to the fourth field (mounting options) for the `/dev/shm`  partition. See\
+      \ the `fstab(5)` manual page for more information.\r\n\r\n_Example:_\r\n\r\n```\r\ntmpfs /dev/shm\
+      \    tmpfs     defaults,rw,nosuid,nodev,noexec,relatime  0 0\r\n```\r\n\r\nRun the following command\
+      \ to remount `/dev/shm` with the configured options:\r\n\r\n```\r\n# mount -o remount /dev/shm\r\
+      \n```\r\n\r\n**Note:** It is recommended to use `tmpfs` as the device/filesystem type as `/dev/shm`\
+      \ is used as shared memory space by applications."
+    additional_information: Some distributions mount `/dev/shm` through other means and require `/dev/shm`
+      to be added to `/etc/fstab` even though it is already being mounted on boot. Others may configure
+      `/dev/shm` in other locations and may override `/etc/fstab` configuration. Consult the documentation
+      appropriate for your distribution.
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

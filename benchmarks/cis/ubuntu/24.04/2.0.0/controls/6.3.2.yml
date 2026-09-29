@@ -1,0 +1,70 @@
+control:
+  id: CIS-6.3.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure filesystem integrity is regularly checked
+  description: Periodic checking of the filesystem integrity is needed to detect changes to the filesystem.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_3_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_3_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_3_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_3_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.3.2
+      url: https://workbench.cisecurity.org/sections/4177296/recommendations/7047787
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AU-2
+      cis_v8:
+      - '3.14'
+      cis_v7:
+      - '14.9'
+      mitre_techniques:
+      - T1036
+      - T1036.002
+      - T1036.003
+      - T1036.004
+      - T1036.005
+      - T1565
+      - T1565.001
+      mitre_tactics:
+      - TA0040
+      mitre_mitigations:
+      - M1022
+    parent: CIS _6_Configure Integrity Checking Main | 2.2.2-Ensure filesystem integrity is regularly
+      checked
+    rationale: Periodic file checking allows the system administrator to determine on a regular basis
+      if critical files have been changed in an unauthorized fashion.
+    impact: ''
+    audit_guidance: "Run the following command:\r\n\r\n```\r\n# systemctl list-unit-files | awk '$1~/^dailyaidecheck\\\
+      .(timer|service)$/{print $1 \"\\t\" $2}'\r\n```\r\n\r\n_Example output:_\r\n```\r\ndailyaidecheck.service\
+      \  static\r\ndailyaidecheck.timer    enabled\r\n```\r\n\r\nVerify `dailyaidecheck.timer` is `enabled`\
+      \ and `dailyaidecheck.service` is either `static` or `enabled`.\r\n\r\nRun the following command\
+      \ to verify `dailyaidecheck.timer` is `active`:\r\n\r\n```\r\n# systemctl is-active dailyaidecheck.timer\r\
+      \n\r\nactive\r\n```"
+    remediation_guidance: "Run the following command to unmask `dailyaidecheck.timer` and `dailyaidecheck.service`:\r\
+      \n\r\n```\r\n# systemctl unmask dailyaidecheck.timer dailyaidecheck.service\r\n```\r\n\r\nRun the\
+      \ following command to enable and start `dailyaidecheck.timer`:\r\n\r\n```\r\n# systemctl --now\
+      \ enable dailyaidecheck.timer\r\n```"
+    additional_information: "The checking in this recommendation occurs every day at 5am. Alter the frequency\
+      \ and time of the checks in compliance with site policy\r\n\r\nsystemd timers, timer file `aidecheck.timer`\
+      \ and service file `aidecheck.service`, have been included as an optional alternative to using `cron`\r\
+      \n\r\nUbuntu advises using `/usr/bin/aide.wrapper` rather than calling `/usr/bin/aide` directly\
+      \ in order to protect the database and prevent conflicts"
+    default_value: ''
+    artifacts_count: 4
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

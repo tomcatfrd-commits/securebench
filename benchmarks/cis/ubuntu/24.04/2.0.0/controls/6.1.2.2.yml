@@ -1,0 +1,62 @@
+control:
+  id: CIS-6.1.2.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure rsyslog service is enabled and active
+  description: Once the `rsyslog`  package is installed, ensure that the service is enabled.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_1_2_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_1_2_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_1_2_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_1_2_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.1.2.2
+      url: https://workbench.cisecurity.org/sections/4177249/recommendations/7047508
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-6
+      cis_v8:
+      - '8.2'
+      cis_v7:
+      - '6.2'
+      - '6.3'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      - T1211
+      - T1562
+      - T1562.001
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1029
+    parent: CIS _6_System Logging Main | 2.2.2.2-Ensure rsyslog service is enabled and active
+    rationale: If the `rsyslog` service is not enabled to start on boot, the system will not capture logging
+      events.
+    impact: ''
+    audit_guidance: "**- IF -** `rsyslog` is being used for logging on the system:\r\n\r\nRun the following\
+      \ command to verify `rsyslog.service` is enabled:\r\n\r\n```\r\n# systemctl is-enabled rsyslog\r\
+      \n\r\nenabled\r\n```\r\n\r\nRun the following command to verify `rsyslog.service` is active:\r\n\
+      \r\n```\r\n# systemctl is-active rsyslog.service\r\n\r\nactive\r\n```"
+    remediation_guidance: "**- IF -** `rsyslog` is being used for logging on the system:\r\n\r\nRun the\
+      \ following commands to unmask, enable, and start `rsyslog.service`:\r\n\r\n```\r\n# systemctl unmask\
+      \ rsyslog.service\r\n# systemctl enable rsyslog.service\r\n# systemctl start rsyslog.service\r\n\
+      ```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

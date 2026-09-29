@@ -1,0 +1,87 @@
+control:
+  id: CIS-5.3.3.2.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure password number of changed characters is configured
+  description: The `pwquality` `difok` option sets the number of characters in a password that must not
+    be present in the old password.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_3_2_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_3_2_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_3_2_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_3_2_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.3.2.1
+      url: https://workbench.cisecurity.org/sections/4177285/recommendations/7047717
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - IA-5
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques:
+      - T1110
+      - T1110.001
+      - T1110.002
+      - T1110.003
+      - T1178.001
+      - T1178.002
+      - T1178.003
+      - T1178.004
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1027
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.4.2.1-Ensure password number of changed
+      characters is configured
+    rationale: "Use of a complex password helps to increase the time and resources required to compromise\
+      \ the password. Password complexity, or strength, is a measure of the effectiveness of a password\
+      \ in resisting attempts at guessing and brute-force attacks.\r\n\r\nPassword complexity is one factor\
+      \ of several that determines how long it takes to crack a password. The more complex the password,\
+      \ the greater the number of possible combinations that need to be tested before the password is\
+      \ compromised."
+    impact: ''
+    audit_guidance: "Run the following command to verify that the `difok` option is set to `2` or more\
+      \ and follows local site policy:\r\n\r\n```\r\n# grep -Psi -- '^\\h*difok\\h*=\\h*([2-9]|[1-9][0-9]+)\\\
+      b' /etc/security/pwquality.conf /etc/security/pwquality.conf.d/*.conf\r\n```\r\n\r\n_Example output:_\r\
+      \n\r\n```\r\n/etc/security/pwquality.conf.d/50-pwdifok.conf:difok = 2\r\n```\r\n\r\nVerify returned\
+      \ value(s) are `2` or more and meet local site policy\r\n\r\nRun the following command to verify\
+      \ that `difok` is not set, is `2` or more, and conforms to local site policy:\r\n\r\n```\r\n# grep\
+      \ -Psi -- '^\\h*password\\h+(requisite|required|sufficient)\\h+pam_pwquality\\.so\\h+([^#\\n\\r]+\\\
+      h+)?difok\\h*=\\h*([0-1])\\b' /etc/pam.d/common-password\r\n```\r\n\r\nNothing should be returned\r\
+      \n\r\n**Note:** \r\n- settings should be configured in only **one** location for clarity\r\n- Settings\
+      \ observe an order of precedence:\r\n  - module arguments override the settings in the `/etc/security/pwquality.conf`\
+      \ configuration file\r\n  - settings in the `/etc/security/pwquality.conf` configuration file override\
+      \ settings in a `.conf` file in the `/etc/security/pwquality.conf.d/` directory\r\n  - settings\
+      \ in a `.conf` file in the `/etc/security/pwquality.conf.d/` directory are read in canonical order,\
+      \ with last read file containing the setting taking precedence\r\n- It is recommended that settings\
+      \ be configured in a `.conf` file in the `/etc/security/pwquality.conf.d/` directory for clarity,\
+      \ convenience, and durability."
+    remediation_guidance: "Create or modify a file ending in `.conf` in the `/etc/security/pwquality.conf.d/`\
+      \ directory or the file `/etc/security/pwquality.conf` and add or modify the following line to set\
+      \ `difok` to `2` or more. Ensure setting conforms to local site policy:\r\n\r\n_Example:_\r\n\r\n\
+      ```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   sed -ri 's/^\\s*difok\\s*=/# &/' /etc/security/pwquality.conf\r\
+      \n   [ ! -d /etc/security/pwquality.conf.d/ ] && mkdir /etc/security/pwquality.conf.d/\r\n   printf\
+      \ '\\n%s' \"difok = 2\" > /etc/security/pwquality.conf.d/50-pwdifok.conf\r\n}\r\n```\r\n\r\nRun\
+      \ the following command:\r\n\r\n```\r\n# grep -Pl -- '\\bpam_pwquality\\.so\\h+([^#\\n\\r]+\\h+)?difok\\\
+      b' /usr/share/pam-configs/*\r\n```\r\n\r\nEdit any returned files and remove the `difok` argument\
+      \ from the `pam_pwquality.so` line(s):"
+    additional_information: ''
+    default_value: difok = 1
+    artifacts_count: 5
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

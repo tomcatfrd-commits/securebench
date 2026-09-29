@@ -1,0 +1,23 @@
+---
+- name: Precheck CIS-1.1.1.1 cramfs remediation
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Refuse remediation when cramfs is mounted or in use
+      ansible.builtin.shell: |
+        set -o pipefail
+        if findmnt -rn -t cramfs | grep . >/dev/null; then
+          echo "a cramfs filesystem is mounted" >&2
+          exit 20
+        fi
+        usage_count="$(lsmod | awk '$1 == "cramfs" { print $3 }')"
+        if [ -n "$usage_count" ] && [ "$usage_count" -gt 0 ]; then
+          echo "the cramfs module is in use" >&2
+          exit 21
+        fi
+        test -d /etc/modprobe.d
+        test -w /etc/modprobe.d
+      args:
+        executable: /bin/bash
+      changed_when: false

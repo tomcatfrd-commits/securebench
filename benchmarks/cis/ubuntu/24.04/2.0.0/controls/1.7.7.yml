@@ -1,0 +1,69 @@
+control:
+  id: CIS-1.7.7
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure Xwayland is configured
+  description: Xwayland is a compatibility layer that allows legacy X11 applications to run within a Wayland
+    environment. It's effectively an X server that runs as a Wayland client, enabling existing X11 software
+    to be displayed on a Wayland compositor.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_7_7.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_7_7.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_7_7.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_7_7.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.7.7
+      url: https://workbench.cisecurity.org/sections/4177290/recommendations/7047783
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1040
+      - T1040.000
+      - T1056
+      - T1056.001
+      - T1557
+      - T1557.000
+      mitre_tactics:
+      - TA0002
+      mitre_mitigations:
+      - M1050
+    parent: CIS _1_Configure GNOME Display Manager Main | 1.1.7-Ensure Xwayland is configured
+    rationale: "Wayland's security benefits from not relying on X11's network listener. Without X11, there's\
+      \ no network listener, making it harder for malicious actors to exploit vulnerabilities in X11.\
+      \ However, enabling Xwayland (running X11 applications on Wayland) introduces X11's security concerns.\r\
+      \n\r\nAll X vulnerabilities apply to Xwayland, including keylogging, but they only affect X windows\
+      \ and interactions with them.\r\n\r\nMalware can potentially exploit Xwayland vulnerabilities to\
+      \ keylog or intercept other input events"
+    impact: Many applications haven't been ported to Wayland yet, and Xwayland makes it possible to run
+      these applications without requiring a full switch back to X11. Disabling Xwayland functionality
+      may cause these applications to fail.
+    audit_guidance: "Run the following command to verify Xwayland is not enabled:\r\n\r\n```\r\n# sed\
+      \ -n '/\\[daemon\\]/,/\\[/p' /etc/gdm/custom.conf | grep -Psi '^\\h*waylandenable\\b'\r\n```\r\n\
+      \r\nVerify output includes:\r\n\r\n```\r\nWaylandEnable=false\r\n```"
+    remediation_guidance: "Edit the file `/etc/gdm/custom.conf` and uncomment or add the following line\
+      \ in the `[daemon]` block:\r\n\r\n```\r\nWaylandEnable=false\r\n```\r\n\r\n_Example:_\r\n\r\n```\r\
+      \n# GDM configuration storage\r\n\r\n[daemon]\r\nWaylandEnable=false\r\n\r\n[security]\r\n\r\n[xdmcp]\r\
+      \n\r\n[chooser]\r\n\r\n[debug]\r\n# Uncomment the line below to turn on debugging\r\n#Enable=true\r\
+      \n```"
+    additional_information: ''
+    default_value: Enabled
+    artifacts_count: 4
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,61 @@
+control:
+  id: CIS-1.2.1.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure weak dependencies are configured
+  description: "The Debian packaging specification allows for 3 levels of dependencies to be declared:\r\
+    \n\r\nhard dependencies (`Requires`) for packages which must be installed for a minimal installation\
+    \ of the application to function\r\nweak dependencies (`Recommends`) for packages which provide additional\
+    \ features, but which are not required for a minimal installation to function\r\nhints (`Suggests`)\
+    \ for packages which offer add-ons which might be useful."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_2_1_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_2_1_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_2_1_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_2_1_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.2.1.2
+      url: https://workbench.cisecurity.org/sections/4177267/recommendations/7047623
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - SI-2
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _1_Package Management Main | 2.2.2-Ensure weak dependencies are configured
+    rationale: Unless a system specifically requires the additional capabilities provides by the weak
+      dependencies, it is recommended that the packages are not installed to reduce the potential attack
+      surface.
+    impact: ''
+    audit_guidance: "Run the following command and verify that the APT options for weak dependencies are\
+      \ disabled:\r\n\r\n```\r\n# /usr/bin/apt-config dump | /usr/bin/grep \"APT::Install-\"\r\n```\r\n\
+      \r\nVerify the output matches the following\r\n```\r\nAPT::Install-Recommends \"0\";\r\nAPT::Install-Suggests\
+      \ \"0\";\r\n```\r\n\r\n**Note:** If no output is returned, this should be considered a failure as\
+      \ the default behavior is to install packages marked as recommended."
+    remediation_guidance: "Create a file under `/etc/apt/apt.conf.d/` to disable the installation of weak\
+      \ dependencies:\r\n\r\n```\r\n# printf '%s\\n%s\\n' \"\" 'APT::Install-Recommends \"0\";' 'APT::Install-Suggests\
+      \ \"0\";' > /etc/apt/apt.conf.d/60-no-weak-dependencies\r\n```\r\n\r\n**Note**: All configuration\
+      \ files under `/etc/apt/apt.conf.d/` are sorted in lexicographic order and where conflicting settings\
+      \ exist the last one will take precedence."
+    additional_information: ''
+    default_value: "```\r\nAPT::Install-Recommends \"1\";\r\nAPT::Install-Suggests \"0\";\r\n```"
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,68 @@
+control:
+  id: CIS-2.3.2.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure systemd-timesyncd is enabled and running
+  description: systemd-timesyncd is a daemon that has been added for synchronizing the system clock across
+    the network
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_3_2_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_3_2_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_3_2_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_3_2_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.3.2.2
+      url: https://workbench.cisecurity.org/sections/4177280/recommendations/7047696
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AU-7
+      - AU-8
+      cis_v8:
+      - '8.4'
+      cis_v7:
+      - '6.1'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      - T1562
+      - T1562.001
+      mitre_tactics:
+      - TA0002
+      mitre_mitigations:
+      - M1022
+    parent: CIS _2_Time Synchronization Main | 2.1.2.2-Ensure systemd-timesyncd is enabled and running
+    rationale: "systemd-timesyncd needs to be enabled and running in order to synchronize the system to\
+      \ a timeserver.\r\n\r\nTime synchronization is important to support time sensitive security mechanisms\
+      \ and to ensure log files have consistent time records across the enterprise to aid in forensic\
+      \ investigations"
+    impact: ''
+    audit_guidance: "**- IF -** systemd-timesyncd is in use on the system, run the following commands:\r\
+      \n\r\nRun the following command to verify that the `systemd-timesyncd` service is enabled:\r\n\r\
+      \n```\r\n# systemctl is-enabled systemd-timesyncd.service\r\n\r\nenabled\r\n```\r\n\r\nRun the following\
+      \ command to verify that the `systemd-timesyncd` service is active:\r\n\r\n```\r\n# systemctl is-active\
+      \ systemd-timesyncd.service\r\n\r\nactive\r\n```"
+    remediation_guidance: "**- IF -** `systemd-timesyncd` is in use on the system, run the following commands:\r\
+      \n\r\nRun the following command to unmask `systemd-timesyncd.service`:\r\n\r\n```\r\n# systemctl\
+      \ unmask systemd-timesyncd.service\r\n```\r\n\r\nRun the following command to enable and start `systemd-timesyncd.service`:\r\
+      \n\r\n```\r\n# systemctl --now enable systemd-timesyncd.service\r\n```\r\n\r\n**- OR -** \r\n\r\n\
+      If another time synchronization service is in use on the system, run the following command to stop\
+      \ and mask `systemd-timesyncd`:\r\n\r\n```\r\n# systemctl --now mask systemd-timesyncd.service\r\
+      \n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 4
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

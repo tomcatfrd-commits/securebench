@@ -1,0 +1,66 @@
+control:
+  id: CIS-5.2.7
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to the su command is restricted
+  description: The `su` command allows a user to run a command or shell as another user. The program has
+    been superseded by `sudo`, which allows for more granular control over privileged access. Normally,
+    the `su` command can be executed by any user. By uncommenting the `pam_wheel.so` statement in `/etc/pam.d/su`,
+    the `su` command will only allow users in a specific groups to execute `su`. This group should be
+    empty to reinforce the use of `sudo` for privileged access.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_2_7.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_2_7.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_2_7.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_2_7.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.2.7
+      url: https://workbench.cisecurity.org/sections/4177269/recommendations/7047665
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1548
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1026
+    parent: CIS _5_Configure privilege escalation Main | 2.1.7-Ensure access to the su command is restricted
+    rationale: Restricting the use of `su` , and using `sudo` in its place, provides system administrators
+      better control of the escalation of user privileges to execute privileged commands. The sudo utility
+      also provides a better logging and audit mechanism, as it can log each command executed via `sudo`
+      , whereas `su` can only record that a user executed the `su` program.
+    impact: ''
+    audit_guidance: "Run the following command:\r\n\r\n```\r\n# grep -Pi '^\\h*auth\\h+(?:required|requisite)\\\
+      h+pam_wheel\\.so\\h+(?:[^#\\n\\r]+\\h+)?((?!\\2)(use_uid\\b|group=\\H+\\b))\\h+(?:[^#\\n\\r]+\\\
+      h+)?((?!\\1)(use_uid\\b|group=\\H+\\b))(\\h+.*)?$' /etc/pam.d/su\r\n```\r\n\r\nVerify the output\
+      \ matches:\r\n\r\n```\r\nauth required pam_wheel.so use_uid group= ```\r\n\r\nRun the following\
+      \ command and verify that the group specified in ` ` contains no users:\r\n\r\n```\r\n# grep /etc/group\r\
+      \n```\r\n\r\nVerify the output does not contain any users in the relevant group:\r\n\r\n``` :x:\
+      \ :\r\n```"
+    remediation_guidance: "Create an empty group that will be specified for use of the `su` command. \
+      \ The group should be named according to site policy.\r\n\r\n_Example:_\r\n\r\n```\r\n# groupadd\
+      \ sugroup\r\n```\r\n\r\nAdd the following line to the `/etc/pam.d/su` file, specifying the empty\
+      \ group:\r\n\r\n```\r\nauth required pam_wheel.so use_uid group=sugroup\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

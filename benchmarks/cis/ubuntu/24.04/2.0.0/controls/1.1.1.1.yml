@@ -1,0 +1,86 @@
+control:
+  id: CIS-1.1.1.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure cramfs kernel module is not available
+  description: The `cramfs` filesystem type is a compressed read-only Linux filesystem embedded in small
+    footprint systems. A `cramfs` image can be used without having to first decompress the image.
+  platform: ubuntu-24.04
+  severity: low
+  audit: cis.ubuntu.24.04.v2_0_0.1_1_1_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_1_1_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_1_1_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_1_1_1.verify
+  rollback_capability: guaranteed
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.1.1.1
+      url: https://workbench.cisecurity.org/sections/4177239/recommendations/7047474
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1005
+      - T1005.000
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1050
+    parent: CIS _1_Configure Filesystem Kernel Modules Main | 1.1.1-Ensure cramfs kernel module is not
+      available
+    rationale: Removing support for unneeded filesystem types reduces the local attack surface of the
+      system. If this filesystem type is not needed, disable it.
+    impact: ''
+    audit_guidance: "Verify the `cramfs` kernel module is not available on the system or has been disabled.\r\
+      \n\r\n1. Run the following script to determine if the `cramfs` kernel module is available on the\
+      \ system:\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   l_mod_name=\"cramfs\" l_mod_type=\"fs\"\
+      \r\n   while IFS= read -r l_mod_path; do\r\n      if [ -d \"$l_mod_path/${l_mod_name//-/\\/}\" ]\
+      \ &&  \\\r\n      [ -n \"$(ls -A \"$l_mod_path/${l_mod_name//-/\\/}\")\" ]; then\r\n         printf\
+      \ '%s\\n' \"$l_mod_name exists in $l_mod_path\"\r\n      fi\r\n   done < <(readlink -e /usr/lib/modules/**/kernel/$l_mod_type\
+      \ \\\r\n   || readlink -e /lib/modules/**/kernel/$l_mod_type)\r\n}\r\n```\r\n\r\nIf nothing is returned,\
+      \ the `cramfs` kernel module is not available on the system and no further audit steps are required.\r\
+      \n\r\n**Note:** Some systems may include the `cramfs` filesystem as part of the kernel opposed to\
+      \ being available as a kernel module. In this case, the above audit will not return anything. This\
+      \ is also considered a passing state.\r\n\r\n**If anything is returned by the above script:**\r\n\
+      \r\n2. verify the `cramfs` kernel module is not loaded and not loadable by performing the following:\r\
+      \n\r\nRun the following command to verify the `cramfs` kernel module is not loaded:\r\n\r\n```\r\
+      \n# lsmod | grep 'cramfs'\r\n```\r\n\r\nNothing should be returned.\r\n\r\nRun the following command\
+      \ to verify the `cramfs` kernel module is not loadable:\r\n\r\n```\r\n# modprobe --showconfig |\
+      \ grep -P -- '\\b(install|blacklist)\\h+cramfs\\b'\r\n```\r\n\r\nVerify the output includes:\r\n\
+      \r\n```\r\nblacklist cramfs\r\n -AND EITHER-\r\ninstall cramfs /bin/false\r\n -OR-\r\ninstall cramfs\
+      \ /bin/true\r\n```\r\n\r\n_Example output:_\r\n\r\n```\r\nblacklist cramfs\r\ninstall cramfs /bin/false\r\
+      \n```"
+    remediation_guidance: "Unload and disable the `cramfs` kernel module.\r\n\r\n1. Run the following\
+      \ commands to unload the `cramfs` kernel module:\r\n\r\n```\r\n# modprobe -r cramfs 2>/dev/null\r\
+      \n# rmmod cramfs 2>/dev/null\r\n```\r\n\r\n2. Perform the following to disable the `cramfs` kernel\
+      \ module:\r\n\r\nCreate a file ending in `.conf` with `install cramfs /bin/false` in the `/etc/modprobe.d/`\
+      \ directory.\r\n\r\n_Example:_\r\n\r\n```\r\n# printf '%s\\n' \"\" \"install cramfs /bin/false\"\
+      \ >> /etc/modprobe.d/60-cramfs.conf\r\n```\r\n\r\nCreate a file ending in `.conf` with `blacklist\
+      \ cramfs` in the `/etc/modprobe.d/` directory.\r\n\r\n_Example:_\r\n\r\n```\r\n# printf '%s\\n'\
+      \ \"\" \"blacklist cramfs\" >> /etc/modprobe.d/60-cramfs.conf\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements:
+      module: cramfs
+      expected:
+        module_loaded: false
+        module_loadable: false
+    safety:
+      default: safe_with_precheck
+      implementation_status: implemented
+      prechecks:
+      - verify_filesystem_not_in_use
+      - verify_module_not_required
+      - verify_modprobe_configuration_can_be_changed
+  dependencies: []
+  conflicts: []

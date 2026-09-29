@@ -1,0 +1,77 @@
+control:
+  id: CIS-1.1.2.4.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure separate partition exists for /var
+  description: The `/var` directory is used by daemons and other system services to temporarily store
+    dynamic data. Some directories created by these processes may be world-writable.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_1_2_4_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_1_2_4_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_1_2_4_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_1_2_4_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.1.2.4.1
+      url: https://workbench.cisecurity.org/sections/4177256/recommendations/7047557
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1499
+      - T1499.001
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1022
+    parent: CIS _1_Configure Filesystem Partitions Main | 1.1.4.1-Ensure separate partition exists for
+      /var
+    rationale: "The reasoning for mounting `/var` on a separate partition is as follows.\r\n\r\nThe default\
+      \ installation only creates a single `/` partition. Since the `/var` directory may contain world\
+      \ writable files and directories, there is a risk of resource exhaustion. It will essentially have\
+      \ the whole disk available to fill up and impact the system. In addition, other operations on the\
+      \ system could fill up the disk unrelated to `/var` and cause unintended behavior across the system\
+      \ as the disk is full. See `man auditd.conf` for details.\r\n\r\nConfiguring `/var` as its own file\
+      \ system allows an administrator to set additional mount options such as `noexec/nosuid/nodev`.\
+      \ These options limit an attacker's ability to create exploits on the system. Other options allow\
+      \ for specific behavior. See `man mount` for exact details regarding filesystem-independent and\
+      \ filesystem-specific options.\r\n\r\nAn example of exploiting `/var` may be an attacker establishing\
+      \ a hard-link to a system `setuid` program and waiting for it to be updated. Once the program is\
+      \ updated, the hard-link can be broken and the attacker would have their own copy of the program.\
+      \ If the program happened to have a security vulnerability, the attacker could continue to exploit\
+      \ the known flaw."
+    impact: Resizing filesystems is a common activity in cloud-hosted servers. Separate filesystem partitions
+      may prevent successful resizing or may require the installation of additional tools solely for the
+      purpose of resizing operations. The use of these additional tools may introduce their own security
+      considerations.
+    audit_guidance: "Run the following command and verify output shows `/var` is mounted.\r\n\r\n_Example:_\r\
+      \n\r\n```\r\n# findmnt -kn /var\r\n\r\n/var  /dev/sdb  ext4   rw,nosuid,nodev,relatime,seclabel\r\
+      \n```"
+    remediation_guidance: "For new installations, during installation create a custom partition setup\
+      \ and specify a separate partition for `/var`.\r\n\r\nFor systems that were previously installed,\
+      \ create a new partition and configure `/etc/fstab` as appropriate.\r\n\r\n**Note:** Using Btrfs\
+      \ subvolumes instead of traditional disk partitions changes how disk space is allocated and enforced,\
+      \ quotas may need to be configured to enforce storage limits and prevent resource exhaustion."
+    additional_information: When modifying `/var` it is advisable to bring the system to emergency mode
+      (so auditd is not running), rename the existing directory, mount the new file system, and migrate
+      the data over before returning to multi-user mode.
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

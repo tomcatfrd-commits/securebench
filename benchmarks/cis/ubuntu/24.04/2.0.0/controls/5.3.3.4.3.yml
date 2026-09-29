@@ -1,0 +1,97 @@
+control:
+  id: CIS-5.3.3.4.3
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure pam_unix includes a strong password hashing algorithm
+  description: "A cryptographic hash function converts an arbitrary-length input into a fixed length output.\
+    \ Password hashing performs a one-way transformation of a password, turning the password into another\
+    \ string, called the hashed password.\r\n\r\nThe `pam_unix` module can be configured to use one of\
+    \ the following hashing algorithms for user's passwords:\r\n- `md5` - When a user changes their password\
+    \ next, encrypt it with the `MD5` algorithm.\r\n- `bigcrypt` - When a user changes their password\
+    \ next, encrypt it with the `DEC C2` algorithm.\r\n- `sha256` - When a user changes their password\
+    \ next, encrypt it with the `SHA256` algorithm. The `SHA256` algorithm must be supported by the crypt(3)\
+    \ function.\r\n- `sha512` - When a user changes their password next, encrypt it with the `SHA512`\
+    \ algorithm. The `SHA512` algorithm must be supported by the crypt(3) function.\r\n- `blowfish` -\
+    \ When a user changes their password next, encrypt it with the `blowfish` algorithm. The `blowfish`\
+    \ algorithm must be supported by the crypt(3) function.\r\n- `gost_yescrypt` - When a user changes\
+    \ their password next, encrypt it with the `gost-yescrypt` algorithm. The `gost-yescrypt` algorithm\
+    \ must be supported by the crypt(3) function.\r\n- `yescrypt` - When a user changes their password\
+    \ next, encrypt it with the `yescrypt` algorithm. The `yescrypt` algorithm must be supported by the\
+    \ crypt(3) function."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_3_4_3.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_3_4_3.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_3_4_3.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_3_4_3.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.3.4.3
+      url: https://workbench.cisecurity.org/sections/4177293/recommendations/7047778
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - IA-5
+      cis_v8:
+      - '3.11'
+      cis_v7:
+      - '16.4'
+      mitre_techniques:
+      - T1003
+      - T1003.008
+      - T1110
+      - T1110.002
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1041
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.4.5.3-Ensure pam_unix includes a strong
+      password hashing algorithm
+    rationale: "The `SHA-512` and `yescrypt` algorithms provide a stronger hash than other algorithms\
+      \ used by Linux for password hash generation. A stronger hash provides additional protection to\
+      \ the system by increasing the level of effort needed for an attacker to successfully determine\
+      \ local user passwords.\r\n\r\n**Note:** These changes only apply to the local system."
+    impact: ''
+    audit_guidance: "Run the following command to verify that a strong password hashing algorithm is set\
+      \ on the pam_unix.so module:\r\n\r\n```\r\n# grep -PH -- '^\\h*password\\h+([^#\\n\\r]+)\\h+pam_unix\\\
+      .so\\h+([^#\\n\\r]+\\h+)?(sha512|yescrypt)\\b' /etc/pam.d/common-password\r\n```\r\n\r\nOutput should\
+      \ be similar to:\r\n\r\n```\r\n/etc/pam.d/common-password:password   [success=1 default=ignore]\
+      \   pam_unix.so obscure use_authtok try_first_pass yescrypt\r\n```\r\n\r\nVerify that the line(s)\
+      \ include either `sha512` **- OR -** `yescrypt`"
+    remediation_guidance: "Run the following command:\r\n\r\n```\r\n# awk '/Password-Type:/{ f = 1;next\
+      \ } /-Type:/{ f = 0 } f {if (/pam_unix\\.so/) print FILENAME}' /usr/share/pam-configs/*\r\n```\r\
+      \n\r\nEdit any returned files and edit or add a strong hashing algorithm, either `sha512` or `yescrypt`,\
+      \ that meets local site policy to the `pam_unix` lines in the `Password` section:\r\n\r\n_Example\
+      \ File:_\r\n\r\n```\r\nName: Unix authentication\r\nDefault: yes\r\nPriority: 256\r\nAuth-Type:\
+      \ Primary # <- Start of \"Auth\" section\r\nAuth:\r\n        [success=end default=ignore]    pam_unix.so\
+      \ try_first_pass\r\nAuth-Initial:\r\n        [success=end default=ignore]    pam_unix.so\r\nAccount-Type:\
+      \ Primary # <- Start of \"Account\" section\r\nAccount:\r\n        [success=end new_authtok_reqd=done\
+      \ default=ignore]      pam_unix.so\r\nAccount-Initial:\r\n        [success=end new_authtok_reqd=done\
+      \ default=ignore]      pam_unix.so\r\nSession-Type: Additional  # <- Start of \"Session\" section\r\
+      \nSession:\r\n        required        pam_unix.so\r\nSession-Initial:\r\n        required      \
+      \  pam_unix.so\r\nPassword-Type: Primary # <- Start of \"Password\" section\r\nPassword:\r\n   \
+      \     [success=end default=ignore]    pam_unix.so obscure use_authtok try_first_pass yescrypt #\
+      \ <- **ensure hashing algorithm is either sha512 or yescrypt**\r\nPassword-Initial:\r\n        [success=end\
+      \ default=ignore]    pam_unix.so obscure yescrypt # <- **ensure hashing algorithm is either sha512\
+      \ or yescrypt**\r\n```\r\n\r\nRun the following command to update the files in the `/etc/pam.d/`\
+      \ directory:\r\n\r\n```\r\n# pam-auth-update --enable ```\r\n\r\n_Example:_\r\n\r\n```\r\n# pam-auth-update\
+      \ --enable unix\r\n```"
+    additional_information: "The following command may be used to expire all non-system user ID's immediately\
+      \ and force them to change their passwords on next login. Any system accounts that need to be expired\
+      \ should be carefully done separately by the system administrator to prevent any potential problems.\r\
+      \n\r\n```\r\n# awk -F: '( $3<'\"$(awk '/^\\s*UID_MIN/{print $2}' /etc/login.defs)\"' && $1 != \"\
+      nfsnobody\" ) { print $1 }' /etc/passwd | xargs -n 1 chage -d 0\r\n```"
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,82 @@
+control:
+  id: CIS-5.3.2.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure pam_faillock module is enabled
+  description: The `pam_faillock.so` module maintains a list of failed authentication attempts per user
+    during a specified interval and locks the account in case there were more than the configured number
+    of consecutive failed authentications (this is defined by the `deny` parameter in the faillock configuration).
+    It stores the failure records into per-user files in the tally directory.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_2_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_2_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_2_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_2_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.2.2
+      url: https://workbench.cisecurity.org/sections/4177277/recommendations/7047693
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '6.2'
+      cis_v7:
+      - '16.7'
+      mitre_techniques:
+      - T1110
+      - T1110.001
+      - T1110.003
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1027
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.2.2-Ensure pam_faillock module is enabled
+    rationale: Locking out user IDs after n unsuccessful consecutive login attempts mitigates brute force
+      password attacks against your systems.
+    impact: ''
+    audit_guidance: "Run the following commands to verify that `pam_faillock` is enabled:\r\n\r\n```\r\
+      \n# grep -P -- '\\bpam_faillock\\.so\\b' /etc/pam.d/common-{auth,account}\r\n```\r\n\r\nOutput should\
+      \ be similar to:\r\n\r\n```\r\n/etc/pam.d/common-auth:auth     requisite                       pam_faillock.so\
+      \ preauth\r\n/etc/pam.d/common-auth:auth     [default=die]                   pam_faillock.so authfail\r\
+      \n/etc/pam.d/common-account:account       required                        pam_faillock.so\r\n```"
+    remediation_guidance: "Create two pam-auth-update profiles in `/usr/share/pam-configs/`:\r\n\r\n1.\
+      \ Create the `faillock` profile in `/usr/share/pam-configs/` with the following lines:\r\n\r\n```\r\
+      \nName: Enable pam_faillock to deny access\r\nDefault: yes\r\nPriority: 0\r\nAuth-Type: Primary\r\
+      \nAuth:\r\n        [default=die]                   pam_faillock.so authfail\r\n```\r\n\r\n_Example\
+      \ Script:_\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   arr=('Name: Enable pam_faillock to deny\
+      \ access' 'Default: yes' 'Priority: 0' 'Auth-Type: Primary' 'Auth:' '        [default=die]     \
+      \              pam_faillock.so authfail') \r\n   printf '%s\\n' \"${arr[@]}\" > /usr/share/pam-configs/faillock\r\
+      \n}\r\n```\r\n\r\n2. Create the `faillock_notify` profile in `/usr/share/pam-configs/` with the\
+      \ following lines:\r\n\r\n```\r\nName: Notify of failed login attempts and reset count upon success\r\
+      \nDefault: yes\r\nPriority: 1024\r\nAuth-Type: Primary\r\nAuth:\r\n        requisite           \
+      \            pam_faillock.so preauth\r\nAccount-Type: Primary\r\nAccount:\r\n        required  \
+      \                      pam_faillock.so\r\n```\r\n\r\n_Example Script:_\r\n\r\n```\r\n#!/usr/bin/env\
+      \ bash\r\n\r\n{\r\n   arr=('Name: Notify of failed login attempts and reset count upon success'\
+      \ 'Default: yes' 'Priority: 1024' 'Auth-Type: Primary' 'Auth:' '        requisite              \
+      \         pam_faillock.so preauth' 'Account-Type: Primary' 'Account:' '        required        \
+      \                pam_faillock.so') \r\n   printf '%s\\n' \"${arr[@]}\" > /usr/share/pam-configs/faillock_notify\r\
+      \n}\r\n```\r\n\r\nRun the following command to update the `common-auth` and `common-account` PAM\
+      \ files with the new profiles:\r\n\r\n```\r\n# pam-auth-update --enable ```\r\n\r\n_Example:_\r\n\
+      \r\n```\r\n# pam-auth-update --enable faillock\r\n# pam-auth-update --enable faillock_notify\r\n\
+      ```\r\n\r\n**Note:**\r\n- The name used for the file must be used in the `pam-auth-update --enable`\
+      \ command\r\n- The `Name:` line should be easily recognizable and understood\r\n- The `Priority:`\
+      \ Line is important as it effects the order of the lines in the `/etc/pam.d/` files\r\n- If a site\
+      \ specific custom profile is being used in your environment to configure PAM that includes the configuration\
+      \ for the `pam_faillock` module, enable that module instead"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

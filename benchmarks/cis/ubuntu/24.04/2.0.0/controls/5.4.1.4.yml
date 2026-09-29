@@ -1,0 +1,77 @@
+control:
+  id: CIS-5.4.1.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure strong password hashing algorithm is configured
+  description: "A cryptographic hash function converts an arbitrary-length input into a fixed length output.\
+    \ Password hashing performs a one-way transformation of a password, turning the password into another\
+    \ string, called the hashed password.\r\n\r\n`ENCRYPT_METHOD` (string) - This defines the system default\
+    \ encryption algorithm for encrypting passwords (if no algorithm are specified on the command line).\
+    \ It can take one of these values:\r\n- `MD5` - MD5-based algorithm will be used for encrypting password\r\
+    \n- `SHA256` - SHA256-based algorithm will be used for encrypting password\r\n- `SHA512` - SHA512-based\
+    \ algorithm will be used for encrypting password\r\n- `BCRYPT` - BCRYPT-based algorithm will be used\
+    \ for encrypting password\r\n- `YESCRYPT` - YESCRYPT-based algorithm will be used for encrypting password\r\
+    \n- `DES` - DES-based algorithm will be used for encrypting password (default)\r\n\r\n**Note:**\r\n\
+    - This parameter overrides the deprecated `MD5_CRYPT_ENAB` variable.\r\n- This parameter will only\
+    \ affect the generation of group passwords.\r\n- The generation of user passwords is done by PAM and\
+    \ subject to the PAM configuration.\r\n- It is recommended to set this variable consistently with\
+    \ the PAM configuration."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_4_1_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_4_1_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_4_1_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_4_1_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.4.1.4
+      url: https://workbench.cisecurity.org/sections/4177295/recommendations/7047788
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - IA-5
+      cis_v8:
+      - '3.11'
+      cis_v7:
+      - '16.4'
+      mitre_techniques:
+      - T1003
+      - T1003.008
+      - T1110
+      - T1110.002
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1041
+    parent: CIS _5_Configure shadow password suite parameters Main | 1.1.1.4-Ensure strong password hashing
+      algorithm is configured
+    rationale: The `SHA-512` and `yescrypt` algorithms provide a stronger hash than other algorithms used
+      by Linux for password hash generation. A stronger hash provides additional protection to the system
+      by increasing the level of effort needed for an attacker to successfully determine local group passwords.
+    impact: ''
+    audit_guidance: "Run the following command to verify the hashing algorithm is `sha512` or `yescrypt`\
+      \ in `/etc/login.defs`:\r\n\r\n```\r\n# grep -Pi -- '^\\h*ENCRYPT_METHOD\\h+(SHA512|YESCRYPT)\\\
+      b' /etc/login.defs\r\n```\r\n\r\n_Example output:_\r\n\r\n```\r\nENCRYPT_METHOD SHA512\r\n - OR\
+      \ -\r\nENCRYPT_METHOD YESCRYPT\r\n```"
+    remediation_guidance: "Edit `/etc/login.defs` and set the `ENCRYPT_METHOD` to `SHA512` or `YESCRYPT`:\r\
+      \n\r\n```\r\nENCRYPT_METHOD ```\r\n\r\n_Example:_\r\n\r\n```\r\nENCRYPT_METHOD YESCRYPT\r\n```\r\
+      \n\r\n**Note:** \r\n- This only effects local groups' passwords created after updating the file\
+      \ to use `sha512` or `yescrypt`.\r\n- If it is determined that the password algorithm being used\
+      \ is not `sha512` or `yescrypt`, once it is changed, it is recommended that all group passwords\
+      \ be updated to use the stronger hashing algorithm.\r\n- It is recommended that the chosen hashing\
+      \ algorithm is consistent across `/etc/login.defs` and the PAM configuration"
+    additional_information: ''
+    default_value: ENCRYPT_METHOD SHA512
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

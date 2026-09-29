@@ -1,0 +1,25 @@
+
+---
+- name: Verify CIS-1.1.1.1 cramfs remediation
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Verify cramfs is unavailable, unloaded, and blocked
+      ansible.builtin.shell: |
+        set -o pipefail
+        if ! modinfo cramfs >/dev/null 2>&1; then
+          exit 0
+        fi
+        if lsmod | awk '$1 == "cramfs" { found=1 } END { exit !found }'; then
+          echo "cramfs is loaded" >&2
+          exit 10
+        fi
+        # Do not use grep -q in a pipe while pipefail is active. On large
+        # modprobe configurations grep exits after the first match, modprobe
+        # receives SIGPIPE, and the successful check is reported as failed.
+        modprobe --showconfig | grep -P -- '^\s*blacklist\s+cramfs\b' >/dev/null || exit 11
+        modprobe -n -v cramfs | grep -P -- '^install\s+/bin/(true|false)\b' >/dev/null || exit 12
+      args:
+        executable: /bin/bash
+      changed_when: false

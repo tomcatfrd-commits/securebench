@@ -1,0 +1,80 @@
+control:
+  id: CIS-7.1.12
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure no files or directories without an owner and a group exist
+  description: Administrators may delete users or groups from the system and neglect to remove all files
+    and/or directories owned by those users or groups.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.7_1_12.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.7_1_12.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.7_1_12.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.7_1_12.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 7.1.12
+      url: https://workbench.cisecurity.org/sections/4177241/recommendations/7047579
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1222
+      - T1222.002
+      mitre_tactics:
+      - TA0007
+      mitre_mitigations:
+      - M1022
+    parent: CIS _7_System File Permissions Main | 2.1.12-Ensure no files or directories without an owner
+      and a group exist
+    rationale: A new user or group who is assigned a deleted user's user ID or group ID may then end up
+      "owning" a deleted user or group's files, and thus have more access on the system than was intended.
+    impact: ''
+    audit_guidance: "Run the following script to verify no unowned or ungrouped files or directories exist:\r\
+      \n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   a_output=() a_output2=() a_nouser=() a_nogroup=()\
+      \ # Initialize arrays\r\n   a_path=(-path \"*/containers/storage/*\" -o -path \"*/containerd/*\"\
+      \ -o -path \"*/kubelet/*\" -o -path \"/sys/*\" -o -path \"/snap/*\" -o -path \"/boot/efi/*\")\r\n\
+      \   while IFS= read -r l_mount; do\r\n      while IFS= read -r -d $'\\0' l_file; do\r\n        \
+      \ if [ -e \"$l_file\" ]; then\r\n            while IFS=: read -r l_user l_group; do\r\n        \
+      \       [ \"$l_user\" = \"UNKNOWN\" ] && a_nouser+=(\"$l_file\")\r\n               [ \"$l_group\"\
+      \ = \"UNKNOWN\" ] && a_nogroup+=(\"$l_file\")\r\n            done < <(stat -Lc '%U:%G' \"$l_file\"\
+      )\r\n         fi\r\n      done < <(find \"$l_mount\" -mount -xdev \\( \"${a_path[@]}\" \\) -prune\
+      \ -o \\( -type f -o -type d \\) \\( -nouser -o -nogroup \\) -print0 2> /dev/null)\r\n   done < <(findmnt\
+      \ -Dkerno fstype,target | awk '($1 !~ /^\\s*(nfs|proc|cifs|smb|vfat|iso9660|efivarfs|selinuxfs|ncpfs)/\
+      \ && $2 !~ /^(\\/run|\\/tmp|\\/var\\/tmp)(\\/|$)/){print $2}')\r\n   if [ \"${#a_nouser[@]}\" -le\
+      \ 0 ]; then\r\n      a_output+=(\"  - No files or directories without an owner exist on the local\
+      \ filesystem.\")\r\n   else\r\n      a_output2+=(\"  - There are \\\"${#a_nouser[@]}\\\" unowned\
+      \ files or directories on the system.\" \\\r\n      \"   - The following is a list of unowned files\
+      \ and/or directories:\" \\\r\n      \"${a_nouser[@]}\" \"   - end of list\")\r\n   fi\r\n   if [\
+      \ \"${#a_nogroup[@]}\" -le 0 ]; then\r\n      a_output+=(\"  - No files or directories without a\
+      \ group owner exist on the local filesystem.\")\r\n   else\r\n      a_output2+=(\"  - There are\
+      \ \\\"${#a_nogroup[@]}\\\" ungrouped files or directories on the system.\" \\\r\n      \"   - The\
+      \ following is a list of ungrouped files and/or directories:\" \\\r\n      \"${a_nogroup[@]}\" \"\
+      \   - end of list\")\r\n   fi \r\n   if [ \"${#a_output2[@]}\" -le 0 ]; then\r\n      printf '%s\\\
+      n' \"\" \"- Audit Result:\" \"  ** PASS **\" \"${a_output[@]}\"\r\n   else\r\n      printf '%s\\\
+      n' \"\" \"- Audit Result:\" \"  ** FAIL **\" \"  * Reasons for audit failure *\" \"${a_output2[@]}\"\
+      \ \"\"\r\n      [ \"${#a_output[@]}\" -gt 0 ] && printf '%s\\n' \"- Correctly set:\" \"${a_output[@]}\"\
+      \r\n   fi\r\n}\r\n```\r\n\r\n**Note:** On systems with a large number of files and/or directories,\
+      \ this audit may be a long running process"
+    remediation_guidance: Remove or set ownership and group ownership of these files and/or directories
+      to an active user on the system as appropriate.
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

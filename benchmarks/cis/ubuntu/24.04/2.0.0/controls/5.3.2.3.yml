@@ -1,0 +1,88 @@
+control:
+  id: CIS-5.3.2.3
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure pam_pwquality module is enabled
+  description: "The `pam_pwquality.so` module performs password quality checking. This module can be plugged\
+    \ into the password stack of a given service to provide strength-checking for passwords. The code\
+    \ was originally based on pam_cracklib module and the module is backwards compatible with its options.\
+    \ \r\n\r\nThe action of this module is to prompt the user for a password and check its strength against\
+    \ a system dictionary and a set of rules for identifying poor choices.\r\n\r\nThe first action is\
+    \ to prompt for a single password, check its strength and then, if it is considered strong, prompt\
+    \ for the password a second time (to verify that it was typed correctly on the first occasion). All\
+    \ being well, the password is passed on to subsequent modules to be installed as the new authentication\
+    \ token."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_2_3.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_2_3.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_2_3.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_2_3.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.2.3
+      url: https://workbench.cisecurity.org/sections/4177277/recommendations/7047698
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques:
+      - T1110
+      - T1110.001
+      - T1110.002
+      - T1110.003
+      - T1178.001
+      - T1178.002
+      - T1178.003
+      - T1178.004
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1027
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.2.3-Ensure pam_pwquality module is enabled
+    rationale: Use of a unique, complex passwords helps to increase the time and resources required to
+      compromise the password.
+    impact: ''
+    audit_guidance: "Run the following command to verify that `pam_pwquality.so` is enabled:\r\n\r\n```\r\
+      \n# grep -P -- '\\bpam_pwquality\\.so\\b' /etc/pam.d/common-password\r\n```\r\n\r\nOutput should\
+      \ be similar to:\r\n\r\n```\r\npassword   requisite   pam_pwquality.so retry=3\r\n```"
+    remediation_guidance: "Run the following script to verify the `pam_pwquality.so` line exists in a\
+      \ `pam-auth-update` profile:\r\n\r\n```\r\n# grep -P -- '\\bpam_pwquality\\.so\\b' /usr/share/pam-configs/*\r\
+      \n```\r\n\r\nOutput should be similar to:\r\n\r\n```\r\n/usr/share/pam-configs/pwquality:      \
+      \ requisite                       pam_pwquality.so retry=3\r\n/usr/share/pam-configs/pwquality:\
+      \       requisite                       pam_pwquality.so retry=3\r\n```\r\n\r\n**- IF -** similar\
+      \ output is returned:\r\n\r\nRun the following command to update `/etc/pam.d/common-password` with\
+      \ the returned profile:\r\n\r\n```\r\n# pam-auth-update --enable {PROFILE_NAME}\r\n```\r\n\r\n_Example:_\r\
+      \n\r\n```\r\n# pam-auth-update --enable pwquality\r\n```\r\n\r\n**- IF -** similar output is **NOT**\
+      \ returned:\r\n\r\nCreate a pam-auth-update profile in `/usr/share/pam-configs/` with the following\
+      \ lines:\r\n\r\n```\r\nName: Pwquality password strength checking\r\nDefault: yes\r\nPriority: 1024\r\
+      \nConflicts: cracklib\r\nPassword-Type: Primary\r\nPassword:\r\n        requisite              \
+      \         pam_pwquality.so retry=3\r\n```\r\n\r\n_Example:_\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\
+      \r\n{\r\n   arr=('Name: Pwquality password strength checking' 'Default: yes' 'Priority: 1024' 'Conflicts:\
+      \ cracklib' 'Password-Type: Primary' 'Password:' '        requisite                       pam_pwquality.so\
+      \ retry=3')\r\n   printf '%s\\n' \"${arr[@]}\" > /usr/share/pam-configs/pwquality\r\n}\r\n```\r\n\
+      \r\nRun the following command to update `/etc/pam.d/common-password` with the `pwquality` profile:\r\
+      \n\r\n```\r\n# pam-auth-update --enable pwquality\r\n```\r\n\r\n**Note:**\r\n- The name used for\
+      \ the file must be used in the `pam-auth-update --enable` command\r\n- The `Name:` line should be\
+      \ easily recognizable and understood\r\n- The `Priority:` Line is important as it effects the order\
+      \ of the lines in the `/etc/pam.d/` files\r\n- If a site specific custom profile is being used in\
+      \ your environment to configure PAM that includes the configuration for the `pam_pwquality` module,\
+      \ enable that module instead"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

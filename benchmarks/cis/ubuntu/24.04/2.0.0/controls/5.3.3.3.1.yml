@@ -1,0 +1,78 @@
+control:
+  id: CIS-5.3.3.3.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure password history remember is configured
+  description: "The `/etc/security/opasswd` file stores the users' old passwords and can be checked to\
+    \ ensure that users are not recycling recent passwords. The number of passwords remembered is set\
+    \ via the remember argument value in set for the `pam_pwhistory` module.\r\n\r\n- remember= - ` `\
+    \ is the number of old passwords to remember"
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_3_3_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_3_3_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_3_3_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_3_3_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.3.3.1
+      url: https://workbench.cisecurity.org/sections/4177291/recommendations/7047767
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - IA-5(1)
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques:
+      - T1078
+      - T1078.001
+      - T1078.002
+      - T1078.003
+      - T1078.004
+      - T1110
+      - T1110.004
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.4.3.1-Ensure password history remember
+      is configured
+    rationale: "Requiring users not to reuse their passwords make it less likely that an attacker will\
+      \ be able to guess the password or use a compromised password.\r\n\r\n**Note:** These change only\
+      \ apply to accounts configured on the local system."
+    impact: ''
+    audit_guidance: "Run the following command and verify:\r\n- The `pwhistory` line in `/etc/pam.d/common-password`\
+      \ includes `remember= `\r\n- The value of is `24` or more\r\n- The value meets local site policy\r\
+      \n\r\n```\r\n# grep -Psi -- '^\\h*password\\h+[^#\\n\\r]+\\h+pam_pwhistory\\.so\\h+([^#\\n\\r]+\\\
+      h+)?remember=\\d+\\b' /etc/pam.d/common-password\r\n```\r\n\r\nOutput should be similar to:\r\n\r\
+      \n```\r\npassword   requisite   pam_pwhistory.so remember=24 enforce_for_root use_authtok\r\n```\r\
+      \n\r\n**- OR/IF -** `pwhistory.conf` exists:\r\n\r\nRun the following command and verify that the\
+      \ remember option is set to `24` or more and meets local site policy in `/etc/security/pwhistory.conf`:\r\
+      \n\r\n```\r\n# grep -Pi -- '^\\h*remember\\h*=\\h*(2[4-9]|[3-9][0-9]|[1-9][0-9]{2,})\\b' /etc/security/pwhistory.conf\r\
+      \n\r\nremember = 24\r\n```"
+    remediation_guidance: "Run the following command:\r\n\r\n```\r\n# awk '/Password-Type:/{ f = 1;next\
+      \ } /-Type:/{ f = 0 } f {if (/pam_pwhistory\\.so/) print FILENAME}' /usr/share/pam-configs/*\r\n\
+      ```\r\n\r\nEdit any returned files and edit or add the `remember=` argument, with a value of `24`\
+      \ or more, that meets local site policy to the `pam_pwhistory` line in the `Password` section:\r\
+      \n\r\n_Example File:_\r\n\r\n```\r\nName: pwhistory password history checking\r\nDefault: yes\r\n\
+      Priority: 1024\r\nPassword-Type: Primary\r\nPassword:\r\n   requisite   pam_pwhistory.so remember=24\
+      \ enforce_for_root use_authtok # <- **ensure line includes remember= **\r\n```\r\n\r\nRun the following\
+      \ command to update the files in the `/etc/pam.d/` directory:\r\n\r\n```\r\n# pam-auth-update --enable\
+      \ ```\r\n\r\n_Example:_\r\n\r\n```\r\n# pam-auth-update --enable pwhistory\r\n```\r\n\r\n**- OR/IF\
+      \ -** `pwhistory.conf` exists:\r\n\r\nEdit or add the `remember` option in `/etc/security/pwhistory.conf`\
+      \ setting it to `24` or more depending on local site policy:\r\n\r\n```\r\nremember = 24\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

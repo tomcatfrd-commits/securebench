@@ -1,0 +1,61 @@
+control:
+  id: CIS-5.4.2.3
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure group root is the only GID 0 group
+  description: The `groupmod` command can be used to specify which group the `root` group belongs to.
+    This affects permissions of files that are group owned by the `root` group.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_4_2_3.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_4_2_3.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_4_2_3.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_4_2_3.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.4.2.3
+      url: https://workbench.cisecurity.org/sections/4177297/recommendations/7047794
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-1
+      - CM-2
+      - CM-6
+      - CM-7
+      - IA-5
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1548
+      - T1548.000
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1026
+    parent: CIS _5_Configure root and system accounts and environment Main | 1.1.2.3-Ensure group root
+      is the only GID 0 group
+    rationale: Using GID 0 for the `root` group helps prevent `root` group owned files from accidentally
+      becoming accessible to non-privileged users.
+    impact: ''
+    audit_guidance: "Run the following command to verify no group other than `root` is assigned GID `0`:\r\
+      \n\r\n```\r\n# awk -F: '$3==\"0\"{print $1\":\"$3}' /etc/group\r\n\r\nroot:0\r\n```"
+    remediation_guidance: "Run the following command to set the `root` group's GID to `0`:\r\n\r\n```\r\
+      \n# groupmod -g 0 root\r\n```\r\n\r\nRemove any groups other than the `root` group with GID 0 or\
+      \ assign them a new GID if appropriate."
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

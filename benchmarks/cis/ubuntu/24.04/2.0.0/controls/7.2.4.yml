@@ -1,0 +1,61 @@
+control:
+  id: CIS-7.2.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure shadow group is empty
+  description: The shadow group allows system programs which require access the ability to read the /etc/shadow
+    file. No users should be assigned to the shadow group.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.7_2_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.7_2_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.7_2_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.7_2_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 7.2.4
+      url: https://workbench.cisecurity.org/sections/4177259/recommendations/7047599
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - IA-5
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1003
+      - T1003.008
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1022
+    parent: CIS _7_Local User and Group Settings Main | 2.1.11-Ensure shadow group is empty
+    rationale: Any users assigned to the shadow group would be granted read access to the /etc/shadow
+      file. If attackers can gain read access to the `/etc/shadow` file, they can easily run a password
+      cracking program against the hashed passwords to break them. Other security information that is
+      stored in the `/etc/shadow` file (such as expiration) could also be useful to subvert additional
+      user accounts.
+    impact: ''
+    audit_guidance: "Run the following commands and verify no results are returned:\r\n```\r\n# awk -F:\
+      \ '($1==\"shadow\") {print $NF}' /etc/group\r\n# awk -F: '($4 == '\"$(getent group shadow | awk\
+      \ -F: '{print $3}' | xargs)\"') {print \"  - user: \\\"\" $1 \"\\\" primary group is the shadow\
+      \ group\"}' /etc/passwd\r\n```"
+    remediation_guidance: "Run the following command to remove all users from the shadow group\r\n```\r\
+      \n# sed -ri 's/(^shadow:[^:]*:[^:]*:)([^:]+$)/\\1/' /etc/group\r\n```\r\n\r\nChange the primary\
+      \ group of any users with shadow as their primary group.\r\n```\r\n# usermod -g ```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

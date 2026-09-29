@@ -1,0 +1,59 @@
+control:
+  id: CIS-6.2.1.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure auditd service is enabled and active
+  description: Turn on the `auditd` daemon to record system events.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_2_1_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_2_1_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_2_1_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_2_1_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.2.1.2
+      url: https://workbench.cisecurity.org/sections/4177262/recommendations/7047604
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - AU-12
+      - AU-2
+      - SI-5
+      cis_v8:
+      - '8.2'
+      cis_v7:
+      - '6.2'
+      - '6.3'
+      mitre_techniques:
+      - T1562
+      - T1562.001
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1028
+    parent: CIS _6_System Auditing Main | 2.2.1.2-Ensure auditd service is enabled and active
+    rationale: The capturing of system events provides system administrators with information to allow
+      them to determine if unauthorized access to their system is occurring.
+    impact: ''
+    audit_guidance: "Run the following command to verify `auditd`  is enabled:\r\n\r\n```\r\n# systemctl\
+      \ is-enabled auditd | grep '^enabled'\r\n\r\nenabled\r\n```\r\n\r\nVerify result is \"enabled\"\
+      .\r\n\r\nRun the following command to verify `auditd` is active:\r\n\r\n```\r\n# systemctl is-active\
+      \ auditd | grep '^active'\r\n\r\nactive\r\n```\r\n\r\nVerify result is active"
+    remediation_guidance: "Run the following commands to unmask, enable and start `auditd`:\r\n\r\n```\r\
+      \n# systemctl unmask auditd\r\n# systemctl enable auditd\r\n# systemctl start auditd\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,77 @@
+control:
+  id: CIS-2.1.13
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure nis server services are not in use
+  description: The Network Information Service (NIS) (formally known as Yellow Pages) is a client-server
+    directory service protocol for distributing system configuration files. The NIS server is a collection
+    of programs that allow for the distribution of configuration files. The NIS client (`ypbind`) was
+    used to bind a machine to an NIS server and receive the distributed configuration files.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_1_13.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_1_13.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_1_13.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_1_13.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.1.13
+      url: https://workbench.cisecurity.org/sections/4177245/recommendations/7047601
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1203
+      - T1203.000
+      - T1210
+      - T1210.000
+      - T1543
+      - T1543.002
+      mitre_tactics:
+      - TA0008
+      mitre_mitigations:
+      - M1042
+    parent: CIS _2_Configure Server Services Main | 2.1.13-Ensure nis server services are not in use
+    rationale: '`ypserv.service` is inherently an insecure system that has been vulnerable to DOS attacks,
+      buffer overflows and has poor authentication for querying NIS maps. NIS generally has been replaced
+      by such protocols as Lightweight Directory Access Protocol (LDAP). It is recommended that `ypserv.service`
+      be removed and other, more secure services be used'
+    impact: "There may be packages that are dependent on the `ypserv` package.  If the `ypserv` package\
+      \ is removed, these dependent packages will be removed as well. Before removing the `ypserv` package,\
+      \ review any dependent packages to determine if they are required on the system.\r\n\r\n**- IF -**\
+      \ a dependent package is required: stop and mask the `ypserv.service` leaving the `ypserv` package\
+      \ installed."
+    audit_guidance: "Run the following command to verify `ypserv` is not installed:\r\n\r\n```\r\n# dpkg-query\
+      \ -s ypserv &>/dev/null && echo \"ypserv is installed\"\r\n```\r\n\r\nNothing should be returned.\r\
+      \n\r\n**- OR -** \r\n\r\n**- IF -** the package is required for dependencies:\r\n\r\nRun the following\
+      \ command to verify `ypserv.service` is not enabled:\r\n\r\n```\r\n# systemctl is-enabled ypserv.service\
+      \ 2>/dev/null | grep 'enabled'\r\n\r\nNothing should be returned\r\n```\r\n\r\nRun the following\
+      \ command to verify `ypserv.service` is not active:\r\n\r\n```\r\n# systemctl is-active ypserv.service\
+      \ 2>/dev/null | grep '^active'\r\n\r\nNothing should be returned\r\n```\r\n\r\n**Note:** If the\
+      \ package is required for a dependency\r\n - Ensure the dependent package is approved by local site\
+      \ policy\r\n - Ensure stopping and masking the service and/or socket meets local site policy"
+    remediation_guidance: "Run the following commands to stop `ypserv.service` and remove `ypserv` package:\r\
+      \n\r\n```\r\n# systemctl stop ypserv.service\r\n# apt purge ypserv\r\n```\r\n\r\n**- OR -**\r\n\r\
+      \n**- IF -** the `ypserv` package is required as a dependency:\r\n\r\nRun the following commands\
+      \ to stop and mask `ypserv.service`:\r\n\r\n```\r\n# systemctl stop ypserv.service\r\n# systemctl\
+      \ mask ypserv.service\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

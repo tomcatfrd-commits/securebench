@@ -1,0 +1,65 @@
+control:
+  id: CIS-5.1.22
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure sshd UsePAM is enabled
+  description: "The `UsePAM` directive enables the Pluggable Authentication Module (PAM) interface. If\
+    \ set to `yes` this will enable PAM authentication using `ChallengeResponseAuthentication` and `PasswordAuthentication`\
+    \ directives in addition to PAM account and session module processing for all authentication types.\r\
+    \n\r\nMore information about the openSSH server configuration is available in the \"Configure SSH\
+    \ Server\" section overview."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_1_22.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_1_22.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_1_22.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_1_22.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.1.22
+      url: https://workbench.cisecurity.org/sections/4177236/recommendations/7047634
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-1
+      - CM-2
+      - CM-6
+      - CM-7
+      - IA-5
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques:
+      - T1021
+      - T1021.004
+      mitre_tactics:
+      - TA0001
+      mitre_mitigations:
+      - M1035
+    parent: CIS _5_Configure SSH Server Main | 2.2.23-Ensure sshd UsePAM is enabled
+    rationale: When `usePAM` is set to `yes`, PAM runs through account and session types properly. This
+      is important if you want to restrict access to services based off of IP, time or other factors of
+      the account. Additionally, you can make sure users inherit certain environment variables on login
+      or disallow access to the server
+    impact: ''
+    audit_guidance: "Run the following command to verify `UsePAM` is set to `yes`:\r\n\r\n```\r\n# sshd\
+      \ -T | grep usepam\r\n\r\nusepam yes\r\n```"
+    remediation_guidance: "Create or edit a `*.conf` file in the `/etc/ssh/sshd_config.d/` and set the\
+      \ `UsePAM` parameter to `yes` above any `Include` entries as follows:\r\n\r\n```\r\nUsePAM yes\r\
+      \n```"
+    additional_information: ''
+    default_value: UsePAM yes
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

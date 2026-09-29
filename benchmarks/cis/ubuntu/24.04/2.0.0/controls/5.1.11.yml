@@ -1,0 +1,61 @@
+control:
+  id: CIS-5.1.11
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure sshd IgnoreRhosts is enabled
+  description: "The `IgnoreRhosts` parameter specifies that `.rhosts` and `.shosts` files will not be\
+    \ used in `RhostsRSAAuthentication` or `HostbasedAuthentication`.\r\n\r\nMore information about the\
+    \ openSSH server configuration is available in the \"Configure SSH Server\" section overview."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_1_11.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_1_11.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_1_11.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_1_11.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.1.11
+      url: https://workbench.cisecurity.org/sections/4177236/recommendations/7047547
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-1
+      - CM-2
+      - CM-6
+      - CM-7
+      - IA-5
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques:
+      - T1078
+      - T1078.001
+      - T1078.003
+      mitre_tactics:
+      - TA0001
+      mitre_mitigations:
+      - M1027
+    parent: CIS _5_Configure SSH Server Main | 2.2.12-Ensure sshd IgnoreRhosts is enabled
+    rationale: Setting this parameter forces users to enter a password when authenticating with SSH.
+    impact: ''
+    audit_guidance: "Run the following command to verify `IgnoreRhosts` is set to `yes`:\r\n\r\n```\r\n\
+      # sshd -T | grep ignorerhosts\r\n\r\nignorerhosts yes\r\n```"
+    remediation_guidance: "Create or edit a `*.conf` file in the `/etc/ssh/sshd_config.d/` and set the\
+      \ `IgnoreRhosts` parameter to `yes` above any `Include` entry as follows:\r\n\r\n```\r\nIgnoreRhosts\
+      \ yes\r\n```"
+    additional_information: ''
+    default_value: IgnoreRhosts yes
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

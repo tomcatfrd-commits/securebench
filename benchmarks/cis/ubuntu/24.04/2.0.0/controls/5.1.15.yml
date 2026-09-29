@@ -1,0 +1,78 @@
+control:
+  id: CIS-5.1.15
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure sshd MACs are configured
+  description: "This variable limits the types of MAC algorithms that SSH can use during communication.\r\
+    \n\r\nMore information about the openSSH server configuration is available in the \"Configure SSH\
+    \ Server\" section overview."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_1_15.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_1_15.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_1_15.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_1_15.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.1.15
+      url: https://workbench.cisecurity.org/sections/4177236/recommendations/7047576
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-1
+      - CM-2
+      - CM-6
+      - CM-7
+      - IA-5
+      cis_v8:
+      - '3.1'
+      cis_v7:
+      - '14.4'
+      - '16.5'
+      mitre_techniques:
+      - T1040
+      - T1040.000
+      - T1557
+      - T1557.000
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1041
+    parent: CIS _5_Configure SSH Server Main | 2.2.16-Ensure sshd MACs are configured
+    rationale: MD5 and 96-bit MAC algorithms are considered weak and have been shown to increase exploitability
+      in SSH downgrade attacks. Weak algorithms continue to have a great deal of attention as a weak spot
+      that can be exploited with expanded computing power. An attacker that breaks the algorithm could
+      take advantage of a MiTM position to decrypt the SSH tunnel and capture credentials and information.
+    impact: Incorrectly configured or an overly restrictive list of MACs could lead to a "no matching
+      MAC" error during an SSH connection. This means the client and server have no overlapping MAC algorithms
+      which typically occurs due to a mismatch in supported MACs.
+    audit_guidance: "Run the following command to verify none of the \"weak\" MACs are being used:\r\n\
+      \r\n```\r\n# sshd -T | grep -Pi -- 'macs\\h+([^#\\n\\r]+,)?(hmac-md5|hmac-md5-96|hmac-ripemd160|hmac-sha1-96|umac-64@openssh\\\
+      .com|hmac-md5-etm@openssh\\.com|hmac-md5-96-etm@openssh\\.com|hmac-ripemd160-etm@openssh\\.com|hmac-sha1-96-etm@openssh\\\
+      .com|umac-64-etm@openssh\\.com|umac-128-etm@openssh\\.com)\\b'\r\n```\r\nNothing should be returned\r\
+      \n\r\n**Note:** Review `CVE-2023-48795` and verify the system has been patched. If the system has\
+      \ not been patched, review the use of the Encrypt Then Mac (etm) MACs.\r\n\r\nThe following are\
+      \ considered \"weak\" MACs, and should not be used:\r\n\r\n```\r\nhmac-md5\r\nhmac-md5-96\r\nhmac-ripemd160\r\
+      \nhmac-sha1-96\r\numac-64@openssh.com\r\nhmac-md5-etm@openssh.com\r\nhmac-md5-96-etm@openssh.com\r\
+      \nhmac-ripemd160-etm@openssh.com\r\nhmac-sha1-96-etm@openssh.com\r\numac-64-etm@openssh.com\r\n\
+      umac-128-etm@openssh.com\r\n```"
+    remediation_guidance: "Create or edit a `*.conf` file in the `/etc/ssh/sshd_config.d/` and add/modify\
+      \ the `MACs` line to contain a comma separated list of the site unapproved (weak) MACs preceded\
+      \ with a `-` above any `Include` entries:\r\n\r\n_Example:_\r\n\r\n```\r\nMACs -hmac-md5,hmac-md5-96,hmac-ripemd160,hmac-sha1-96,umac-64@openssh.com,hmac-md5-etm@openssh.com,hmac-md5-96-etm@openssh.com,hmac-ripemd160-etm@openssh.com,hmac-sha1-96-etm@openssh.com,umac-64-etm@openssh.com,umac-128-etm@openssh.com\r\
+      \n```\r\n\r\n**- IF -** `CVE-2023-48795` has not been reviewed and addressed, the following `etm`\
+      \ MACs should be added to the exclude list: hmac-sha1-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com"
+    additional_information: ''
+    default_value: MACs umac-64-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha1-etm@openssh.com,umac-64@openssh.com,umac-128@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-sha1
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

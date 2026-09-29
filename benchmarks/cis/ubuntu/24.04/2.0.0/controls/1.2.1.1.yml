@@ -1,0 +1,87 @@
+control:
+  id: CIS-1.2.1.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure the source.list and .source files use the Signed-By option
+  description: "`sources.list` - List of configured APT data sources\r\n\r\nThe source list `/etc/apt/sources.list`\
+    \ and the files contained in `/etc/apt/sources.list.d/` are designed to support any number of active\
+    \ sources and a variety of source media.\r\n\r\n**Signed-By** (`signed-by`) is an option to require\
+    \ a repository to pass apt-secure(8) verification with a certain set of keys rather than all trusted\
+    \ keys apt has configured. It is specified as a list of absolute paths to keyring files (have to be\
+    \ accessible and readable for the _apt system user, so ensure everyone has read-permissions on the\
+    \ file) and fingerprints of keys to select from these keyrings. The recommended locations for keyrings\
+    \ are `/usr/share/keyrings` for keyrings managed by packages, and `/etc/apt/keyrings` for keyrings\
+    \ managed by the system operator. If no keyring files are specified, the default is the `trusted.gpg`\
+    \ keyring and all keyrings in the `trusted.gpg.d/` directory. If no fingerprint is specified all keys\
+    \ in the keyrings are selected. A fingerprint will accept also all signatures by a subkey of this\
+    \ key, if this isn't desired an exclamation mark (`!`) can be appended to the fingerprint to disable\
+    \ this behaviour. The option defaults to the value of the option with the same name if set in the\
+    \ previously acquired Release file of this repository (only fingerprints can be specified there through).\
+    \ Otherwise, all keys in the trusted keyrings are considered valid signers for this repository. The\
+    \ option may also be set directly to an embedded GPG public key block."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_2_1_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_2_1_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_2_1_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_2_1_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.2.1.1
+      url: https://workbench.cisecurity.org/sections/4177267/recommendations/7047621
+    assessment_status: manual
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - SI-2
+      cis_v8:
+      - '7.3'
+      - '7.4'
+      cis_v7:
+      - '3.4'
+      - '3.5'
+      mitre_techniques:
+      - T1195
+      - T1195.001
+      - T1195.002
+      mitre_tactics:
+      - TA0001
+      mitre_mitigations:
+      - M1051
+    parent: CIS _1_Package Management Main | 2.2.1-Ensure the source.list and .source files use the Signed-By
+      option
+    rationale: Verifying that updates originate from a trusted and authenticated source helps mitigate
+      the risk of spoofing attacks, which could otherwise lead to the inadvertent installation of malicious
+      or compromised software.
+    impact: "`apt-key list` is deprecated. Manage keyring files in `trusted.gpg.d` instead (see apt-key(8)).\r\
+      \nWith the deprecation of `apt-key` it is recommended to use the `Signed-By` option in `sources.list`\
+      \ to require a repository to pass apt-secure(8) verification with a certain set of keys rather than\
+      \ all trusted keys apt has configured.\r\n\r\nIt is important to list sources in order of preference,\
+      \ with the most preferred source listed first. Typically, this will result in sorting by speed from\
+      \ fastest to slowest (CD-ROM followed by hosts on a local network, followed by distant Internet\
+      \ hosts, for example)."
+    audit_guidance: "Run the following command and verify that the file `/etc/apt/sources.list` and files\
+      \ ending `.list` and `.sources` in the `/etc/apt/sources.list.d/` directory use the `Signed-By`\
+      \ option:\r\n\r\n```\r\n# grep -PRiLs -- '^([^#\\n\\r]+)?\\bSigned-By\\b' /etc/apt/sources.list\
+      \ /etc/apt/sources.list.d/*.{list,sources}\r\n```\r\nNothing should be returned."
+    remediation_guidance: "Update the file `sources.list` and any `.sources` files found in the `/etc/apt/sources.list.d/`\
+      \ directory in accordance with site policy.\r\n\r\n**Note:** \r\n- The suggested filename for new\
+      \ systems is `/etc/apt/sources.list.d/vendor.sources`, where vendor is the result of `dpkg-vendor\
+      \ --query Vendor | tr A-Z a-z`, in deb822-style format. For example, Ubuntu uses `/etc/apt/sources.list.d/ubuntu.sources`.\r\
+      \n- It is important to list sources in order of preference, with the most preferred source listed\
+      \ first. Typically, this will result in sorting by speed from fastest to slowest (CD-ROM followed\
+      \ by hosts on a local network, followed by distant Internet hosts, for example)."
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 0
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

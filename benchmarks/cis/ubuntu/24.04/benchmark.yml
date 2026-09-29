@@ -1,13 +1,15 @@
 benchmark:
   id: cis-ubuntu-24.04
   name: CIS Ubuntu Linux 24.04 LTS Benchmark
-  version: "2.0.0"
+  version: 2.0.0
   platform: ubuntu-24.04
-  description: >
-    Security configuration benchmark definition for Ubuntu Server 24.04 LTS.
-    This file defines benchmark metadata and references control definitions.
-    Remediation policy is intentionally defined separately in SecureBench
-    profiles.
-
+  description: CIS Ubuntu Linux 24.04 LTS Benchmark v2.0.0. Imported from the project-local CIS WorkBench
+    CSV export.
+  source:
+    type: cis-workbench-csv
+    benchmark_id: '26891'
+    file: CIS Ubuntu Linux 24.04 LTS Benchmark (v2.0.0).csv
+    sha256: bd02a060f3cb37dd94c0d4b86f7df15f029f4fdb161e5b6beb0bdd83b06b1c06
+    control_count: 332
 controls:
-  path: controls
+  path: 2.0.0/controls

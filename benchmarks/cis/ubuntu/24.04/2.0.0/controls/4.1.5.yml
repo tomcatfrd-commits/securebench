@@ -1,0 +1,60 @@
+control:
+  id: CIS-4.1.5
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure ufw routed default is configured
+  description: The default policy for routed traffic determines if `UFW` forwards traffic between different
+    network interfaces without requiring specific UFW rules.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.4_1_5.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.4_1_5.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.4_1_5.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.4_1_5.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 4.1.5
+      url: https://workbench.cisecurity.org/sections/4177247/recommendations/7047528
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '4.4'
+      - '4.5'
+      cis_v7:
+      - '9.4'
+      mitre_techniques:
+      - T1562
+      - T1562.004
+      mitre_tactics:
+      - TA0011
+      mitre_mitigations:
+      - M1031
+      - M1037
+    parent: CIS _4_Host Based Firewall Main | 2.1.1.5-Ensure ufw routed default is configured
+    rationale: A default `disabled` or `deny` policy ensures that UFW does not forward traffic between
+      different network interfaces by default. This reduces the risk from unwanted or malicious routed
+      traffic.
+    impact: Any port and protocol will be prevented for being routed.
+    audit_guidance: "Run the following command and verify that the default policy for `routed` is `disabled`\
+      \ or `deny`:\r\n\r\n```\r\n# ufw status verbose | awk -F',' '$1=\"Default\"{print $3}'\r\n```\r\n\
+      \r\n_Example output:_\r\n\r\n```\r\n disabled (routed)\r\n```\r\n\r\n**Important:** Any port and\
+      \ protocol will be prevented for being routed."
+    remediation_guidance: "Run the following command to set the defalut for `routed` to `disabled`:\r\n\
+      \r\n```\r\n# ufw default disabled routed\r\n```"
+    additional_information: ''
+    default_value: disabled
+    artifacts_count: 5
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

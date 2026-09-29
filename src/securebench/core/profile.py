@@ -16,14 +16,13 @@ This separation is fundamental to production-safe automation.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import Mapping
+
+from securebench.core.exceptions import ProfileError
 
 from .control import SafetyClassification
-
-from securebench.core.control import Control
-from securebench.core.exceptions import ProfileError
 
 
 @dataclass(frozen=True, slots=True)
@@ -118,6 +117,8 @@ class Profile:
 
     allow_best_effort_rollback: bool = False
     require_approval_for_unknown: bool = True
+    benchmark_id: str | None = None
+    benchmark_version: str | None = None
 
     def __post_init__(self) -> None:
         """Validate and freeze profile policy data."""
@@ -154,6 +155,17 @@ class Profile:
             raise ValueError(
                 "require_approval_for_unknown must be boolean"
             )
+
+        for field_name, value in (
+            ("benchmark_id", self.benchmark_id),
+            ("benchmark_version", self.benchmark_version),
+        ):
+            if value is not None and (
+                not isinstance(value, str) or not value.strip()
+            ):
+                raise ValueError(
+                    f"{field_name} must be a non-empty string when supplied"
+                )
 
         normalized_rules: dict[str, ProfileRule] = {}
 

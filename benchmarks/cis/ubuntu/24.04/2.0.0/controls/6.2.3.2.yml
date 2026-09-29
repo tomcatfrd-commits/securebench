@@ -1,0 +1,69 @@
+control:
+  id: CIS-6.2.3.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure actions as another user are always logged
+  description: '`sudo` provides users with temporary elevated privileges to perform operations, either
+    as the superuser or another user.'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_2_3_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_2_3_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_2_3_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_2_3_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.2.3.2
+      url: https://workbench.cisecurity.org/sections/4203192/recommendations/7091549
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - AU-3
+      cis_v8:
+      - '8.5'
+      cis_v7:
+      - '4.9'
+      mitre_techniques:
+      - T1562
+      - T1562.006
+      mitre_tactics:
+      - TA0004
+      mitre_mitigations:
+      - M1047
+    parent: CIS _6_System Auditing Main | 2.2.3.2-Ensure actions as another user are always logged
+    rationale: Creating an audit log of users with temporary elevated privileges and the operation(s)
+      they performed is essential to reporting.  Administrators will want to correlate the events written
+      to the audit trail with the records written to `sudo`'s logfile to verify if unauthorized commands
+      have been executed.
+    impact: ''
+    audit_guidance: "1. Run the following command to verify a rule exists in the running configuration:\r\
+      \n```\r\n# auditctl -l | grep execve\r\n```\r\n\r\nVerify the output matches:\r\n\r\n```\r\n-a always,exit\
+      \ -F arch=b64 -C euid!=uid -F auid!=unset -S execve -k user_emulation \r\n-a always,exit -F arch=b32\
+      \ -C euid!=uid -F auid!=unset -S execve -k user_emulation\r\n```\r\n\r\n2. Run the following command\
+      \ to verify a rule exists in a rules file:\r\n```\r\n# grep -Ps -- 'execve' /etc/audit/rules.d/*.rules\r\
+      \n```\r\n\r\nVerify the output matches:\r\n\r\n```\r\n/etc/audit/rules.d/50-user_emulation.rules:-a\
+      \ always,exit -F arch=b64 -S execve -C uid!=euid -F auid!=-1 -F key=user_emulation\r\n/etc/audit/rules.d/50-user_emulation.rules:-a\
+      \ always,exit -F arch=b32 -S execve -C uid!=euid -F auid!=-1 -F key=user_emulation\r\n```"
+    remediation_guidance: "1. Edit or create a file in the `/etc/audit/rules.d/` directory, ending in\
+      \ `.rules` extension, with the relevant rules to monitor elevated privileges.\r\n\r\n_Example:_\r\
+      \n\r\n```\r\n# printf \"\r\n-a always,exit -F arch=b64 -C euid!=uid -F auid!=unset -S execve -k\
+      \ user_emulation \r\n-a always,exit -F arch=b32 -C euid!=uid -F auid!=unset -S execve -k user_emulation\r\
+      \n\" >> /etc/audit/rules.d/50-user_emulation.rules\r\n```\r\n\r\n2. Merge and load the rules into\
+      \ active configuration:\r\n\r\n```\r\n# augenrules --load\r\n```\r\n\r\n3. Check if reboot is required.\r\
+      \n\r\n```\r\n# if [[ $(auditctl -s | grep \"enabled\") =~ \"2\" ]]; then printf \"Reboot required\
+      \ to load rules\\n\"; fi\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

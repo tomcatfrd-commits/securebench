@@ -1,0 +1,116 @@
+control:
+  id: CIS-5.4.3.3
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure default user umask is configured
+  description: "The user file-creation mode mask (`umask`) is used to determine the file permission for\
+    \ newly created directories and files. In Linux, the default permissions for any newly created directory\
+    \ is 0777 (`rwxrwxrwx`), and for any newly created file it is 0666 (`rw-rw-rw-`). The `umask` modifies\
+    \ the default Linux permissions by restricting (masking) these permissions. The `umask` is not simply\
+    \ subtracted, but is processed bitwise. Bits set in the `umask` are cleared in the resulting file\
+    \ mode.\r\n\r\n`umask` can be set with either `Octal` or `Symbolic` values:\r\n- `Octal` (Numeric)\
+    \ Value - Represented by either three or four digits. ie `umask 0027` or `umask 027`.  If a four digit\
+    \ umask is used, the first digit is ignored. The remaining three digits effect the resulting permissions\
+    \ for user, group, and world/other respectively.\r\n- `Symbolic` Value - Represented by a comma separated\
+    \ list for User `u`, group `g`, and world/other `o`.  The permissions listed are not masked by `umask`.\
+    \ ie a `umask` set by `umask u=rwx,g=rx,o=` is the `Symbolic` equivalent of the `Octal` `umask 027`.\
+    \  This `umask` would set a newly created directory with file mode `drwxr-x---` and a newly created\
+    \ file with file mode `rw-r-----`.\r\n\r\nThe default `umask` can be set to use the `pam_umask` module\
+    \ or in a `System Wide Shell Configuration File`. The user creating the directories or files has the\
+    \ discretion of changing the permissions via the chmod command, or choosing a different default `umask`\
+    \ by adding the `umask` command into a `User Shell Configuration File`, ( `.bash_profile` or `.bashrc`),\
+    \ in their home directory.\r\n\r\n**Setting the default umask:**\r\n- pam_umask module:\r\n  - will\
+    \ set the umask according to the system default in `/etc/login.defs` and user settings, solving the\
+    \ problem of different `umask` settings with different shells, display managers, remote sessions etc.\r\
+    \n  - `umask= ` value in the `/etc/login.defs` file is interpreted as Octal\r\n  - Setting `USERGROUPS_ENAB`\
+    \ to yes in `/etc/login.defs` (default):\r\n    - will enable setting of the `umask` group bits to\
+    \ be the same as owner bits. (examples: 022 -> 002, 077 -> 007) for non-root users, if the `uid` is\
+    \ the same as `gid`, and `username` is the same as the ` `\r\n    - userdel will remove the user's\
+    \ group if it contains no more members, and useradd will create by default a group with the name of\
+    \ the user\r\n- `System Wide Shell Configuration File`:\r\n  - `/etc/profile` - used to set system\
+    \ wide environmental variables on users shells. The variables are sometimes the same ones that are\
+    \ in the `.bash_profile`, however this file is used to set an initial PATH or PS1 for all shell users\
+    \ of the system. **is only executed for interactive *login* shells, or shells executed with the --login\
+    \ parameter.** \r\n  - `/etc/profile.d` - `/etc/profile` will execute the scripts within `/etc/profile.d/*.sh`.\
+    \ It is recommended to place your configuration in a shell script within `/etc/profile.d` to set your\
+    \ own system wide environmental variables.\r\n  - `/etc/bashrc` - System wide version of `.bashrc`.\
+    \  In Fedora derived distributions, `etc/bashrc` also invokes /etc/profile.d/*.sh if *non-login* shell,\
+    \ but redirects output to `/dev/null` if *non-interactive.* **Is only executed for *interactive* shells\
+    \ or if `BASH_ENV` is set to `/etc/bashrc`.**\r\n\r\n**User Shell Configuration Files:**\r\n- `~/.bash_profile`\
+    \ - Is executed to configure your shell before the initial command prompt. **Is only read by login\
+    \ shells.**\r\n- `~/.bashrc` - Is executed for interactive shells. **only read by a shell that's both\
+    \ interactive and non-login**\r\n\r\n`umask` is set by order of precedence. If `umask` is set in multiple\
+    \ locations, this order of precedence will determine the system's default `umask`.\r\n \r\n**Order\
+    \ of precedence:**\r\n1. A file in `/etc/profile.d/` ending in `.sh` - This will override any other\
+    \ system-wide `umask` setting\r\n2. In the file `/etc/profile`\r\n3. On the `pam_umask.so` module\
+    \ in `/etc/pam.d/postlogin`\r\n4. In the file `/etc/login.defs`\r\n5. In the file `/etc/default/login`"
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_4_3_3.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_4_3_3.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_4_3_3.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_4_3_3.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.4.3.3
+      url: https://workbench.cisecurity.org/sections/4177298/recommendations/7047802
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-6
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1083
+      mitre_tactics:
+      - TA0007
+      mitre_mitigations: []
+    parent: CIS _5_ User Accounts and Environment Main | 1.1.1.3-Ensure default user umask is configured
+    rationale: "Setting a secure default value for `umask` ensures that users make a conscious choice\
+      \ about their file permissions. A permissive `umask` value could result in directories or files\
+      \ with excessive permissions that can be read and/or written to by unauthorized users.\r\n\r\nSatisfies:\
+      \ SRG-OS-000480-GPOS-00228, SRG-OS-000480-GPOS-00227"
+    impact: ''
+    audit_guidance: "Run the following commands to verify the systemwide `umask` is `0027 (u=rwx,g=rx,o=)`\
+      \ or more restrictive:\r\n\r\n1. Run the following command to verify `umask` is set to `027` or\
+      \ more restrictive in a file ending in `.sh` in `/etc/profile.d/`\r\n\r\n```\r\n# grep -Psi -- '^\\\
+      h*umask\\b' /etc/profile.d/*.sh\r\n```\r\n\r\n_Example output:_\r\n\r\n```\r\numask 027\r\n```\r\
+      \n\r\n2. Run the following command to verify `UMASK` is `027` or more restrictive in `/etc/login.defs`:\r\
+      \n\r\n```\r\n# grep -Psi -- '^\\h*UMASK\\b' /etc/login.defs\r\n```\r\n\r\n_Example output:_\r\n\r\
+      \n```\r\nUMASK           027\r\n```"
+    remediation_guidance: "1. Run the following script to comment out all occurrences of `umask` that\
+      \ are less restrictive than `027` in files ending in `*.sh` in the `/etc/profile.d/` directory:\r\
+      \n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   while IFS= read -r -d $'\\0' l_file; do\r\n    \
+      \  sed -ri '/^\\s*umask\\s+0?(0[01][0-7]|0[0-7][^7]|[^0][0-7][0-7])(\\s*|\\s+.*)$/s/^/# /' \"$l_file\"\
+      \r\n   done < <(find /etc/profile.d/ -type f -name '*.sh' -print0)\r\n}\r\n```\r\n\r\n2. Create\
+      \ or edit a file in `/etc/profile.d/` ending in `*.sh` and add or modify the following line:\r\n\
+      \r\n```\r\numask 0027\r\n```\r\n\r\n_Example:_\r\n\r\n```\r\n# printf '%s\\n' \"\" \"umask 027\"\
+      \ >> /etc/profile.d/60-default_umask.sh\r\n```\r\n\r\n3. Edit `/etc/login.defs` and add or update\
+      \ the following line:\r\n\r\n```\r\nUMASK 027\r\n```\r\n\r\n**Notes:**\r\n- This method only applies\
+      \ to bash and shell. If other shells are supported on the system, it is recommended that their configuration\
+      \ files also are checked\r\n- If the `pam_umask.so` module is going to be used to set `umask`, ensure\
+      \ that it's not being overridden by another setting. Refer to the PAM_UMASK(8) man page for more\
+      \ information"
+    additional_information: "- Other methods of setting a default user umask exist\r\n- If other methods\
+      \ are in use in your environment they should be audited\r\n- The default user umask can be overridden\
+      \ with a user specific umask\r\n- The user creating the directories or files has the discretion\
+      \ of changing the permissions:\r\n  - Using the chmod command\r\n  - Setting a different default\
+      \ umask by adding the umask command into a User Shell Configuration File, (.bashrc), in their home\
+      \ directory\r\n  - Manually changing the umask for the duration of a login session by running the\
+      \ umask command"
+    default_value: UMASK 022
+    artifacts_count: 4
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

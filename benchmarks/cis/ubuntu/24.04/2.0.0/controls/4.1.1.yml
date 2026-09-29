@@ -1,0 +1,62 @@
+control:
+  id: CIS-4.1.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure ufw is installed
+  description: The Uncomplicated Firewall (ufw) is a frontend for iptables and is particularly well-suited
+    for host-based firewalls. ufw provides a framework for managing netfilter, as well as a command-line
+    interface for manipulating the firewall
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.4_1_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.4_1_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.4_1_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.4_1_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 4.1.1
+      url: https://workbench.cisecurity.org/sections/4177247/recommendations/7047480
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-17 (1)
+      cis_v8:
+      - '4.4'
+      - '4.5'
+      cis_v7:
+      - '9.4'
+      mitre_techniques:
+      - T1562
+      - T1562.004
+      mitre_tactics:
+      - TA0011
+      mitre_mitigations:
+      - M1031
+      - M1037
+    parent: CIS _4_Host Based Firewall Main | 2.1.1.1-Ensure ufw is installed
+    rationale: "UFW acts as a frontend for both iptables and nftables and can use either as its backend,\
+      \ though the specific backend depends on the Linux distribution and system configuration.\r\n\r\n\
+      You can enable the firewall, view its status, and manage rules using simple command-line tools to\
+      \ secure your system."
+    impact: Changing firewall settings while connected over the network can result in being locked out
+      of the system.
+    audit_guidance: "Run the following command to verify that Uncomplicated Firewall (UFW) is installed:\r\
+      \n\r\n```\r\n# dpkg-query -s ufw &>/dev/null && echo \"ufw is installed\"\r\n\r\nufw is installed\r\
+      \n```"
+    remediation_guidance: "Run the following command to install Uncomplicated Firewall (UFW):\r\n\r\n\
+      ```\r\n# apt install ufw\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

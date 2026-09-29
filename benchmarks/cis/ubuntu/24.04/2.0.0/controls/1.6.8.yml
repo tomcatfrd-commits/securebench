@@ -1,0 +1,63 @@
+control:
+  id: CIS-1.6.8
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to /etc/issue.net is configured
+  description: The contents of the `/etc/issue.net`  file are displayed to users prior to login for remote
+    connections from configured services.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_6_8.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_6_8.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_6_8.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_6_8.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.6.8
+      url: https://workbench.cisecurity.org/sections/4177288/recommendations/7047744
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      - MP-2
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1222
+      - T1222.002
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1022
+    parent: CIS _1_Configure Command Line Warning Banners Main | 1.2.8-Ensure access to /etc/issue.net
+      is configured
+    rationale: '**- IF -** the `/etc/issue.net`  file does not have the correct access configured, it
+      could be modified by unauthorized users with incorrect or misleading information.'
+    impact: ''
+    audit_guidance: "Run the following command and verify `Access` is `644` or more restrictive and `Uid`\
+      \  and `Gid`  are both `0/root`:\r\n\r\n```\r\n# stat -Lc 'Access: (%#a/%A)  Uid: ( %u/ %U) Gid:\
+      \ { %g/ %G)' /etc/issue.net\r\n```\r\nVerify output includes:\r\n```\r\nAccess: (0644/-rw-r--r--)\
+      \  Uid: ( 0/ root)   Gid: ( 0/ root)\r\n```\r\n\r\n**Note:** `/etc/issue.net` may not exist by default,\
+      \ best practice is to create an `/etc/issue.net` file with the appropriate contents according to\
+      \ your site policy and remove any instances of `\\m` , `\\r` , `\\s` , `\\v` or references to the\
+      \ `OS platform`"
+    remediation_guidance: "Run the following commands to set mode, owner, and group on `/etc/issue.net`:\r\
+      \n\r\n```\r\n# chown root:root $(readlink -e /etc/issue.net)\r\n# chmod u-x,go-wx $(readlink -e\
+      \ /etc/issue.net)\r\n```"
+    additional_information: ''
+    default_value: 'Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)'
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

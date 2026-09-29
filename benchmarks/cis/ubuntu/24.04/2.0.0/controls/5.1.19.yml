@@ -1,0 +1,64 @@
+control:
+  id: CIS-5.1.19
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure sshd PermitEmptyPasswords is disabled
+  description: "The `PermitEmptyPasswords` parameter specifies if the SSH server allows login to accounts\
+    \ with empty password strings.\r\n\r\nMore information about the openSSH server configuration is available\
+    \ in the \"Configure SSH Server\" section overview."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_1_19.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_1_19.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_1_19.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_1_19.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.1.19
+      url: https://workbench.cisecurity.org/sections/4177236/recommendations/7047608
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-1
+      - CM-2
+      - CM-6
+      - CM-7
+      - IA-5
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques:
+      - T1021
+      mitre_tactics:
+      - TA0008
+      mitre_mitigations:
+      - M1042
+    parent: CIS _5_Configure SSH Server Main | 2.2.20-Ensure sshd PermitEmptyPasswords is disabled
+    rationale: Disallowing remote shell access to accounts that have an empty password reduces the probability
+      of unauthorized access to the system.
+    impact: ''
+    audit_guidance: "Run the following command to verify `PermitEmptyPasswords` is set to `no`:\r\n\r\n\
+      ```\r\n# sshd -T | grep permitemptypasswords\r\n\r\npermitemptypasswords no\r\n```\r\n\r\n**- IF\
+      \ -** `Match` set statements are used in your environment, specify the connection parameters to\
+      \ use for the `-T` extended test mode and run the audit to verify the setting is not incorrectly\
+      \ configured in a match block\r\n\r\n_Example additional audit needed for a match block for the\
+      \ user `sshuser`:_\r\n\r\n```\r\n# sshd -T -C user=sshuser | grep permitemptypasswords\r\n```"
+    remediation_guidance: "Create or edit a `*.conf` file in the `/etc/ssh/sshd_config.d/` and set the\
+      \ `PermitEmptyPasswords` parameter to `no` above any `Include` and `Match` entries as follows:\r\
+      \n\r\n```\r\nPermitEmptyPasswords no\r\n```"
+    additional_information: ''
+    default_value: PermitEmptyPasswords no
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,67 @@
+control:
+  id: CIS-2.1.19
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure telnet server services are not in use
+  description: The `telnetd` package contains the `telnet daemon`, which accepts connections from users
+    from other systems via the telnet protocol.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_1_19.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_1_19.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_1_19.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_1_19.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.1.19
+      url: https://workbench.cisecurity.org/sections/4177245/recommendations/7047649
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '2.6'
+      - '9.2'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _2_Configure Server Services Main | 2.1.19-Ensure telnet server services are not in use
+    rationale: The telnet protocol is insecure and unencrypted. The use of an unencrypted transmission
+      medium could allow a user with access to sniff network traffic the ability to steal credentials.
+      The ssh package provides an encrypted session and stronger security.
+    impact: "There may be packages that are dependent on the `telnetd` package. If the `telnetd` package\
+      \ is removed, these dependent packages will be removed as well. Before removing the `telnetd` package,\
+      \ review any dependent packages to determine if they are required on the system.\r\n\r\n**- IF -**\
+      \ a dependent package is required: stop and mask `inetutils-inetd.service` leaving the `telnetd`\
+      \ package installed."
+    audit_guidance: "Run the following command to verify `telnetd` is not installed:\r\n\r\n```\r\n# dpkg-query\
+      \ -l | awk '{print $2}' | grep -Pio -- '^telnetd|^telnetd-ssl' &>/dev/null && echo \"telnetd is\
+      \ installed\"\r\n```\r\nNothing should be returned.\r\n\r\n**- OR -**\r\n\r\n**- IF -** the `telnetd`\
+      \ package is required as a dependency:\r\n\r\nRun the following command to verify `inetutils-inetd.service`\
+      \ is not enabled:\r\n\r\n```\r\n# systemctl is-enabled inetutils-inetd.service 2>/dev/null | grep\
+      \ 'enabled'\r\n```\r\nNothing should be returned.\r\n\r\nRun the following command to verify `inetutils-inetd.service`\
+      \ is not active:\r\n\r\n```\r\n# systemctl is-active inetutils-inetd.service 2>/dev/null | grep\
+      \ '^active'\r\n```\r\nNothing should be returned.\r\n\r\n**Note**: If the package is required for\
+      \ a dependency\r\n- Ensure the dependent package is approved by local site policy\r\n- Ensure stopping\
+      \ and masking the service and/or socket meets local site policy"
+    remediation_guidance: "Run the following commands to stop `inetutils-inetd.service`, and remove the\
+      \ `telnetd` package:\r\n\r\n```\r\n# systemctl stop inetutils-inetd.service\r\n# apt purge telnetd\r\
+      \n```\r\n**- OR -**\r\n\r\n**- IF -** the `telnetd` package is required as a dependency:\r\n\r\n\
+      Run the following commands to stop and mask inetutils-inetd.service:\r\n\r\n```\r\n# systemctl stop\
+      \ inetutils-inetd.service\r\n# systemctl mask inetutils-inetd.service\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 4
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

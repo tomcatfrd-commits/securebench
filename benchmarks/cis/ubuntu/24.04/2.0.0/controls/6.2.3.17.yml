@@ -1,0 +1,92 @@
+control:
+  id: CIS-6.2.3.17
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure unsuccessful file access attempts are collected
+  description: "Monitor for unsuccessful attempts to access files. The following parameters are associated\
+    \ with system calls that control files:\r\n- creation - `creat`\r\n- opening - `open` , `openat`\r\
+    \n- truncation - `truncate` , `ftruncate`\r\n\r\nAn audit log record will only be written if all of\
+    \ the following criteria is met for the user when trying to access a file:\r\n- a non-privileged user\
+    \ (auid>=UID_MIN)\r\n- is not a Daemon event (auid=4294967295/unset/-1)\r\n- if the system call returned\
+    \ EACCES (permission denied) or EPERM (some other permanent error associated with the specific system\
+    \ call)"
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_2_3_17.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_2_3_17.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_2_3_17.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_2_3_17.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.2.3.17
+      url: https://workbench.cisecurity.org/sections/4203192/recommendations/7091564
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - AU-3
+      cis_v8:
+      - '8.5'
+      cis_v7:
+      - '14.9'
+      mitre_techniques:
+      - T1562
+      - T1562.006
+      mitre_tactics:
+      - TA0007
+      mitre_mitigations:
+      - M1047
+    parent: CIS _6_System Auditing Main | 2.2.3.17-Ensure unsuccessful file access attempts are collected
+    rationale: Failed attempts to open, create or truncate files could be an indication that an individual
+      or process is trying to gain unauthorized access to the system.
+    impact: ''
+    audit_guidance: "**On disk configuration**\r\n\r\nRun the following command to check the on disk rules:\r\
+      \n\r\n```\r\n# {\r\n UID_MIN=$(awk '/^\\s*UID_MIN/{print $2}' /etc/login.defs)\r\n [ -n \"${UID_MIN}\"\
+      \ ] && awk \"/^ *-a *always,exit/ \\\r\n &&/ -F *arch=b(32|64)/ \\\r\n &&(/ -F *auid!=unset/||/\
+      \ -F *auid!=-1/||/ -F *auid!=4294967295/) \\\r\n &&/ -F *auid>=${UID_MIN}/ \\\r\n &&(/ -F *exit=-EACCES/||/\
+      \ -F *exit=-EPERM/) \\\r\n &&/ -S/ \\\r\n &&/creat/ \\\r\n &&/open/ \\\r\n &&/truncate/ \\\r\n &&(/\
+      \ key= *[!-~]* *$/||/ -k *[!-~]* *$/)\" /etc/audit/rules.d/*.rules \\\r\n || printf \"ERROR: Variable\
+      \ 'UID_MIN' is unset.\\n\"\r\n}\r\n```\r\n\r\nVerify the output includes:\r\n\r\n```\r\n-a always,exit\
+      \ -F arch=b64 -S creat,open,openat,truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=unset\
+      \ -k access\r\n-a always,exit -F arch=b64 -S creat,open,openat,truncate,ftruncate -F exit=-EPERM\
+      \ -F auid>=1000 -F auid!=unset -k access\r\n-a always,exit -F arch=b32 -S creat,open,openat,truncate,ftruncate\
+      \ -F exit=-EACCES -F auid>=1000 -F auid!=unset -k access\r\n-a always,exit -F arch=b32 -S creat,open,openat,truncate,ftruncate\
+      \ -F exit=-EPERM -F auid>=1000 -F auid!=unset -k access\r\n```\r\n\r\n**Running configuration**\r\
+      \n\r\nRun the following command to check loaded rules:\r\n\r\n```\r\n# {\r\n UID_MIN=$(awk '/^\\\
+      s*UID_MIN/{print $2}' /etc/login.defs)\r\n [ -n \"${UID_MIN}\" ] && auditctl -l | awk \"/^ *-a *always,exit/\
+      \ \\\r\n &&/ -F *arch=b(32|64)/ \\\r\n &&(/ -F *auid!=unset/||/ -F *auid!=-1/||/ -F *auid!=4294967295/)\
+      \ \\\r\n &&/ -F *auid>=${UID_MIN}/ \\\r\n &&(/ -F *exit=-EACCES/||/ -F *exit=-EPERM/) \\\r\n &&/\
+      \ -S/ \\\r\n &&/creat/ \\\r\n &&/open/ \\\r\n &&/truncate/ \\\r\n &&(/ key= *[!-~]* *$/||/ -k *[!-~]*\
+      \ *$/)\" \\\r\n || printf \"ERROR: Variable 'UID_MIN' is unset.\\n\"\r\n}\r\n```\r\n\r\nVerify the\
+      \ output includes:\r\n\r\n```\r\n-a always,exit -F arch=b64 -S open,truncate,ftruncate,creat,openat\
+      \ -F exit=-EACCES -F auid>=1000 -F auid!=-1 -F key=access\r\n-a always,exit -F arch=b64 -S open,truncate,ftruncate,creat,openat\
+      \ -F exit=-EPERM -F auid>=1000 -F auid!=-1 -F key=access\r\n-a always,exit -F arch=b32 -S open,truncate,ftruncate,creat,openat\
+      \ -F exit=-EACCES -F auid>=1000 -F auid!=-1 -F key=access\r\n-a always,exit -F arch=b32 -S open,truncate,ftruncate,creat,openat\
+      \ -F exit=-EPERM -F auid>=1000 -F auid!=-1 -F key=access\r\n```"
+    remediation_guidance: "**Create audit rules**\r\n\r\nEdit or create a file in the `/etc/audit/rules.d/`\
+      \ directory, ending in `.rules` extension, with the relevant rules to monitor unsuccessful file\
+      \ access attempts.\r\n\r\n_Example:_\r\n\r\n```\r\n# {\r\nUID_MIN=$(awk '/^\\s*UID_MIN/{print $2}'\
+      \ /etc/login.defs)\r\n[ -n \"${UID_MIN}\" ] && printf \"\r\n-a always,exit -F arch=b64 -S creat,open,openat,truncate,ftruncate\
+      \ -F exit=-EACCES -F auid>=${UID_MIN} -F auid!=unset -k access\r\n-a always,exit -F arch=b64 -S\
+      \ creat,open,openat,truncate,ftruncate -F exit=-EPERM -F auid>=${UID_MIN} -F auid!=unset -k access\r\
+      \n-a always,exit -F arch=b32 -S creat,open,openat,truncate,ftruncate -F exit=-EACCES -F auid>=${UID_MIN}\
+      \ -F auid!=unset -k access\r\n-a always,exit -F arch=b32 -S creat,open,openat,truncate,ftruncate\
+      \ -F exit=-EPERM -F auid>=${UID_MIN} -F auid!=unset -k access\r\n\" >> /etc/audit/rules.d/50-access.rules\
+      \ || printf \"ERROR: Variable 'UID_MIN' is unset.\\n\"\r\n}\r\n```\r\n\r\n**Load audit rules**\r\
+      \n\r\nMerge and load the rules into active configuration:\r\n\r\n```\r\n# augenrules --load\r\n\
+      ```\r\n\r\nCheck if reboot is required.\r\n\r\n```\r\n# if [[ $(auditctl -s | grep \"enabled\")\
+      \ =~ \"2\" ]]; then printf \"Reboot required to load rules\\n\"; fi\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 4
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

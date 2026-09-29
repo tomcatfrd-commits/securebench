@@ -1,0 +1,58 @@
+control:
+  id: CIS-1.2.1.5
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to /etc/apt/auth.conf.d directory  is configured
+  description: '`/etc/apt/auth.conf.d` contains `.conf` files with credentials to access APT private repositories.'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_2_1_5.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_2_1_5.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_2_1_5.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_2_1_5.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.2.1.5
+      url: https://workbench.cisecurity.org/sections/4177267/recommendations/7047643
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 2 - Server
+    mappings:
+      nist:
+      - AC-3
+      - MP-2
+      - SC-5 (2)
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _1_Package Management Main | 2.2.5-Ensure access to /etc/apt/auth.conf.d directory  is
+      configured
+    rationale: The `/etc/apt/auth.conf.d` directory contains APT `.conf` files which should have restricted
+      access because they control how the package manager runs as root and may contain sensitive information.
+      If writable or readable by non-root users, they could be altered to run malicious commands or expose
+      credentials.
+    impact: ''
+    audit_guidance: "Run the following command and verify `/etc/apt/auth.conf.d` `Uid` and `Gid` are both\
+      \ `0/root` and access is `0755` or more restrictive:\r\n```\r\n# stat -Lc 'Access: (%a/%A) Uid:\
+      \ ( %u/ %U) Gid: ( %g/ %G)' /etc/apt/auth.conf.d\r\n\r\nAccess: (755/drwxr-xr-x) Uid: ( 0/ root)\
+      \ Gid: ( 0/ root)\r\n```"
+    remediation_guidance: "Run the following commands to set permissions on `/etc/apt/auth.conf.d/` `Uid`\
+      \ and `Gid` are both `0/root` and access is `0755` or more restrictive:\r\n```\r\n# chown root:root\
+      \ /etc/apt/auth.conf.d\r\n# chmod u=rwx,g=rx,o=rx /etc/apt/auth.conf.d\r\n```"
+    additional_information: ''
+    default_value: 'Access: (755/drwxr-xr-x) Uid: ( 0/ root) Gid: ( 0/ root)'
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,78 @@
+control:
+  id: CIS-6.1.2.3
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure rsyslog log file creation mode is configured
+  description: "`rsyslog` will create logfiles that do not already exist on the system.\r\n\r\nThe `global()`\
+    \ configuration object `umask`, available in rsyslog 8.26.0+, sets the rsyslogd process’ umask. If\
+    \ not specified, the system-provided default is used. The value given must always be a 4-digit octal\
+    \ number, with the initial digit being zero.\r\n\r\nThe legacy `$umask` parameter sets the `rsyslogd`\
+    \ process' umask. If not specified, the system-provided default is used. The value given must always\
+    \ be a 4-digit octal number, with the initial digit being zero.\r\n\r\nThe legacy `$FileCreateMode`\
+    \ parameter allows the setting of the mode with which `rsyslogd` creates new files. If not specified,\
+    \ the value `0644` is used. The value given must always be a 4-digit octal number, with the initial\
+    \ digit being zero. Please note that the actual permission depend on `rsyslogd` process `umask`. If\
+    \ in doubt, use `$umask 0000` right at the beginning of the configuration file to remove any restrictions.\r\
+    \n\r\nThe legacy `$FileCreateMode` may be specified multiple times. If so, it specifies the creation\
+    \ mode for all selector lines that follow until the next `$FileCreateMode` parameter. Order of lines\
+    \ is vitally important."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_1_2_3.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_1_2_3.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_1_2_3.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_1_2_3.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.1.2.3
+      url: https://workbench.cisecurity.org/sections/4177249/recommendations/7047517
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      - AC-6
+      - MP-2
+      cis_v8:
+      - '3.3'
+      - '8.2'
+      cis_v7:
+      - '5.1'
+      - '6.2'
+      - '6.3'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      - T1083
+      - T1083.000
+      mitre_tactics:
+      - TA0007
+      mitre_mitigations:
+      - M1022
+    parent: CIS _6_System Logging Main | 2.2.2.3-Ensure rsyslog log file creation mode is configured
+    rationale: It is important to ensure that log files have the correct permissions to ensure that sensitive
+      data is archived and protected.
+    impact: ''
+    audit_guidance: "Run the following command \r\n\r\nRun the following command to verify `$FileCreateMode`:\
+      \ \r\n\r\n```\r\n# grep -Ps '^\\h*\\$FileCreateMode\\h+0[0,2,4,6][0,2,4]0\\b' /etc/rsyslog.conf\
+      \ /etc/rsyslog.d/*.conf\r\n```\r\n\r\nVerify the output is includes `0640` or more restrictive:\r\
+      \n\r\n```\r\n$FileCreateMode 0640\r\n```\r\n\r\nShould a site policy dictate less restrictive permissions,\
+      \ ensure to follow said policy.\r\n\r\n>**Note:** More restrictive permissions such as `0600` is\
+      \ implicitly sufficient."
+    remediation_guidance: "Edit either `/etc/rsyslog.conf` or a dedicated `.conf` file in `/etc/rsyslog.d/`\
+      \ and set `$FileCreateMode` to `0640` or more restrictive:\r\n\r\n```\r\n$FileCreateMode 0640\r\n\
+      ```\r\n\r\nRestart the service:\r\n\r\n```\r\n# systemctl restart rsyslog\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 4
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

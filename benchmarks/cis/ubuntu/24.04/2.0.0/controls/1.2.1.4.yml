@@ -1,0 +1,57 @@
+control:
+  id: CIS-1.2.1.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to /etc/apt/trusted.gpg.d  directory is configured
+  description: The `/etc/apt/trusted.gpg.d` directory stores individual GPG key files that APT uses to
+    verify the authenticity of packages and repositories.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_2_1_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_2_1_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_2_1_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_2_1_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.2.1.4
+      url: https://workbench.cisecurity.org/sections/4177267/recommendations/7047640
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 2 - Server
+    mappings:
+      nist:
+      - AC-3
+      - MP-2
+      - SC-5 (2)
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _1_Package Management Main | 2.2.4-Ensure access to /etc/apt/trusted.gpg.d  directory
+      is configured
+    rationale: ''
+    impact: A non-privileged user with write access to `/etc/apt/trusted.gpg.d` can compromise the chain
+      of trust by adding new public keys to APT trusted keys configuration.
+    audit_guidance: "Run the following command and verify `/etc/apt/trusted.gpg.d` `Uid` and `Gid` are\
+      \ both `0/root` and access is set to `0755` or more secure\r\n```\r\n# stat -Lc 'Access: (%a/%A)\
+      \ Uid: ( %u/ %U) Gid: ( %g/ %G)' /etc/apt/trusted.gpg.d\r\n\r\nAccess: (755/drwxr-xr-x) Uid: ( 0/\
+      \ root) Gid: ( 0/ root)\r\n```"
+    remediation_guidance: "Run the following commands to set `/etc/apt/trusted.gpg.d` `Uid` and `Gid`\
+      \ to `0/root` and access to `0755` or more restrictive:\r\n```\r\n# chown root:root /etc/apt/trusted.gpg.d\r\
+      \n# chmod u=rwx,g=rx,o=rx /etc/apt/trusted.gpg.d\r\n```"
+    additional_information: ''
+    default_value: 'Access: (755/drwxr-xr-x) Uid: ( 0/ root) Gid: ( 0/ root)'
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

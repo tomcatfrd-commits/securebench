@@ -1,0 +1,59 @@
+control:
+  id: CIS-6.2.3.30
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure the running and on disk configuration is the same
+  description: "The Audit system have both on disk and running configuration. It is possible for these\
+    \ configuration settings to differ.\r\n\r\n**Note:** Due to the limitations of `augenrules` and `auditctl`,\
+    \ it is not absolutely guaranteed that loading the rule sets via `augenrules --load` will result in\
+    \ all rules being loaded or even that the user will be informed if there was a problem loading the\
+    \ rules."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_2_3_30.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_2_3_30.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_2_3_30.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_2_3_30.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.2.3.30
+      url: https://workbench.cisecurity.org/sections/4203192/recommendations/7091577
+    assessment_status: manual
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - AU-3
+      cis_v8:
+      - '8.5'
+      cis_v7:
+      - '6.3'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _6_System Auditing Main | 2.2.3.30-Ensure the running and on disk configuration is the
+      same
+    rationale: Configuration differences between what is currently running and what is on disk could cause
+      unexpected problems or may give a false impression of compliance requirements.
+    impact: ''
+    audit_guidance: "**Merged rule sets**\r\n\r\nEnsure that all rules in `/etc/audit/rules.d` have been\
+      \ merged into `/etc/audit/audit.rules`:\r\n\r\n```\r\n# augenrules --check\r\n\r\n/usr/sbin/augenrules:\
+      \ No change\r\n```\r\n\r\nShould there be any drift, run `augenrules --load` to merge and load all\
+      \ rules."
+    remediation_guidance: "If the rules are not aligned across all three () areas, run the following command\
+      \ to merge and load all rules:\r\n\r\n```\r\n# augenrules --load\r\n```\r\n\r\nCheck if reboot is\
+      \ required.\r\n\r\n```\r\nif [[ $(auditctl -s | grep \"enabled\") =~ \"2\" ]]; then echo \"Reboot\
+      \ required to load rules\"; fi\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 0
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

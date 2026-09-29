@@ -1,0 +1,54 @@
+control:
+  id: CIS-1.2.1.7
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to /usr/share/keyrings directory is configured
+  description: The `/usr/share/keyrings` directory contains trusted gpg keyring files used by APT to verify
+    package signatures from repositories. It provides a centralized, read-only location for system-wide
+    keys that ensures package integrity and authenticity.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_2_1_7.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_2_1_7.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_2_1_7.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_2_1_7.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.2.1.7
+      url: https://workbench.cisecurity.org/sections/4177267/recommendations/7047652
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 2 - Server
+    mappings:
+      nist: []
+      cis_v8: []
+      cis_v7:
+      - '3.3'
+      - '14.6'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _1_Package Management Main | 2.2.7-Ensure access to /usr/share/keyrings directory is configured
+    rationale: A non-root user should not be able to add or remove keys from this directory. Misconfiguring
+      could allow a non-root user to add repositories containing malicious packages.
+    impact: ''
+    audit_guidance: "Run the following command and verify `/usr/share/keyrings` `Uid` and `Gid` are both\
+      \ `0/root` and access is `0755` or more restrictive:\r\n```\r\n# stat -Lc 'Access: (%a/%A) Uid:\
+      \ ( %u/ %U) Gid: ( %g/ %G)' /usr/share/keyrings\r\n\r\nAccess: (755/drwxr-xr-x) Uid: ( 0/ root)\
+      \ Gid: ( 0/ root)\r\n```"
+    remediation_guidance: "Run the following commands to set permissions on `/usr/share/keyrings` `Uid`\
+      \ and `Gid` both `0/root` and access is `0755` or more restrictive:\r\n```\r\n# chown root:root\
+      \ /usr/share/keyrings\r\n# chmod u=rwx,g=rx,o=rx /usr/share/keyrings\r\n```"
+    additional_information: ''
+    default_value: 'Access: (755/drwxr-xr-x) Uid: ( 0/ root) Gid: ( 0/ root)'
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

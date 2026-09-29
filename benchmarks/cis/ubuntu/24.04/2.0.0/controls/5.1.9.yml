@@ -1,0 +1,67 @@
+control:
+  id: CIS-5.1.9
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure sshd GSSAPIAuthentication is disabled
+  description: "The `GSSAPIAuthentication` parameter specifies whether user authentication based on GSSAPI\
+    \ is allowed\r\n\r\nMore information about the openSSH server configuration is available in the \"\
+    Configure SSH Server\" section overview."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_1_9.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_1_9.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_1_9.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_1_9.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.1.9
+      url: https://workbench.cisecurity.org/sections/4177236/recommendations/7047536
+    assessment_status: automated
+    profiles:
+    - Level 1 - Workstation
+    - Level 2 - Server
+    mappings:
+      nist:
+      - CM-1
+      - CM-2
+      - CM-6
+      - CM-7
+      - IA-5
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques:
+      - T1078
+      - T1078.001
+      - T1078.003
+      mitre_tactics:
+      - TA0001
+      mitre_mitigations:
+      - M1042
+    parent: CIS _5_Configure SSH Server Main | 2.2.10-Ensure sshd GSSAPIAuthentication is disabled
+    rationale: Allowing GSSAPI authentication through SSH exposes the system's GSSAPI to remote hosts,
+      and should be disabled to reduce the attack surface of the system
+    impact: Disabling GSSAPI authentication in environments that rely on centralized authentication could
+      disrupt legitimate access.
+    audit_guidance: "Run the following command to verify `GSSAPIAuthentication` is set to `no`:\r\n\r\n\
+      ```\r\n# sshd -T | grep gssapiauthentication\r\n\r\ngssapiauthentication no\r\n```\r\n\r\n**- IF\
+      \ -** `Match` set statements are used in your environment, specify the connection parameters to\
+      \ use for the `-T` extended test mode and run the audit to verify the setting is not incorrectly\
+      \ configured in a match block\r\n\r\n_Example additional audit needed for a match block for the\
+      \ user `sshuser`:_\r\n\r\n```\r\n# sshd -T -C user=sshuser | grep gssapiauthentication\r\n```"
+    remediation_guidance: "Create or edit a `*.conf` file in the `/etc/ssh/sshd_config.d/` and set the\
+      \ `GSSAPIAuthentication` parameter to `no` above any `Include` and `Match` entries as follows:\r\
+      \n\r\n```\r\nGSSAPIAuthentication no\r\n```"
+    additional_information: ''
+    default_value: GSSAPIAuthentication no
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

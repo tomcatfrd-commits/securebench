@@ -1,0 +1,55 @@
+control:
+  id: CIS-6.1.2.8
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure rsyslog-gnutls is installed
+  description: TLS protocol support for rsyslog (GnuTLS). This netstream plugin allows rsyslog to send
+    and receive encrypted syslog messages via the syslog-transport-tls IETF standard protocol using GnuTLS.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_1_2_8.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_1_2_8.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_1_2_8.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_1_2_8.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.1.2.8
+      url: https://workbench.cisecurity.org/sections/4177249/recommendations/7047561
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '8.2'
+      cis_v7:
+      - '6.2'
+      - '6.3'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _6_System Logging Main | 2.2.2.8-Ensure rsyslog-gnutls is installed
+    rationale: Traditional syslog is a clear-text protocol that means anyone with a sniffer can have a
+      peek at your data. `rsyslog-gnutls` is a secure communications library implementing the SSL, TLS
+      and DTLS protocols and technologies around them, and provides an easy way to encrypt syslog communication.
+    impact: Enabling TLS support using `rsyslog-gnutls` requires certificate management to ensure reliable
+      encrypted logging. If misconfigured, remote log forwarding may fail until valid certificates and
+      trusted CAs are applied.
+    audit_guidance: "Run the following command and verify `rsyslog-gnutls` is installed:\r\n```\r\n# dpkg-query\
+      \ -s rsyslog-gnutls &>/dev/null && echo \"rsyslog-gnutls is installed\"\r\n\r\nrsyslog-gnutls is\
+      \ installed\r\n```"
+    remediation_guidance: "Run the following command to install `rsyslog-gnutls`:\r\n```\r\n# apt install\
+      \ rsyslog-gnutls\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 4
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

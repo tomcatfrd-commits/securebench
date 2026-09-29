@@ -40,7 +40,7 @@ class RollbackProvider(Protocol):
         self,
         control: Control,
         host: str,
-    ) -> "RollbackExecution":
+    ) -> RollbackExecution:
         """
         Restore one control on one host.
         """
@@ -122,6 +122,16 @@ class RollbackEngine:
                     f"No change found for control '{control.control_id}' "
                     f"on host '{host}'."
                 ),
+            )
+
+        identity_error = self._identity_error(control, change)
+        if identity_error is not None:
+            change.status = ChangeStatus.ROLLBACK_REQUIRED
+            return RollbackExecution(
+                control_id=control.control_id,
+                host=host,
+                success=False,
+                message=identity_error,
             )
 
         if control.rollback_capability is RollbackCapability.UNSUPPORTED:
@@ -332,4 +342,17 @@ class RollbackEngine:
             if change.control_id == control_id and change.host == host:
                 return change
 
+        return None
+
+    @staticmethod
+    def _identity_error(control: Control, change: ChangeRecord) -> str | None:
+        if change.benchmark_id and change.benchmark_id != control.benchmark_id:
+            return "Rollback control belongs to a different benchmark."
+        if (
+            change.benchmark_version
+            and change.benchmark_version != control.benchmark_version
+        ):
+            return "Rollback control belongs to a different benchmark version."
+        if change.control_digest and change.control_digest != control.definition_digest:
+            return "Rollback control definition does not match the executed definition."
         return None

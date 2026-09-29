@@ -1,0 +1,110 @@
+control:
+  id: CIS-6.1.1.1.3
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure journald is configured to send logs to rsyslog
+  description: Data from `systemd-journald` may be stored in volatile memory or persisted locally on the
+    server.  Utilities exist to accept remote export of `systemd-journald` logs, however, use of the `rsyslog`
+    service provides a consistent means of log collection and export.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_1_1_1_3.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_1_1_1_3.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_1_1_1_3.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_1_1_1_3.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.1.1.1.3
+      url: https://workbench.cisecurity.org/sections/4177234/recommendations/7047473
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      - AU-12
+      - AU-2
+      - AU-4
+      - MP-2
+      cis_v8:
+      - '8.2'
+      - '8.9'
+      cis_v7:
+      - '6.2'
+      - '6.3'
+      - '6.5'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      - T1562
+      - T1562.006
+      - T1565
+      mitre_tactics:
+      - TA0040
+      mitre_mitigations:
+      - M1029
+    parent: CIS _6_System Logging Main | 2.2.1.1.3-Ensure journald is configured to send logs to rsyslog
+    rationale: "**- IF -** `rsyslog` is the preferred method for capturing logs, all logs of the system\
+      \ should be sent to it for further processing.\r\n\r\n>**Note:** This recommendation **only applies\
+      \ if `rsyslog` is the chosen method for client side logging**. Do not apply this recommendation\
+      \ if `systemd-journald` is used."
+    impact: ''
+    audit_guidance: "**- IF -** `rsyslog` is the preferred method for capturing logs\r\n\r\nRun the following\
+      \ script to verify that logs are forwarded to `rsyslog` by setting  `ForwardToSyslog` to `yes` in\
+      \ the systemd-journald configuration:\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   l_analyze_cmd=\"\
+      $(readlink -e /bin/systemd-analyze || \\\r\n   readlink -e /usr/bin/systemd-analyze)\"\r\n   l_conf_file=\"\
+      systemd/journald.conf\" l_block=\"Journal\"\r\n   l_option=\"ForwardToSyslog\" l_option_value=\"\
+      yes\" a_output=()\r\n   while IFS= read -r l_file; do\r\n      l_file=\"${l_file//# /}\"\r\n   \
+      \   l_opt=\"$(awk '/\\['\"$l_block\"'\\]/{a=1;next}/\\[/{a=0}a' \"$l_file\" \\\r\n      2>/dev/null\
+      \ | grep -Poi '^\\h*'\"$l_option\"'\\h*=\\h*\\H+\\b' | tail -n 1)\"\r\n         l_option_value=\"\
+      $(cut -d= -f2 <<< \"$l_opt\" | xargs)\"\r\n      [ -n \"$l_option_value\" ] && \\\r\n      a_output+=(\"\
+      \ - \\\"$l_option\\\" is set to: \\\"$l_option_value\\\"\" \\\r\n      \"    in: \\\"$l_file\\\"\
+      \")\r\n   done < <(\"$l_analyze_cmd\" cat-config \"$l_conf_file\" | tac | \\\r\n   grep -Pio '^\\\
+      h*#\\h*\\/[^#\\n\\r\\h]+\\.conf\\b')\r\n   if [ \"${#a_output[@]}\" -le \"0\" ]; then\r\n      l_file=\"\
+      /etc/$l_conf_file\"\r\n      l_opt=\"$(awk '/\\['\"$l_block\"'\\]/{a=1;next}/\\[/{a=0}a' \"$l_file\"\
+      \ \\\r\n      2>/dev/null | grep -Poim 1 '^(\\h*#)?\\h*'\"$l_option\"'\\h*=\\h*\\H+\\b')\"\r\n \
+      \     l_option_value=\"$(cut -d= -f2 <<< \"${l_opt//# /}\" | xargs)\"\r\n      [ -n \"$l_option_value\"\
+      \ ] && \\\r\n      a_output+=(\" - The default value: \\\"${l_opt//#/}\\\"\" \\\r\n      \"    is\
+      \ being used in the configuration\")\r\n   fi\r\n   [ \"${#a_output[@]}\" -gt \"0\" ] && printf\
+      \ '%s\\n' \"\" \"${a_output[@]}\" \"\"\r\n}\r\n```\r\n\r\nRun the following command to verify `systemd-journald.service`\
+      \ and `rsyslog.service` are loaded and active:\r\n\r\n```\r\n# systemctl list-units --type service\
+      \ | grep -P -- '(journald|rsyslog)'\r\n```\r\n\r\nOutput should be similar to:\r\n\r\n```\r\nrsyslog.service\
+      \                                       loaded active running System Logging Service\r\nsystemd-journald.service\
+      \                              loaded active running Journal Service\r\n```"
+    remediation_guidance: "**- IF -** `Journald` is the preferred method for capturing logs, this section\
+      \ and Recommendation should be skipped and the \"Configure Journald\" section followed.\r\n\r\n\
+      **- IF -** `rsyslog` is the preferred method for capturing logs:\r\n\r\nSet the following parameter\
+      \ in the `[Journal]` section in `/etc/systemd/journald.conf` or a file in `/etc/systemd/journald.conf.d/`\
+      \ ending in `.conf`:\r\n\r\n```\r\nForwardToSyslog=yes\r\n```\r\n\r\n_Example:_\r\n```\r\n#!/usr/bin/env\
+      \ bash\r\n\r\n{\r\n   [ ! -d /etc/systemd/journald.conf.d/ ] && mkdir /etc/systemd/journald.conf.d/\r\
+      \n   if grep -Psq -- '^\\h*\\[Journal\\] /etc/systemd/journald.conf.d/60-journald.conf; then\r\n\
+      \      printf '%s\\n' \"ForwardToSyslog=yes\" >> /etc/systemd/journald.conf.d/60-journald.conf\r\
+      \n   else\r\n      printf '%s\\n' \"[Journal]\" \"ForwardToSyslog=yes\" >> /etc/systemd/journald.conf.d/60-journald.conf\r\
+      \n   fi\r\n}\r\n```\r\n\r\n>**Note:** Drop-in configuration files have higher precedence and override\
+      \ the main configuration file. Files in the *.conf.d/ configuration subdirectories are sorted by\
+      \ their filename in lexicographic order, regardless of in which of the subdirectories they reside.\
+      \ When multiple files specify the same option, for options which accept just a single value, the\
+      \ entry in the file sorted last takes precedence, and for options which accept a list of values,\
+      \ entries are collected as they occur in the sorted files.\r\n\r\nRun to following command to update\
+      \ the parameters in the service:\r\n\r\n\r\nRestart `systemd-journald.service`:\r\n\r\n```\r\n#\
+      \ systemctl reload-or-restart systemd-journald.service\r\n```"
+    additional_information: As noted in the `systemd-journald` man pages, `systemd-journald` logs may
+      be exported to `rsyslog` either through the process mentioned here, or through a facility like `systemd-journald.service`.  There
+      are trade-offs involved in each implementation, where `ForwardToSyslog` will immediately capture
+      all events (and forward to an external log server, if properly configured), but may not capture
+      all boot-up activities.  Mechanisms such as `systemd-journald.service`, on the other hand, will
+      record bootup events, but may delay sending the information to `rsyslog`, leading to the potential
+      for log manipulation prior to export.  Be aware of the limitations of all tools employed to secure
+      a system.
+    default_value: ''
+    artifacts_count: 8
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

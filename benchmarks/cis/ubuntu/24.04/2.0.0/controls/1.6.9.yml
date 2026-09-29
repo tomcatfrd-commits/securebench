@@ -1,0 +1,58 @@
+control:
+  id: CIS-1.6.9
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to pam_motd file is configured
+  description: "`pam_motd` is a PAM module that can be used to display arbitrary `motd` (message of the\
+    \ day) files after a successful login. By default, `pam_motd` shows files in the following locations:\r\
+    \n\r\n```\r\n/etc/motd\r\n/run/motd\r\n/usr/lib/motd\r\n/etc/motd.d/\r\n/run/motd.d/\r\n/usr/lib/motd.d/\r\
+    \n```"
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_6_9.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_6_9.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_6_9.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_6_9.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.6.9
+      url: https://workbench.cisecurity.org/sections/4177288/recommendations/7047747
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _1_Configure Command Line Warning Banners Main | 1.2.9-Ensure access to pam_motd file
+      is configured
+    rationale: If the `pam_motd` file does not have the correct access configured, it could be modified
+      by unauthorized users with incorrect or misleading information.
+    impact: ''
+    audit_guidance: "Run the following command and verify Access is `0644` or more restrictive and `Uid`\
+      \ and `Gid` are both `0/root`:\r\n```\r\n# grep -hPo 'motd=\\K\\S+' /etc/pam.d/* 2>/dev/null | sort\
+      \ -u | xargs -r stat -Lc 'Access: (%#a/%A)  Uid: ( %u/ %U) Gid: { %g/ %G)'\r\n```\r\n_Example Output_\r\
+      \n```\r\nAccess: (0644/-rw-r--r--)  Uid: ( 0/ root) Gid: { 0/ root)\r\n```"
+    remediation_guidance: "Run the following commands to set mode, owner, and group to the `pam_motd`\
+      \ file:\r\n```\r\n# chown root:root # chmod u-x,go-wx ```\r\n**Note:** The audit procedure command\
+      \ `grep -hPo 'motd=\\K\\S+' /etc/pam.d/*` output will provide the path to the `pam_motd` file. \r\
+      \n\r\n_Example_\r\n```\r\n# chown root:root /run/motd.dynamic\r\n# chmod u-x,go-wx /run/motd.dynamic\r\
+      \n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

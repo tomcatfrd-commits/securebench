@@ -1,0 +1,61 @@
+control:
+  id: CIS-5.4.3.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure nologin is not listed in /etc/shells
+  description: "`/etc/shells` is a text file which contains the full pathnames of valid login shells.\
+    \ This file is consulted by `chsh` and available to be queried by other programs.\r\n\r\nBe aware\
+    \ that there are programs which consult this file to find out if a user is a normal user; for example,\
+    \ FTP daemons traditionally disallow access to users with shells not included in this file."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_4_3_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_4_3_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_4_3_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_4_3_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.4.3.1
+      url: https://workbench.cisecurity.org/sections/4177298/recommendations/7047800
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - CM-1
+      - CM-2
+      - CM-6
+      - CM-7
+      - IA-5
+      cis_v8:
+      - '0'
+      cis_v7:
+      - '0'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _5_ User Accounts and Environment Main | 1.1.1.1-Ensure nologin is not listed in /etc/shells
+    rationale: "A user can use `chsh` to change their configured shell.\r\n\r\nIf a user has a shell configured\
+      \ that isn't in in `/etc/shells`, then the system assumes that they're somehow restricted. In the\
+      \ case of `chsh` it means that the user cannot change that value.\r\n\r\nOther programs might query\
+      \ that list and apply similar restrictions.\r\n\r\nBy putting `nologin` in `/etc/shells`, any user\
+      \ that has `nologin` as its shell is considered a full, unrestricted user. This is not the expected\
+      \ behavior for `nologin`."
+    impact: ''
+    audit_guidance: "Run the following command to verify that `nologin` is not listed in the `/etc/shells`\
+      \ file:\r\n\r\n```\r\n# grep -Ps '^\\h*([^#\\n\\r]+)?\\/nologin\\b' /etc/shells\r\n```\r\n\r\nNothing\
+      \ should be returned"
+    remediation_guidance: Edit `/etc/shells` and remove any lines that include `nologin`
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

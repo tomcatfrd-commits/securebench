@@ -1,0 +1,155 @@
+control:
+  id: CIS-1.1.1.11
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure unused filesystems kernel modules are not available
+  description: Filesystem kernel modules are pieces of code that can be dynamically loaded into the Linux
+    kernel to extend its filesystem capabilities, or so-called base kernel, of an operating system. Filesystem
+    kernel modules are typically used to add support for new hardware (as device drivers), or for adding
+    system calls.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_1_1_11.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_1_1_11.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_1_1_11.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_1_1_11.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.1.1.11
+      url: https://workbench.cisecurity.org/sections/4177239/recommendations/7047519
+    assessment_status: manual
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _1_Configure Filesystem Kernel Modules Main | 1.1.11-Ensure unused filesystems kernel
+      modules are not available
+    rationale: "While loadable filesystem kernel modules are a convenient method of modifying the running\
+      \ kernel, this can be abused by attackers on a compromised system to prevent detection of their\
+      \ processes or files, allowing them to maintain control over the system. Many rootkits make use\
+      \ of loadable filesystem kernel modules in this way. \r\n\r\nRemoving support for unneeded filesystem\
+      \ types reduces the local attack surface of the system. If this filesystem type is not needed, disable\
+      \ it. The following filesystem kernel modules have known CVE's and should be made unavailable if\
+      \ no dependencies exist:\r\n- `ceph` - CVE-2022-0670\r\n- `cifs` - CVE-2022-29869 \r\n- `exfat`\
+      \ CVE-2022-29973 \r\n- `ext` CVE-2022-1184\r\n- `fat` CVE-2022-22043\r\n- `fscache` CVE-2022-3630\
+      \ \r\n- `fuse` CVE-2023-0386 \r\n- `gfs2` CVE-2023-3212\r\n- `nfs_common` CVE-2023-6660\r\n- `nfsd`\
+      \ CVE-2022-43945\r\n- `smbfs_common` CVE-2022-2585"
+    impact: This list may be quite extensive and covering all edges cases is difficult. Therefore, it's
+      crucial to carefully consider the implications and dependencies before making any changes to the
+      filesystem kernel module configurations.
+    audit_guidance: "Verify filesystem kernel modules that are not in use on the system are disabled.\
+      \ Review currently loaded kernel modules to ensure they are needed and conform to local site policy.\r\
+      \n\r\n**Note:** The \"Audit script\" included at the bottom of the \"Audit Procedure\" will perform\
+      \ the steps included below.\r\n\r\n1. Run the following command to generate a list of filesystem\
+      \ types currently mounted on the system.\r\n\r\n```\r\n# findmnt -Dkerno fstype | sort -u\r\n```\r\
+      \n\r\nReview the output. These filesystem types should either be excluded from the audit or if no\
+      \ longer needed, unmounted and disabled.\r\n\r\n_Example output:_\r\n\r\n```\r\ndevtmpfs\r\next4\r\
+      \ntmpfs\r\nvfat\r\n```\r\n\r\n2. Run the following script to generate a list of all file system\
+      \ kernel modules currently installed on the system:\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\
+      \n   l_search=\"$(readlink -e /usr/lib/modules/ || readlink -e /lib/modules/)\"\r\n   a_module=()\
+      \ \r\n   while IFS= read -r -d $'\\0' l_module_dir; do\r\n      if [ ! \"$(basename \"$l_module_dir\"\
+      )\" = \"nls\" ]; then\r\n         while IFS= read -r -d $'\\0' l_module_file; do\r\n           \
+      \ l_mname=\"$(basename \"$l_module_file\" | cut -d'.' -f1)\"\r\n            if [ -f \"$l_module_file\"\
+      \ ] && ! grep -Psiq -- '\\b'\"$l_mname\"'\\b' \\\r\n            <<< \"${a_module[*]}\"; then\r\n\
+      \               a_module+=(\"$l_mname\")\r\n            fi\r\n         done < <(find -L \"$l_module_dir\"\
+      \ -mindepth 1 -maxdepth 1 -type f -print0)\r\n      fi\r\n   done < <(find \"$l_search\"/**/kernel/fs/\
+      \ -mindepth 1 -maxdepth 1 -type d ! -empty -print0)\r\n   printf '%s\\n' \"\" \"${a_module[@]}\"\
+      \r\n}\r\n```\r\n\r\nThe output is a list of the kernel modules included in the `/usr/lib/modules/{KERNEL_VERSION}/kernel/fs/`\
+      \ or `/lib/modules/{KERNEL_VERSION}/kernel/fs/` directories. This list has been sorted to be unique\
+      \ values, ignore items in the `nls` directory, and added to an array called `a_module`.\r\n\r\n\
+      3. Run the following command to generate a list of modules currently loaded into the kernel:\r\n\
+      \r\n```\r\n# lsmod\r\n```\r\n\r\n4. compare the output from the list generated in step 2 to the\
+      \ list of loaded modules generated by the `lsmod` command in step 3. Any module appearing in both\
+      \ lists is currently loaded into the kernel. Review these to verify they are needed and approved\
+      \ by local site policy\r\n\r\n5. Run the following command to generate a list of modules that are\
+      \ set to be Deny Listed: `blacklist {MODULE_NAME}`, and/or set be be not loadable: `install {MODULE_NAME}\
+      \ /bin/false` or `install {MODULE_NAME} /bin/true`:\r\n\r\n```\r\n# modprobe --showconfig | grep\
+      \ -Pi -- '^\\h*(blacklist|install)\\h+'\r\n```\r\n\r\n6. Verify all modules in the output from the\
+      \ list generated in step 2 are both Deny Listed: `blacklist {MODULE_NAME}` and set to be not loadable:\
+      \ `install {MODULE_NAME} /bin/false` or `install {MODULE_NAME} /bin/true`. \r\n\r\n\r\n**_Audit\
+      \ Script:_**\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   a_check=() a_output=() a_module=()\
+      \ a_output2=() a_output3=()\r\n   l_search=\"$(readlink -e /usr/lib/modules/ || readlink -e /lib/modules/)\"\
+      \r\n   IFS=$'\\n' read -r -d '' -a a_mounted < <(findmnt -Dkerno fstype \\\r\n   | sort -u && printf\
+      \ '\\0' )\r\n   IFS=$'\\n' read -r -d '' -a a_lsmod < <(lsmod | awk '{print $1}' && printf '\\0'\
+      \ )\r\n   IFS=$'\\n' read -r -d '' -a a_showconfig < <(modprobe --showconfig | \\\r\n   grep -Pi\
+      \ -- '^\\h*(blacklist|install)\\h+' && printf '\\0')\r\n   while IFS= read -r -d $'\\0' l_module_dir;\
+      \ do\r\n      if [ ! \"$(basename \"$l_module_dir\")\" = \"nls\" ]; then\r\n         while IFS=\
+      \ read -r -d $'\\0' l_module_file; do\r\n            l_mname=\"$(basename \"$l_module_file\" | cut\
+      \ -d'.' -f1)\"\r\n            if [ -f \"$l_module_file\" ] && ! grep -Psiq -- '\\b'\"$l_mname\"\
+      '\\b' <<< \"${a_module[*]}\"; then\r\n               a_module+=(\"$l_mname\")\r\n            fi\r\
+      \n         done < <(find -L \"$l_module_dir\" -mindepth 1 -maxdepth 1 -type f -print0)\r\n     \
+      \ fi\r\n   done < <(find \"$l_search\"/**/kernel/fs/ -mindepth 1 -maxdepth 1 -type d ! -empty -print0)\r\
+      \n   for l_module in \"${a_module[@]}\"; do\r\n      if grep -Psoiq -- '\\b'\"$l_module\"'\\b' <<<\
+      \ \"${a_mounted[*]}\"; then\r\n         a_output+=(\"  - \\\"$l_module\\\"\")\r\n      elif grep\
+      \ -Psoiq -- '\\b'\"$l_module\"'\\b' <<< \"${a_lsmod[*]}\"; then\r\n         a_output2+=(\"  - \\\
+      \"$l_module\\\"\")\r\n      elif ! grep -Psioq -- '\\binstall\\h+'\"${l_module//-/_}\"'\\h+\\H+\\\
+      b' <<< \"${a_showconfig[*]}\" || \\\r\n      ! grep -Psioq -- '\\bblacklist\\h+'\"${l_module//-/_}\"\
+      '\\b' <<< \"${a_showconfig[*]}\"; then\r\n         a_output3+=(\"  - \\\"$l_module\\\"\")\r\n  \
+      \    fi\r\n   done\r\n   [ \"${#a_output[@]}\" -gt 0 ] && printf '%s\\n' \"\" \\\r\n   \"- There\
+      \ are \\\"${#a_output[@]}\\\" kernel modules currently mounted:\" \"${a_output[@]}\"\r\n   [ \"\
+      ${#a_output2[@]}\" -gt 0 ] && printf '%s\\n' \"\" \\\r\n   \"- There are \\\"${#a_output2[@]}\\\"\
+      \ kernel modules currently loaded:\" \"${a_output2[@]}\"\r\n   [ \"${#a_output3[@]}\" -gt 0 ] &&\
+      \ printf '%s\\n' \"\" \\\r\n   \"- There are \\\"${#a_output3[@]}\\\" Kernel modules currently loadable:\"\
+      \ \"${a_output3[@]}\"\r\n}\r\n```\r\n\t\r\n**WARNING**: disabling or denylisting filesystem modules\
+      \ that are in use on the system may be FATAL. It is extremely important to thoroughly review this\
+      \ list."
+    remediation_guidance: "**- IF -** the module is available in the running kernel:\r\n- Unload the filesystem\
+      \ kernel module from the kernel\r\n- Create a file ending in `.conf` with install filesystem kernel\
+      \ modules `/bin/false` in the `/etc/modprobe.d/` directory\r\n- Create a file ending in `.conf`\
+      \ with deny list filesystem kernel modules in the `/etc/modprobe.d/` directory\r\n\r\n**WARNING**:\
+      \ unloading, disabling or denylisting filesystem modules that are in use on the system may be FATAL.\
+      \ It is extremely important to thoroughly review the filesystems returned by the audit before following\
+      \ the remediation procedure.\r\n\r\n_Example of unloading the `gfs2`kernel module:_\r\n\r\n```\r\
+      \n# modprobe -r gfs2 2>/dev/null\r\n# rmmod gfs2 2>/dev/null\r\n```\r\n\r\n_Example of fully disabling\
+      \ the `gfs2` kernel module:_\r\n\r\n```\r\n# printf '%s\\n' \"\" \"blacklist gfs2\" \"install gfs2\
+      \ /bin/false\" >> /etc/modprobe.d/gfs2.conf\r\n```\r\n\r\n**Note:** \r\n- Disable a kernel module\
+      \ by modifying the command above for each unused filesystem kernel module\r\n- The example `gfs2`\
+      \ must be updated with the appropriate module name for the command or example script bellow to run\
+      \ correctly.\r\n\r\n**Below is an example script that can be modified to use on various filesystem\
+      \ kernel modules manual remediation process:**\r\n\r\n_Example Script_\r\n\r\n```\r\n#!/usr/bin/env\
+      \ bash\r\n\r\n{\r\n   a_output2=(); a_output3=(); l_dl=\"\" # Initialize arrays and clear variables\r\
+      \n   l_mod_name=\"gfs2\" # set module name\r\n   l_mod_type=\"fs\" # set module type\r\n   l_mod_path=\"\
+      $(readlink -f /usr/lib/modules/**/kernel/$l_mod_type || readlink -f /lib/modules/**/kernel/$l_mod_type)\"\
+      \r\n   f_module_fix()\r\n   {\r\n      l_dl=\"y\" # Set to ignore duplicate checks\r\n      a_showconfig=()\
+      \ # Create array with modprobe output\r\n      while IFS= read -r l_showconfig; do\r\n         a_showconfig+=(\"\
+      $l_showconfig\")\r\n      done < <(modprobe --showconfig | grep -P -- '\\b(install|blacklist)\\\
+      h+'\"${l_mod_name//-/_}\"'\\b')\r\n      if  lsmod | grep \"$l_mod_name\" &> /dev/null; then # Check\
+      \ if the module is currently loaded\r\n         a_output2+=(\" - unloading kernel module: \\\"$l_mod_name\\\
+      \"\")\r\n         modprobe -r \"$l_mod_name\" 2>/dev/null; rmmod \"$l_mod_name\" 2>/dev/null\r\n\
+      \      fi\r\n      if ! grep -Pq -- '\\binstall\\h+'\"${l_mod_name//-/_}\"'\\h+(\\/usr)?\\/bin\\\
+      /(true|false)\\b' <<< \"${a_showconfig[*]}\"; then\r\n         a_output2+=(\" - setting kernel module:\
+      \ \\\"$l_mod_name\\\" to \\\"$(readlink -f /bin/false)\\\"\")\r\n         printf '%s\\n' \"install\
+      \ $l_mod_name $(readlink -f /bin/false)\" >> /etc/modprobe.d/\"$l_mod_name\".conf\r\n      fi\r\n\
+      \      if ! grep -Pq -- '\\bblacklist\\h+'\"${l_mod_name//-/_}\"'\\b' <<< \"${a_showconfig[*]}\"\
+      ; then\r\n         a_output2+=(\" - denylisting kernel module: \\\"$l_mod_name\\\"\")\r\n      \
+      \   printf '%s\\n' \"blacklist $l_mod_name\" >> /etc/modprobe.d/\"$l_mod_name\".conf\r\n      fi\r\
+      \n   }\r\n   for l_mod_base_directory in $l_mod_path; do # Check if the module exists on the system\r\
+      \n      if [ -d \"$l_mod_base_directory/${l_mod_name/-/\\/}\" ] && [ -n \"$(ls -A \"$l_mod_base_directory/${l_mod_name/-/\\\
+      /}\")\" ]; then\r\n         a_output3+=(\"  - \\\"$l_mod_base_directory\\\"\")\r\n         [[ \"\
+      $l_mod_name\" =~ overlay ]] && l_mod_name=\"${l_mod_name::-2}\"        \r\n         [ \"$l_dl\"\
+      \ != \"y\" ] && f_module_fix\r\n      else\r\n         echo -e \" - kernel module: \\\"$l_mod_name\\\
+      \" doesn't exist in \\\"$l_mod_base_directory\\\"\"\r\n      fi\r\n   done\r\n   [ \"${#a_output3[@]}\"\
+      \ -gt 0 ] && printf '%s\\n' \"\" \" -- INFO --\" \" - module: \\\"$l_mod_name\\\" exists in:\" \"\
+      ${a_output3[@]}\"\r\n   [ \"${#a_output2[@]}\" -gt 0 ] && printf '%s\\n' \"\" \"${a_output2[@]}\"\
+      \ || printf '%s\\n' \"\" \" - No changes needed\"\r\n   printf '%s\\n' \"\" \" - remediation of\
+      \ kernel module: \\\"$l_mod_name\\\" complete\" \"\"\r\n}\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 0
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,68 @@
+control:
+  id: CIS-6.2.4.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure audit log files group owner is configured
+  description: Audit log files contain information about the system and system activity.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_2_4_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_2_4_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_2_4_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_2_4_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.2.4.4
+      url: https://workbench.cisecurity.org/sections/4177289/recommendations/7047759
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - AU-3
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      - T1083
+      - T1083.000
+      mitre_tactics:
+      - TA0007
+      mitre_mitigations:
+      - M1022
+    parent: CIS _6_System Auditing Main | 2.2.4.4-Ensure audit log files group owner is configured
+    rationale: Access to audit records can reveal system and configuration data to attackers, potentially
+      compromising its confidentiality.
+    impact: ''
+    audit_guidance: "Run the following command to verify `log_group` parameter is set to either `adm`\
+      \ or `root` in `/etc/audit/auditd.conf`: \r\n\r\n```\r\n#  grep -Piws -- '^\\h*log_group\\h*=\\\
+      h*\\H+\\b' /etc/audit/auditd.conf | grep -Pvi -- '(adm)'\r\n```\r\n\r\nNothing should be returned\r\
+      \n\r\nUsing the path of the directory containing the audit logs, verify audit log files are owned\
+      \ by the \"root\" or \"adm\" group by running the following script: \r\n\r\n```\r\n#!/usr/bin/env\
+      \ bash\r\n\r\n{\r\n  if [ -e /etc/audit/auditd.conf ]; then\r\n      l_fpath=\"$(dirname \"$(awk\
+      \ -F \"=\" '/^\\s*log_file/ {print $2}' /etc/audit/auditd.conf | xargs)\")\"\r\n      find -L \"\
+      $l_fpath\" -maxdepth 1 -not -path \"$l_fpath\"/lost+found -type f \\( ! -group root -a ! -group\
+      \ adm \\) -exec ls -l {} +\r\n   fi\r\n}\r\n```\r\n\r\nNothing should be returned"
+    remediation_guidance: "Run the following command to configure the audit log files to be group owned\
+      \ by `adm`: \r\n\r\n```\r\n# find $(dirname $(awk -F\"=\" '/^\\s*log_file/ {print $2}' /etc/audit/auditd.conf\
+      \ | xargs)) -type f \\( ! -group adm -a ! -group root \\) -exec chgrp adm {} +\r\n```\r\n\r\nRun\
+      \ the following command to set the `log_group` parameter in the audit configuration file to `log_group\
+      \ = adm`:\r\n\r\n```\r\n# sed -ri 's/^\\s*#?\\s*log_group\\s*=\\s*\\S+(\\s*#.*)?.*$/log_group =\
+      \ adm\\1/' /etc/audit/auditd.conf\r\n```\r\n\r\nRun the following command to restart the audit daemon\
+      \ to reload the configuration file: \r\n\r\n```\r\n# systemctl restart auditd\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

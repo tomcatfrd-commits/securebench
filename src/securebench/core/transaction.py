@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import Mapping
 
 
 class TransactionStatus(StrEnum):
@@ -25,6 +25,9 @@ class ChangeRecord:
     change_id: str
     control_id: str
     host: str
+    benchmark_id: str = ""
+    benchmark_version: str = ""
+    control_digest: str = ""
     status: ChangeStatus = ChangeStatus.PENDING
     before: Mapping[str, object] | None = field(default_factory=dict)
     after: Mapping[str, object] | None = field(default_factory=dict)
@@ -45,6 +48,14 @@ class ChangeRecord:
         if not isinstance(self.status, ChangeStatus):
             raise TypeError("status must be a ChangeStatus")
 
+        for field_name, value in (
+            ("benchmark_id", self.benchmark_id),
+            ("benchmark_version", self.benchmark_version),
+            ("control_digest", self.control_digest),
+        ):
+            if not isinstance(value, str):
+                raise TypeError(f"{field_name} must be a string")
+
 
 class Transaction:
     def __init__(
@@ -52,6 +63,7 @@ class Transaction:
         transaction_id: str,
         profile_id: str | None = None,
         benchmark_id: str | None = None,
+        benchmark_version: str | None = None,
         host: str | None = None,
     ) -> None:
         if not isinstance(transaction_id, str) or not transaction_id.strip():
@@ -65,10 +77,14 @@ class Transaction:
         if benchmark_id is not None:
             if not isinstance(benchmark_id, str) or not benchmark_id.strip():
                 raise ValueError("benchmark_id must be a non-empty string")
+        if benchmark_version is not None:
+            if not isinstance(benchmark_version, str) or not benchmark_version.strip():
+                raise ValueError("benchmark_version must be a non-empty string")
 
         self._transaction_id = transaction_id
         self._profile_id = profile_id or ""
         self._benchmark_id = benchmark_id or ""
+        self._benchmark_version = benchmark_version or ""
         self._host = host
         self._status = TransactionStatus.PENDING
         self._changes: list[ChangeRecord] = []
@@ -84,6 +100,10 @@ class Transaction:
     @property
     def benchmark_id(self) -> str:
         return self._benchmark_id
+
+    @property
+    def benchmark_version(self) -> str:
+        return self._benchmark_version
 
     @property
     def host(self) -> str | None:

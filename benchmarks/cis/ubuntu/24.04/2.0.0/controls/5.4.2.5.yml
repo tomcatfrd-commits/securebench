@@ -1,0 +1,81 @@
+control:
+  id: CIS-5.4.2.5
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure root path integrity
+  description: The `root` user can execute any command on the system and could be fooled into executing
+    programs unintentionally if the `PATH` is not set correctly.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_4_2_5.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_4_2_5.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_4_2_5.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_4_2_5.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.4.2.5
+      url: https://workbench.cisecurity.org/sections/4177297/recommendations/7047796
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-1
+      - CM-2
+      - CM-6
+      - CM-7
+      - IA-5
+      cis_v8:
+      - '0'
+      cis_v7:
+      - '0'
+      mitre_techniques:
+      - T1204
+      - T1204.002
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1022
+    parent: CIS _5_Configure root and system accounts and environment Main | 1.1.2.5-Ensure root path
+      integrity
+    rationale: Including the current working directory (.) or other writable directory in `root`'s executable
+      path makes it likely that an attacker can gain superuser access by forcing an administrator operating
+      as `root` to execute a Trojan horse program.
+    impact: ''
+    audit_guidance: "Run the following script to verify root's path does not include:\r\n- Locations that\
+      \ are not directories\r\n- An empty directory (`::`)\r\n- A trailing (`:`)\r\n- Current working\
+      \ directory (`.`)\r\n- Non `root` owned directories\r\n- Directories that less restrictive than\
+      \ mode `0755`\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   a_output2=() l_pmask=\"0022\"\r\n\
+      \   l_maxperm=\"$( printf '%o' $(( 0777 & ~$l_pmask )) )\"\r\n   l_root_path=\"$(sudo su - root\
+      \ -c env | awk -F= '$1==\"PATH\"{print $2}')\"\r\n   IFS=\":\" read -ra a_path_loc <<< \"$l_root_path\"\
+      \r\n   grep -q -- \"::\" <<< \"$l_root_path\" && \\\r\n   a_output2+=(\" - root's path contains\
+      \ a empty directory (::)\")\r\n   grep -Pq -- \":\\h*$\" <<< \"$l_root_path\" && \\\r\n   a_output2+=(\"\
+      \ - root's path contains a trailing (:)\")\r\n   grep -Pq -- '(^\\h*|:)\\.(:|\\h*$)' <<< \"$l_root_path\"\
+      \ && \\\r\n   a_output2+=(\" - root's path contains current working directory (.)\")\r\n   for l_path\
+      \ in \"${a_path_loc[@]}\"; do\r\n      if [ -d \"$l_path\" ]; then\r\n         while IFS=: read\
+      \ -r l_fmode l_fown; do\r\n            [ \"$l_fown\" != \"root\" ] && \\\r\n            a_output2+=(\"\
+      \ - Directory: \\\"$l_path\\\" is owned by: \\\"$l_fown\\\"\" \\\r\n            \"    should be\
+      \ owned by \\\"root\\\"\")\r\n            [ $(( $l_fmode & $l_pmask )) -gt 0 ] && \\\r\n       \
+      \     a_output2+=(\" - Directory: \\\"$l_path\\\" is mode: \\\"$l_fmode\\\"\" \\\r\n           \
+      \ \"    and should be mode: \\\"$l_maxperm\\\" or more restrictive\")\r\n         done <<< \"$(stat\
+      \ -Lc '%#a:%U' \"$l_path\")\"\r\n      else\r\n         a_output2+=(\" - \\\"$l_path\\\" is not\
+      \ a directory\")\r\n      fi\r\n   done\r\n   if [ \"${#a_output2[@]}\" -le 0 ]; then\r\n      printf\
+      \ '%s\\n' \"\" \"- Audit Result:\" \"  ** PASS **\" \\\r\n      \" - Root's path is correctly configured\"\
+      \r\n   else\r\n      printf '%s\\n' \"\" \"- Audit Result:\" \"  ** FAIL **\" \\\r\n      \"- *\
+      \ Reasons for audit failure * :\" \"${a_output2[@]}\"\r\n   fi\r\n}\r\n```"
+    remediation_guidance: "Correct or justify any:\r\n- Locations that are not directories\r\n- Empty\
+      \ directories (`::`)\r\n- Trailing (`:`)\r\n- Current working directory (`.`)\r\n- Non `root` owned\
+      \ directories\r\n- Directories that less restrictive than mode `0755`"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

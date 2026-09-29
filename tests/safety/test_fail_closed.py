@@ -136,7 +136,7 @@ def test_control_with_invalid_required_field_is_rejected() -> None:
 
 
 def test_control_with_invalid_rollback_capability_is_rejected() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         make_control(
             rollback_capability="invalid"  # type: ignore[arg-type]
         )

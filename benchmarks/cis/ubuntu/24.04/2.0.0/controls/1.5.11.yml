@@ -1,0 +1,96 @@
+control:
+  id: CIS-1.5.11
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure systemd-coredump Storage is configured
+  description: A core dump is the memory of an executable program. It is generally used to determine why
+    a program aborted. It can also be used to glean confidential information from a core file.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_5_11.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_5_11.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_5_11.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_5_11.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.5.11
+      url: https://workbench.cisecurity.org/sections/4177281/recommendations/7047722
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-6
+      cis_v8:
+      - '0'
+      cis_v7:
+      - '0'
+      mitre_techniques:
+      - T1005
+      - T1005.000
+      mitre_tactics:
+      - TA0007
+      mitre_mitigations:
+      - M1057
+    parent: CIS _1_Configure Additional Process Hardening Main | 2.2.12-Ensure systemd-coredump Storage
+      is configured
+    rationale: A core dump includes a memory image taken at the time the operating system terminates an
+      application. The memory image could contain sensitive data and is generally useful only for developers
+      trying to debug problems.
+    impact: The core dumps may be logged, but not stored permanently.
+    audit_guidance: "Run the following script to verify `systemd-coredump` `Storage` is set to `none`:\r\
+      \n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   l_analyze_cmd=\"$(readlink -e /bin/systemd-analyze\
+      \ || \\\r\n   readlink -e /usr/bin/systemd-analyze)\"\r\n   l_conf_file=\"systemd/coredump.conf\"\
+      \ l_block=\"Coredump\"\r\n   l_option=\"Storage\" l_option_value=\"\" a_output=()\r\n   while IFS=\
+      \ read -r l_file; do\r\n      l_file=\"${l_file//# /}\"\r\n      l_opt=\"$(awk '/\\['\"$l_block\"\
+      '\\]/{a=1;next}/\\[/{a=0}a' \"$l_file\" \\\r\n      2>/dev/null | grep -Poi '^\\h*'\"$l_option\"\
+      '\\h*=\\h*\\H+\\b' | tail -n 1)\"\r\n         l_option_value=\"$(cut -d= -f2 <<< \"$l_opt\" | xargs)\"\
+      \r\n      [ -n \"$l_option_value\" ] && \\\r\n      a_output+=(\" - \\\"$l_option\\\" is set to:\
+      \ \\\"$l_option_value\\\"\" \\\r\n      \"    in: \\\"$l_file\\\"\")\r\n   done < <(\"$l_analyze_cmd\"\
+      \ cat-config \"$l_conf_file\" | tac | \\\r\n   grep -Pio '^\\h*#\\h*\\/[^#\\n\\r\\h]+\\.conf\\b')\r\
+      \n   if [ \"${#a_output[@]}\" -le \"0\" ]; then\r\n      l_file=\"$(readlink -e /etc/\"$l_conf_file\"\
+      \ || \\\r\n\t  readlink -e /usr/lib/\"$l_conf_file\")\"\r\n      l_opt=\"$(awk '/\\['\"$l_block\"\
+      '\\]/{a=1;next}/\\[/{a=0}a' \"$l_file\" \\\r\n      2>/dev/null | grep -Poim 1 '^(\\h*#)?\\h*'\"\
+      $l_option\"'\\h*=\\h*\\H+\\b')\"\r\n      l_option_value=\"$(cut -d= -f2 <<< \"${l_opt//# /}\" |\
+      \ xargs)\"\r\n      [ -n \"$l_option_value\" ] && \\\r\n      a_output+=(\" - The default value:\
+      \ \\\"${l_opt//#/}\\\"\" \\\r\n      \"    is being used in the configuration\")\r\n   fi\r\n  \
+      \ [ \"${#a_output[@]}\" -gt \"0\" ] && printf '%s\\n' \"\" \"${a_output[@]}\" \"\"\r\n}\r\n```\r\
+      \n\r\n_Example output:_\r\n\r\n```\r\n - \"Storage\" is set to: \"none\" in: \"/etc/systemd/coredump.conf.d/60-coredump.conf\"\
+      \r\n```\r\n\r\n>**Note:** \r\n>- **- IF -** the `systemd-coredump` package is not installed this\
+      \ is considered a passing state and remediation is not necessary.\r\n>- If multiple lines are returned:\
+      \ \r\n>> - The first line includes the value being used by `systemd-coredump`. If this is a correct\
+      \ value, this is \t\t considered a passing state.\r\n>> - Files that include an incorrect value\
+      \ should be modified to correct or comment out the incorrect value to minimize the potential of\
+      \ the incorrect value being used by `systemd-coredump` due to system configuration changes\r\n>>\
+      \ - If the default value is displayed, and is the correct value, this is considered a passing state.\
+      \ However, it is recommended to follow the Remediation procedure to mitigate the potential of a\
+      \ system update changing the default value to an incorrect value."
+    remediation_guidance: "1. Review all files ending in `.conf` in the `/etc/systemd/coredump.conf.d/`\
+      \ directory and comment out or remove all `Storage=` lines in the `[Coredump]` block that are not\
+      \ `Storage=none`. \r\n\r\n_Example script:_\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   l_block=\"\
+      Coredump\" l_option=\"Storage\" l_value=\"none\"\r\n   while IFS= read -r -d $'\\0' l_file; do\r\
+      \n      awk '/\\['\"$l_block\"'\\]/{a=1;next}/\\[/{a=0}a' \"$l_file\" 2>/dev/null | \\\r\n     \
+      \ grep -Poi '\\h*'\"$l_option\"'\\h*=\\h*\\H+\\b' | \\\r\n      grep -Pivq '^\\h*'\"$l_option\"\
+      '\\h*=\\h*'\"$l_value\"'\\b' && \\\r\n      sed -ri '/^\\s*[Ss]torage\\s*=/s/^/# /' \"$l_file\"\r\
+      \n   done < <(find /etc/systemd/coredump.conf.d/ -type f -name '*.conf' -print0)\r\n}\r\n```\r\n\
+      \r\n2. Create or edit a file in the `/etc/systemd/coredump.conf.d` directory ending in `.conf` and\
+      \ edit or add the following line to the `[Coredump]` section:\r\n\r\n```\r\nStorage=none\r\n```\r\
+      \n\r\n_Example:_\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   [ ! -d /etc/systemd/coredump.conf.d/\
+      \ ] && mkdir -p \\\r\n   /etc/systemd/coredump.conf.d/\r\n   l_file=\"/etc/systemd/coredump.conf.d/60-coredump.conf\"\
+      \r\n   if grep -Psq -- '^\\h*\\[Coredump\\]' \"$l_file\"; then\r\n      sed -ri '/^\\s*\\[Coredump\\\
+      ]/a Storage=none' \"$l_file\"\r\n   else\r\n      printf '%s\\n' \"\" \"[Coredump]\" \"Storage=none\"\
+      \ >> \"$l_file\"\r\n   fi\r\n}\r\n```\r\n\r\n3. Run the following command to load the updated configuration:\r\
+      \n\r\n```\r\n# systemctl reload-or-restart systemd-coredump.socket\r\n```"
+    additional_information: ''
+    default_value: Storage=external
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

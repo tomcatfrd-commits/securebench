@@ -1,0 +1,60 @@
+control:
+  id: CIS-6.1.2.7
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure logrotate is configured
+  description: The system includes the capability of rotating log files regularly to avoid filling up
+    the system with logs or making the logs unmanageably large. The file `/etc/logrotate.d/syslog` is
+    the configuration file used to rotate log files created by `syslog` or `rsyslog`.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_1_2_7.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_1_2_7.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_1_2_7.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_1_2_7.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.1.2.7
+      url: https://workbench.cisecurity.org/sections/4177249/recommendations/7047558
+    assessment_status: manual
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AU-8
+      cis_v8:
+      - '8.3'
+      cis_v7:
+      - '6.4'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      mitre_tactics:
+      - TA0040
+      mitre_mitigations:
+      - M1022
+    parent: CIS _6_System Logging Main | 2.2.2.7-Ensure logrotate is configured
+    rationale: By keeping the log files smaller and more manageable, a system administrator can easily
+      archive these files to another system and spend less time looking through inordinately large log
+      files.
+    impact: ''
+    audit_guidance: Review `/etc/logrotate.conf` and `/etc/logrotate.d/*` and verify logs are rotated
+      according to site policy.
+    remediation_guidance: Edit `/etc/logrotate.conf` and `/etc/logrotate.d/*` to ensure logs are rotated
+      according to site policy.
+    additional_information: If no `maxage` setting is set for `logrotate` a situation can occur where
+      `logrotate` is interrupted and fails to delete rotated log files.  It is recommended to set this
+      to a value greater than the longest any log file should exist on your system to ensure that any
+      such log file is removed but standard rotation settings are not overridden.
+    default_value: ''
+    artifacts_count: 0
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

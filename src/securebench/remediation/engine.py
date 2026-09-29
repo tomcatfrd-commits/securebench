@@ -13,6 +13,7 @@ Execution follows this principle:
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -22,7 +23,9 @@ from securebench.core import (
     Control,
     ExecutionResult,
     ExecutionStatus,
+    RollbackCapability,
     Transaction,
+    TransactionStore,
 )
 
 from .planner import PlanAction, RemediationPlan, RemediationPlanItem
@@ -42,12 +45,16 @@ class RemediationProvider(Protocol):
         ...
 
     def remediate(self, control: Control, host: str) -> Any:
-        """
-        Apply the remediation for one control on one host.
-
-        May return an ExecutionResult or a mapping with success/changed/message.
-        """
+        """Apply the remediation for one control on one host."""
         ...
+
+
+@dataclass(frozen=True, slots=True)
+class RollbackPreparation:
+    """State captured and durably recorded before remediation starts."""
+
+    before: Mapping[str, object]
+    rollback_data: Mapping[str, object]
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,8 +79,16 @@ class RemediationEngine:
     Transaction state is updated as execution progresses.
     """
 
-    def __init__(self, provider: RemediationProvider) -> None:
+    def __init__(
+        self,
+        provider: RemediationProvider,
+        *,
+        transaction_store: TransactionStore | None = None,
+        require_rollback_data: bool = False,
+    ) -> None:
         self._provider = provider
+        self._transaction_store = transaction_store
+        self._require_rollback_data = require_rollback_data
 
     def execute(
         self,
@@ -125,7 +140,9 @@ class RemediationEngine:
             )
 
         if item.action is PlanAction.REMEDIATE:
-            return self._run_remediate(control, host, control_id, transaction)
+            return self._prepare_and_remediate(
+                control, host, control_id, transaction
+            )
 
         return RemediationResult(
             control_id=control_id,
@@ -164,7 +181,63 @@ class RemediationEngine:
                 message="Precheck failed.",
             )
 
-        return self._run_remediate(control, host, control_id, transaction)
+        return self._prepare_and_remediate(
+            control, host, control_id, transaction
+        )
+
+    def _prepare_and_remediate(
+        self,
+        control: Control,
+        host: str,
+        control_id: str,
+        transaction: Transaction,
+    ) -> RemediationResult:
+        if control.rollback_capability is RollbackCapability.UNSUPPORTED:
+            return RemediationResult(
+                control_id=control_id,
+                host=host,
+                status=ExecutionStatus.FAILED,
+                message="Control does not support rollback.",
+            )
+
+        preparation: RollbackPreparation | None = None
+        if self._require_rollback_data:
+            prepare = getattr(self._provider, "prepare_rollback", None)
+            if prepare is None:
+                return RemediationResult(
+                    control_id=control_id,
+                    host=host,
+                    status=ExecutionStatus.FAILED,
+                    message="Provider cannot capture rollback state.",
+                )
+            try:
+                raw = prepare(control, host)
+                preparation = self._normalize_preparation(raw)
+                self._record_change(
+                    transaction,
+                    control=control,
+                    host=host,
+                    status=ChangeStatus.PENDING,
+                    message="Rollback state captured before remediation.",
+                    before=preparation.before,
+                    rollback_data=preparation.rollback_data,
+                )
+                self._persist(transaction)
+            except Exception as exc:
+                return RemediationResult(
+                    control_id=control_id,
+                    host=host,
+                    status=ExecutionStatus.FAILED,
+                    message=f"Rollback preparation failed: {exc}",
+                )
+
+        return self._run_remediate(
+            control,
+            host,
+            control_id,
+            transaction,
+            preparation=preparation,
+        )
 
     def _run_remediate(
         self,
@@ -172,17 +245,21 @@ class RemediationEngine:
         host: str,
         control_id: str,
         transaction: Transaction,
+        preparation: RollbackPreparation | None = None,
     ) -> RemediationResult:
         try:
             raw = self._provider.remediate(control, host)
         except Exception as exc:
             self._record_change(
                 transaction,
-                control_id=control_id,
+                control=control,
                 host=host,
                 status=ChangeStatus.FAILED,
                 message=str(exc),
+                before=preparation.before if preparation else None,
+                rollback_data=preparation.rollback_data if preparation else None,
             )
+            self._persist(transaction)
             return RemediationResult(
                 control_id=control_id,
                 host=host,
@@ -194,11 +271,14 @@ class RemediationEngine:
 
         self._record_change(
             transaction,
-            control_id=control_id,
+            control=control,
             host=host,
             status=ChangeStatus.SUCCESS if success else ChangeStatus.FAILED,
             message=message,
+            before=preparation.before if preparation else None,
+            rollback_data=preparation.rollback_data if preparation else None,
         )
+        self._persist(transaction)
 
         return RemediationResult(
             control_id=control_id,
@@ -231,14 +311,46 @@ class RemediationEngine:
         return success, success, ""
 
     @staticmethod
+    def _normalize_preparation(raw: Any) -> RollbackPreparation:
+        if isinstance(raw, RollbackPreparation):
+            preparation = raw
+        elif isinstance(raw, Mapping):
+            before = raw.get("before")
+            rollback_data = raw.get("rollback_data")
+            if not isinstance(before, Mapping) or not isinstance(
+                rollback_data, Mapping
+            ):
+                raise TypeError(
+                    "rollback preparation must contain mapping values for "
+                    "'before' and 'rollback_data'"
+                )
+            preparation = RollbackPreparation(
+                before=dict(before),
+                rollback_data=dict(rollback_data),
+            )
+        else:
+            raise TypeError("provider returned invalid rollback preparation")
+
+        if not preparation.rollback_data:
+            raise ValueError("rollback_data must not be empty")
+        return preparation
+
+    def _persist(self, transaction: Transaction) -> None:
+        if self._transaction_store is not None:
+            self._transaction_store.save(transaction)
+
+    @staticmethod
     def _record_change(
         transaction: Transaction,
         *,
-        control_id: str,
+        control: Control,
         host: str,
         status: ChangeStatus,
         message: str,
+        before: Mapping[str, object] | None = None,
+        rollback_data: Mapping[str, object] | None = None,
     ) -> None:
+        control_id = control.control_id
         change_id = f"{control_id}:{host}:{len(transaction.changes)}"
         try:
             existing = None
@@ -249,6 +361,10 @@ class RemediationEngine:
             if existing is not None:
                 existing.status = status
                 existing.message = message
+                if before is not None:
+                    existing.before = dict(before)
+                if rollback_data is not None:
+                    existing.rollback_data = dict(rollback_data)
                 return
         except Exception:
             pass
@@ -258,7 +374,16 @@ class RemediationEngine:
                 change_id=change_id,
                 control_id=control_id,
                 host=host,
+                benchmark_id=control.benchmark_id,
+                benchmark_version=(
+                    control.benchmark_version or transaction.benchmark_version
+                ),
+                control_digest=control.definition_digest,
                 status=status,
+                before=dict(before) if before is not None else {},
+                rollback_data=(
+                    dict(rollback_data) if rollback_data is not None else None
+                ),
                 message=message,
             )
         )

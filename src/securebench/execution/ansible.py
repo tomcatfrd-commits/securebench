@@ -25,11 +25,11 @@ from __future__ import annotations
 
 import json
 import subprocess
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any
 
 from securebench.core import (
-    ComplianceStatus,
     Control,
     ExecutionResult,
     ExecutionStatus,
@@ -235,6 +235,22 @@ class AnsibleExecutionBackend(ExecutionBackend):
             check_mode=context.check_mode,
         )
 
+    def prepare_rollback(
+        self,
+        control: Control,
+        host: str | None = None,
+        context: ExecutionContext | None = None,
+        **kwargs: Any,
+    ) -> ExecutionResult:
+        control, host, context = self._normalize_args(control, host, context, kwargs)
+        return self._run_operation(
+            operation="prepare_rollback",
+            control=control,
+            host=host,
+            context=context,
+            check_mode=False,
+        )
+
     def rollback(
         self,
         control: Control,
@@ -256,6 +272,18 @@ class AnsibleExecutionBackend(ExecutionBackend):
             host,
             context,
             kwargs,
+        )
+        rollback_data = getattr(change, "rollback_data", None)
+        if rollback_data is None:
+            rollback_data = kwargs.get("rollback_data")
+        variables = dict(context.variables)
+        if rollback_data is not None:
+            variables["securebench_rollback_data"] = dict(rollback_data)
+        context = ExecutionContext(
+            inventory=context.inventory,
+            variables=variables,
+            check_mode=context.check_mode,
+            extra=context.extra,
         )
         return self._run_operation(
             operation="rollback",

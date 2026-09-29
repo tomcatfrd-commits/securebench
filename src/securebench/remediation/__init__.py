@@ -8,6 +8,8 @@ from .engine import (
     RemediationEngine,
     RemediationExecution,
     RemediationProvider,
+    RemediationResult,
+    RollbackPreparation,
 )
 from .planner import (
     PlanAction,
@@ -24,4 +26,6 @@ __all__ = [
     "RemediationPlanItem",
     "RemediationPlanner",
     "RemediationProvider",
+    "RemediationResult",
+    "RollbackPreparation",
 ]

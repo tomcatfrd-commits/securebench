@@ -1,0 +1,113 @@
+control:
+  id: CIS-2.3.2.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure systemd-timesyncd configured with authorized timeserver
+  description: "`NTP=`\r\n- A space-separated list of NTP server host names or IP addresses. During runtime\
+    \ this list is combined with any per-interface NTP servers acquired from systemd-networkd.service(8).\
+    \ systemd-timesyncd will contact all configured system or per-interface servers in turn, until one\
+    \ responds. When the empty string is assigned, the list of NTP servers is reset, and all prior assignments\
+    \ will have no effect. This setting defaults to an empty list.\r\n\r\n`FallbackNTP=`\r\n- A space-separated\
+    \ list of NTP server host names or IP addresses to be used as the fallback NTP servers. Any per-interface\
+    \ NTP servers obtained from systemd-networkd.service(8) take precedence over this setting, as do any\
+    \ servers set via NTP= above. This setting is hence only relevant if no other NTP server information\
+    \ is known. When the empty string is assigned, the list of NTP servers is reset, and all prior assignments\
+    \ will have no effect. If this option is not given, a compiled-in list of NTP servers is used."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_3_2_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_3_2_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_3_2_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_3_2_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.3.2.1
+      url: https://workbench.cisecurity.org/sections/4177280/recommendations/7047691
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AU-7
+      - AU-8
+      cis_v8:
+      - '8.4'
+      cis_v7:
+      - '6.1'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      - T1562
+      - T1562.001
+      mitre_tactics:
+      - TA0002
+      mitre_mitigations:
+      - M1022
+    parent: CIS _2_Time Synchronization Main | 2.1.2.1-Ensure systemd-timesyncd configured with authorized
+      timeserver
+    rationale: Time synchronization is important to support time sensitive security mechanisms and to
+      ensure log files have consistent time records across the enterprise to aid in forensic investigations
+    impact: ''
+    audit_guidance: "Run the following command to verify the `NTP` **and/or** `FallbackNTP` option is\
+      \ set to local site approved authoritative time server(s):\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\
+      \r\n{\r\n   a_output=() a_output2=() a_output3=() a_out=() a_out2=() a_parlist=(\"NTP=[^#\\n\\r]+\"\
+      \ \"FallbackNTP=[^#\\n\\r]+\") \r\n   l_analyze_cmd=\"$(readlink -f /bin/systemd-analyze)\" l_systemd_config_file=\"\
+      /etc/systemd/timesyncd.conf\"\r\n   f_config_file_parameter_chk()\r\n   {\r\n      l_used_parameter_setting=\"\
+      \"\r\n      while IFS= read -r l_file; do\r\n         l_file=\"$(tr -d '# ' <<< \"$l_file\")\"\r\
+      \n         l_used_parameter_setting=\"$(grep -PHs -- '^\\h*'\"$l_parameter_name\"'\\b' \"$l_file\"\
+      \ | tail -n 1)\"\r\n         [ -n \"$l_used_parameter_setting\" ] && break\r\n      done < <($l_analyze_cmd\
+      \ cat-config \"$l_systemd_config_file\" | tac | grep -Pio '^\\h*#\\h*\\/[^#\\n\\r\\h]+\\.conf\\\
+      b')\r\n      if [ -n \"$l_used_parameter_setting\" ]; then\r\n         while IFS=: read -r l_file_name\
+      \ l_file_parameter; do\r\n            while IFS=\"=\" read -r l_file_parameter_name l_file_parameter_value;\
+      \ do\r\n               if grep -Pq -- \"$l_parameter_value\" <<< \"$l_file_parameter_value\"; then\r\
+      \n                  a_out+=(\"  - Parameter: \\\"${l_file_parameter_name// /}\\\"\" \\\r\n     \
+      \             \"    correctly set to: \\\"${l_file_parameter_value// /}\\\"\" \\\r\n           \
+      \       \"    in the file: \\\"$l_file_name\\\"\")\r\n               else\r\n                  a_out2+=(\"\
+      \  - Parameter: \\\"${l_file_parameter_name// /}\\\"\" \\\r\n                  \"    incorrectly\
+      \ set to: \\\"${l_file_parameter_value// /}\\\"\" \\\r\n                  \"    in the file: \\\"\
+      $l_file_name\\\"\" \\\r\n                  \"    Should be set to: \\\"$l_value_out\\\"\")\r\n \
+      \              fi\r\n            done <<< \"$l_file_parameter\"\r\n         done <<< \"$l_used_parameter_setting\"\
+      \r\n      else\r\n         a_out2+=(\"  - Parameter: \\\"$l_parameter_name\\\" is not set in an\
+      \ included file\" \\\r\n         \"   *** Note: \\\"$l_parameter_name\\\" May be set in a file that's\
+      \ ignored by load procedure ***\")\r\n      fi\r\n   }\r\n   while IFS=\"=\" read -r l_parameter_name\
+      \ l_parameter_value; do # Assess and check parameters\r\n      l_parameter_name=\"${l_parameter_name//\
+      \ /}\"; l_parameter_value=\"${l_parameter_value// /}\"\r\n      l_value_out=\"${l_parameter_value//-/\
+      \ through }\"; l_value_out=\"${l_value_out//|/ or }\"\r\n      l_value_out=\"$(tr -d '(){}' <<<\
+      \ \"$l_value_out\")\"\r\n      f_config_file_parameter_chk\r\n   done < <(printf '%s\\n' \"${a_parlist[@]}\"\
+      )\r\n   if [ \"${#a_out[@]}\" -gt 0 ]; then\r\n      a_output+=(\"${a_out[@]}\"); [ \"${#a_out2[@]}\"\
+      \ -gt 0 ] && a_output3+=(\"  ** INFO: **\" \"${a_out2[@]}\")\r\n   else\r\n      a_output2+=(\"\
+      ${a_out2[@]}\")\r\n   fi\r\n   if [ \"${#a_output2[@]}\" -le 0 ]; then\r\n      printf '%s\\n' \"\
+      \" \"- Audit Result:\" \"  ** PASS **\" \"${a_output[@]}\" \"\"\r\n      [ \"${#a_output3[@]}\"\
+      \ -gt 0 ] && printf '%s\\n' \"${a_output3[@]}\"\r\n   else\r\n      printf '%s\\n' \"\" \"- Audit\
+      \ Result:\" \"  ** FAIL **\" \" - Reason(s) for audit failure:\" \"${a_output2[@]}\"\r\n      [\
+      \ \"${#a_output[@]}\" -gt 0 ] && printf '%s\\n' \"\" \"- Correctly set:\" \"${a_output[@]}\" \"\"\
+      \r\n   fi\r\n}\r\n```\r\n\r\n**Note:** Please ensure the output for `NTP` and/or `FallbackNTP` is\
+      \ in accordance with local site policy. The timeservers in the example output are provided as an\
+      \ example of possible timeservers and they may not follow local site policy."
+    remediation_guidance: "Set `NTP` and/or `FallbackNTP` parameters to local site approved authoritative\
+      \ time server(s) in `/etc/systemd/timesyncd.conf` or a file in `/etc/systemd/timesyncd.conf.d/`\
+      \ ending in `.conf` in the `[Time]` section:\r\n\r\n_Example file:_\r\n\r\n```\r\n[Time]\r\nNTP=time.nist.gov\
+      \ # Uses the generic name for NIST's time servers  \r\nFallbackNTP=time-a-g.nist.gov time-b-g.nist.gov\
+      \ time-c-g.nist.gov # Space separated list of NIST time servers\r\n```\r\n\r\n_Example script to\
+      \ create systemd drop-in configuration file:_\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   a_settings=(\"\
+      NTP=time.nist.gov\" \"FallbackNTP=time-a-g.nist.gov time-b-g.nist.gov time-c-g.nist.gov\")\r\n \
+      \  [ ! -d /etc/systemd/timesyncd.conf.d/ ] && mkdir /etc/systemd/timesyncd.conf.d/\r\n   if grep\
+      \ -Psq -- '^\\h*\\[Time\\]' /etc/systemd/timesyncd.conf.d/60-timesyncd.conf; then\r\n      printf\
+      \ '%s\\n' \"\" \"${a_settings[@]}\" >> /etc/systemd/timesyncd.conf.d/60-timesyncd.conf\r\n   else\r\
+      \n      printf '%s\\n' \"\" \"[Time]\" \"${a_settings[@]}\" >> /etc/systemd/timesyncd.conf.d/60-timesyncd.conf\r\
+      \n   fi\r\n}\r\n```\r\n\r\n**Note:** If this setting appears in a canonically later file, or later\
+      \ in the same file, the setting will be overwritten\r\n\r\nRun to following command to update the\
+      \ parameters in the service:\r\n\r\n```\r\n# systemctl reload-or-restart systemd-timesyncd\r\n```"
+    additional_information: ''
+    default_value: "#NTP=\r\n\r\n#FallbackNTP="
+    artifacts_count: 4
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

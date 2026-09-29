@@ -1,0 +1,59 @@
+control:
+  id: CIS-1.3.1.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure AppArmor is enabled
+  description: "`AppArmor` is a kernel enhancement to confine programs to a limited set of resources.\
+    \ `AppArmor` is enabled by default.\r\n\r\n**Note:** This recommendation is designed around the grub\
+    \ bootloader, if LILO or another bootloader is in use in your environment enact equivalent settings."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_3_1_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_3_1_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_3_1_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_3_1_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.3.1.2
+      url: https://workbench.cisecurity.org/sections/4177272/recommendations/7047672
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1068
+      - T1068.000
+      - T1565
+      - T1565.001
+      - T1565.003
+      mitre_tactics:
+      - TA0003
+      mitre_mitigations:
+      - M1026
+    parent: CIS _1_Mandatory Access Control Main | 2.1.1.2-Ensure AppArmor is enabled
+    rationale: '`AppArmor` is a security mechanism and disabling it is not recommended.'
+    impact: ''
+    audit_guidance: "Run the following command to verify that `AppArmor` has not been disabled:\r\n```\r\
+      \n# grep \"^\\s*linux\" /boot/grub/grub.cfg | grep \"apparmor=0\"\r\n```\r\nNothing should be returned."
+    remediation_guidance: "Edit `/etc/default/grub` of file in `/etc/default/grub.d` and remove the `apparmor=0`\
+      \ parameters to the `GRUB_CMDLINE_LINUX=` line\r\n\r\nRun the following commands to update the `grub2`\
+      \ configuration and reboot the system:\r\n\r\n```\r\n# update-grub\r\n# reboot\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,73 @@
+control:
+  id: CIS-2.1.10
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure ldap server services are not in use
+  description: The Lightweight Directory Access Protocol (LDAP) was introduced as a replacement for NIS/YP.
+    It is a service that provides a method for looking up information from a central database.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_1_10.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_1_10.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_1_10.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_1_10.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.1.10
+      url: https://workbench.cisecurity.org/sections/4177245/recommendations/7047565
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1203
+      - T1203.000
+      - T1210
+      - T1210.000
+      - T1543
+      - T1543.002
+      mitre_tactics:
+      - TA0008
+      mitre_mitigations:
+      - M1042
+    parent: CIS _2_Configure Server Services Main | 2.1.10-Ensure ldap server services are not in use
+    rationale: If the system will not need to act as an LDAP server, it is recommended that the software
+      be removed to reduce the potential attack surface.
+    impact: "There may be packages that are dependent on the `slapd` package.  If the `slapd` package\
+      \ is removed, these dependent packages will be removed as well. Before removing the `slapd` package,\
+      \ review any dependent packages to determine if they are required on the system.\r\n\r\n**- IF -**\
+      \ a dependent package is required: stop and mask the `slapd.service` leaving the `slapd` package\
+      \ installed."
+    audit_guidance: "Run the following command to verify `slapd` is not installed:\r\n\r\n```\r\n# dpkg-query\
+      \ -s slapd &>/dev/null && echo \"slapd is installed\"\r\n```\r\n\r\nNothing should be returned.\r\
+      \n\r\n**- OR -** \r\n\r\n**- IF -** the package is required for dependencies:\r\n\r\nRun the following\
+      \ command to verify `slapd.service` is not enabled:\r\n\r\n```\r\n# systemctl is-enabled slapd.service\
+      \ 2>/dev/null | grep 'enabled'\r\n\r\nNothing should be returned\r\n```\r\n\r\nRun the following\
+      \ command to verify `slapd.service` is not active:\r\n\r\n```\r\n# systemctl is-active slapd.service\
+      \ 2>/dev/null | grep '^active'\r\n\r\nNothing should be returned\r\n```\r\n\r\n**Note:** If the\
+      \ package is required for a dependency\r\n - Ensure the dependent package is approved by local site\
+      \ policy\r\n - Ensure stopping and masking the service and/or socket meets local site policy"
+    remediation_guidance: "Run the following commands to stop `slapd.service` and remove the `slapd` package:\r\
+      \n\r\n```\r\n# systemctl stop slapd.service\r\n# apt purge slapd\r\n```\r\n\r\n**- OR -**\r\n\r\n\
+      **- IF -** the `slapd` package is required as a dependency:\r\n\r\nRun the following commands to\
+      \ stop and mask `slapd.service`:\r\n\r\n```\r\n# systemctl stop slapd.service\r\n# systemctl mask\
+      \ slapd.service\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

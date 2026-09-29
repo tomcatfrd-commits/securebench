@@ -1,0 +1,71 @@
+control:
+  id: CIS-1.7.6
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure XDMCP is not enabled
+  description: X Display Manager Control Protocol (XDMCP) is designed to provide authenticated access
+    to display management services for remote displays
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_7_6.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_7_6.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_7_6.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_7_6.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.7.6
+      url: https://workbench.cisecurity.org/sections/4177290/recommendations/7047781
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - SI-4
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1040
+      - T1040.000
+      - T1056
+      - T1056.001
+      - T1557
+      - T1557.000
+      mitre_tactics:
+      - TA0002
+      mitre_mitigations:
+      - M1050
+    parent: CIS _1_Configure GNOME Display Manager Main | 1.1.6-Ensure XDMCP is not enabled
+    rationale: "XDMCP is inherently insecure.\r\n- XDMCP is not a ciphered protocol. This may allow an\
+      \ attacker to capture keystrokes entered by a user\r\n- XDMCP is vulnerable to man-in-the-middle\
+      \ attacks. This may allow an attacker to steal the credentials of legitimate users by impersonating\
+      \ the XDMCP server."
+    impact: ''
+    audit_guidance: "Run the following script and verify the output:\r\n\r\n```\r\n#!/usr/bin/env bash\r\
+      \n\r\n{\r\n   while IFS= read -r l_file; do\r\n      awk '/\\[xdmcp\\]/{ f = 1;next } /\\[/{ f =\
+      \ 0 } f {if (/^\\s*Enable\\s*=\\s*true/) print \"The file: \\\"'\"$l_file\"'\\\" includes: \\\"\"\
+      \ $0 \"\\\" in the \\\"[xdmcp]\\\" block\"}' \"$l_file\"\r\n   done < <(grep -Psil -- '^\\h*\\[xdmcp\\\
+      ]' /etc/{gdm3,gdm}/{custom,daemon}.conf)\r\n}\r\n```\r\n\r\nNothing should be returned"
+    remediation_guidance: "Edit all files returned by the audit and remove or commend out the `Enable=true`\
+      \ line in the `[xdmcp]` block:\r\n\r\n_Example File:_\r\n\r\n```\r\n# GDM configuration storage\r\
+      \n#\r\n# See /usr/share/gdm/gdm.schemas for a list of available options.\r\n\r\n[daemon]\r\n# Uncomment\
+      \ the line below to force the login screen to use Xorg\r\n#WaylandEnable=false\r\n\r\n# Enabling\
+      \ automatic login\r\n#  AutomaticLoginEnable = true\r\n#  AutomaticLogin = user1\r\n\r\n# Enabling\
+      \ timed login\r\n#  TimedLoginEnable = true\r\n#  TimedLogin = user1\r\n#  TimedLoginDelay = 10\r\
+      \n\r\n[security]\r\n\r\n[xdmcp]\r\n# Enable=true <- **This line should be removed or commented out**\r\
+      \n\r\n[chooser]\r\n\r\n[debug]\r\n# Uncomment the line below to turn on debugging\r\n# More verbose\
+      \ logs\r\n# Additionally lets the X server dump core if it crashes\r\n#Enable=true\r\n```"
+    additional_information: ''
+    default_value: 'FALSE'
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

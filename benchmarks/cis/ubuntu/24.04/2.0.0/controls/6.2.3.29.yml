@@ -1,0 +1,67 @@
+control:
+  id: CIS-6.2.3.29
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure the audit configuration is immutable
+  description: "Set system audit so that audit rules cannot be modified with `auditctl` . Setting the\
+    \ flag `-e 2` forces audit to be put in immutable mode. Audit changes can only be made on system reboot.\r\
+    \n\r\n**Note:** This setting will require the system to be rebooted to update the active `auditd`\
+    \ configuration settings."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_2_3_29.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_2_3_29.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_2_3_29.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_2_3_29.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.2.3.29
+      url: https://workbench.cisecurity.org/sections/4203192/recommendations/7091576
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      - AU-12
+      - AU-3
+      - MP-2
+      cis_v8:
+      - '8.1'
+      - '8.5'
+      cis_v7:
+      - '6.2'
+      - '6.3'
+      mitre_techniques:
+      - T1562
+      - T1562.001
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1022
+    parent: CIS _6_System Auditing Main | 2.2.3.29-Ensure the audit configuration is immutable
+    rationale: In immutable mode, unauthorized users cannot execute changes to the audit system to potentially
+      hide malicious activity and then put the audit rules back. Users would most likely notice a system
+      reboot and that could alert administrators of an attempt to make unauthorized audit changes.
+    impact: ''
+    audit_guidance: "Run the following command and verify output matches:\r\n\r\n```\r\n# grep -Ph --\
+      \ '^\\h*-e\\h+2\\b' /etc/audit/rules.d/*.rules | tail -1\r\n\r\n-e 2\r\n```"
+    remediation_guidance: "Edit or create the file `/etc/audit/rules.d/99-finalize.rules` and add the\
+      \ line `-e 2` at the end of the file:\r\n\r\n_Example:_ \r\n\r\n```\r\n# printf '\\n%s' \"-e 2\"\
+      \ >> /etc/audit/rules.d/99-finalize.rules\r\n```\r\n\r\n**Load audit rules**\r\n\r\nMerge and load\
+      \ the rules into active configuration:\r\n\r\n```\r\n# augenrules --load\r\n```\r\n\r\nCheck if\
+      \ reboot is required.\r\n\r\n```\r\n# if [[ $(auditctl -s | grep \"enabled\") =~ \"2\" ]]; then\
+      \ printf \"Reboot required to load rules\\n\"; fi\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

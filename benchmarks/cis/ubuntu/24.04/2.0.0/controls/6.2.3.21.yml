@@ -1,0 +1,69 @@
+control:
+  id: CIS-6.2.3.21
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure login and logout events are collected
+  description: "Monitor login and logout events. The parameters below track changes to files associated\
+    \ with login/logout events.\r\n- `/var/log/lastlog` - maintain records of the last time a user successfully\
+    \ logged in. \r\n- `/var/run/faillock` - directory maintains records of login failures via the `pam_faillock`\
+    \ module."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_2_3_21.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_2_3_21.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_2_3_21.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_2_3_21.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.2.3.21
+      url: https://workbench.cisecurity.org/sections/4203192/recommendations/7091568
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - AU-3
+      cis_v8:
+      - '8.5'
+      cis_v7:
+      - '4.9'
+      - '16.11'
+      - '16.13'
+      mitre_techniques:
+      - T1562
+      - T1562.006
+      mitre_tactics:
+      - TA0001
+      mitre_mitigations:
+      - M1047
+    parent: CIS _6_System Auditing Main | 2.2.3.21-Ensure login and logout events are collected
+    rationale: Monitoring login/logout events could provide a system administrator with information associated
+      with brute force attacks against user logins.
+    impact: ''
+    audit_guidance: "1. Run the following command to verify a rule exists in the running configuration:\r\
+      \n\r\n```\r\n# auditctl -l | grep -Ps -- '(lastlog|faillock)'\r\n```\r\n\r\nVerify the output matches:\r\
+      \n\r\n```\r\n-w /var/log/lastlog -p wa -k logins\r\n-w /var/run/faillock -p wa -k logins\r\n```\r\
+      \n\r\n2. Run the following command to verify a rule exists in a rules file:\r\n\r\n```\r\n# grep\
+      \ -Ps -- '(lastlog|faillock)' /etc/audit/rules.d/*.rules\r\n```\r\n\r\n_Example output_:\r\n\r\n\
+      ```\r\n/etc/audit/rules.d/50-login.rules:-w /var/log/lastlog -p wa -k logins\r\n/etc/audit/rules.d/50-login.rules:-w\
+      \ /var/run/faillock -p wa -k logins\r\n```"
+    remediation_guidance: "1. Edit or create a file in the `/etc/audit/rules.d/` directory, ending in\
+      \ `.rules` extension, with the relevant rules to monitor login and logout events.\r\n\r\n_Example:_\r\
+      \n\r\n```\r\n# printf \"\r\n-w /var/log/lastlog -p wa -k logins\r\n-w /var/run/faillock -p wa -k\
+      \ logins\r\n\" >> /etc/audit/rules.d/50-login.rules\r\n```\r\n\r\n2. Merge and load the rules into\
+      \ active configuration:\r\n\r\n```\r\n# augenrules --load\r\n```\r\n\r\n3. Check if reboot is required:\r\
+      \n\r\n```\r\n# if [[ $(auditctl -s | grep \"enabled\") =~ \"2\" ]]; then printf \"Reboot required\
+      \ to load rules\\n\"; fi\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 4
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

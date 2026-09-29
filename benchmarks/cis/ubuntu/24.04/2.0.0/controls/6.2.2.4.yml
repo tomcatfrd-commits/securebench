@@ -1,0 +1,89 @@
+control:
+  id: CIS-6.2.2.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure system warns when audit logs are low on space
+  description: "The `auditd` daemon can be configured to halt the system, put the system in single user\
+    \ mode or send a warning message, if the partition that holds the audit log files is low on space.\r\
+    \n\r\nThe `space_left_action` parameter tells the system what action to take when the system has detected\
+    \ that it is starting to get low on disk space. Valid values are `ignore`, `syslog`, `rotate`, `email`,\
+    \ `exec`, `suspend`, `single`, and `halt`.\r\n- `ignore`, the audit daemon does nothing\r\n- `syslog`,\
+    \ the audit daemon will issue a warning to syslog\r\n- `rotate`, the audit daemon will rotate logs,\
+    \ losing the oldest to free up space\r\n- `email`, the audit daemon will send a warning to the email\
+    \ account specified in `action_mail_acct` as well as sending the message to syslog\r\n- `exec`,  \
+    \ /path-to-script will execute the script. You cannot pass parameters to the script. The script is\
+    \ also responsible for telling the auditd daemon to resume logging once its completed its action\r\
+    \n- `suspend`, the audit daemon will stop writing records to the disk\r\n- `single`, the audit daemon\
+    \ will put the computer system in single user mode\r\n- `halt`, the audit daemon will shut down the\
+    \ system\r\n\r\nThe `admin_space_left_action` parameter tells the system what action to take when\
+    \ the system has detected that it is  low on disk space. Valid values are `ignore`, `syslog`, `rotate`,\
+    \ `email`, `exec`, `suspend`, `single`, and `halt`.\r\n- `ignore`, the audit daemon does nothing\r\
+    \n- `syslog`, the audit daemon will issue a warning to syslog\r\n- `rotate`, the audit daemon will\
+    \ rotate logs, losing the oldest to free up space\r\n- `email`, the audit daemon will send a warning\
+    \ to the email account specified in `action_mail_acct` as well as sending the message to syslog\r\n\
+    - `exec`,   /path-to-script will execute the script. You cannot pass parameters to the script. The\
+    \ script is also responsible for telling the auditd daemon to resume logging once its completed its\
+    \ action\r\n- `suspend`, the audit daemon will stop writing records to the disk\r\n- `single`, the\
+    \ audit daemon will put the computer system in single user mode\r\n- `halt`, the audit daemon will\
+    \ shut down the system"
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_2_2_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_2_2_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_2_2_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_2_2_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.2.2.4
+      url: https://workbench.cisecurity.org/sections/4177265/recommendations/7047635
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - AU-12
+      - AU-2
+      - AU-8
+      - SI-5
+      cis_v8:
+      - '8.2'
+      - '8.3'
+      cis_v7: []
+      mitre_techniques:
+      - T1562
+      - T1562.006
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations: []
+    parent: CIS _6_System Auditing Main | 2.2.2.4-Ensure system warns when audit logs are low on space
+    rationale: In high security contexts, the risk of detecting unauthorized access or nonrepudiation
+      exceeds the benefit of the system's availability.
+    impact: If the `admin_space_left_action` is set to `single` the audit daemon will put the computer
+      system in single user mode.
+    audit_guidance: "Run the following command and verify the `space_left_action` is set to `email`, `exec`,\
+      \ `single`, or `halt`:\r\n\r\n```\r\ngrep -Pi -- '^\\h*space_left_action\\h*=\\h*(email|exec|single|halt)\\\
+      b' /etc/audit/auditd.conf\r\n```\r\n\r\nVerify the output is `email`, `exec`, `single`, or `halt`\r\
+      \n\r\n_Example output_\r\n\r\n```\r\nspace_left_action = email\r\n```\r\n\r\nRun the following command\
+      \ and verify the `admin_space_left_action` is set to `single` **- OR -** `halt`:\r\n\r\n```\r\n\
+      grep -Pi -- '^\\h*admin_space_left_action\\h*=\\h*(single|halt)\\b' /etc/audit/auditd.conf\r\n```\r\
+      \n\r\nVerify the output is `single` or `halt`\r\n\r\n_Example output:_\r\n\r\n```\r\nadmin_space_left_action\
+      \ = single\r\n```\r\n\r\n**Note:** A Mail Transfer Agent (MTA) must be installed and configured\
+      \ properly to set `space_left_action = email`"
+    remediation_guidance: "Set the `space_left_action` parameter in `/etc/audit/auditd.conf` to `email`,\
+      \ `exec`, `single`, or `halt`:\r\n\r\n_Example:_\r\n\r\n```\r\nspace_left_action = email\r\n```\r\
+      \n\r\nSet the `admin_space_left_action` parameter in `/etc/audit/auditd.conf` to `single` or `halt`:\r\
+      \n\r\n_Example:_\r\n\r\n```\r\nadmin_space_left_action = single\r\n```\r\n\r\n**Note:** A Mail Transfer\
+      \ Agent (MTA) must be installed and configured properly to set `space_left_action = email`"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,72 @@
+control:
+  id: CIS-1.2.1.3
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to gpg key files are configured
+  description: GPG key files are cryptographic keys used by APT to verify the authenticity and integrity
+    of software packages. Each key ensures that packages come from a trusted source and have not been
+    tampered with. These keys are typically stored in keyring directories `/etc/apt/trusted.gpg.d` or
+    `/usr/share/keyrings` and referenced in repository configuration files using the `signed-by` option
+    for secure package verification.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_2_1_3.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_2_1_3.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_2_1_3.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_2_1_3.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.2.1.3
+      url: https://workbench.cisecurity.org/sections/4177267/recommendations/7047628
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 2 - Server
+    mappings:
+      nist: []
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _1_Package Management Main | 2.2.3-Ensure access to gpg key files are configured
+    rationale: ''
+    impact: The `apt-key` command is deprecated, and you should manage keyring files individually in the
+      `trusted.gpg.d` directory instead. This change is due to security concerns with the way `apt-key`
+      works, as it adds keys to the `/etc/apt/trusted.gpg` file, which can lead to potential security
+      issues.
+    audit_guidance: "1. Run the following script to verify all `.gpg` key files in `/usr/share/keyrings/`\
+      \ and `/etc/apt/trusted.gpg.d` are mode `0644` or more restrictive, are owned by the user `root`,\
+      \ and group owned by the group `root`:\r\n\r\n```\r\n#! /usr/bin/env bash\r\n\r\n{\r\n   while IFS=\
+      \ read -r -d $'\\0' l_file; do\r\n      stat -Lc 'File: %n Mode: (%#a) User: (%U) Group: (%G)' \"\
+      $l_file\"\r\n   done < <(find -L /usr/share/keyrings/ /etc/apt/trusted.gpg.d/ \\\r\n   -mount -xdev\
+      \ -type f \\( ! -user root -o ! -group root -o -perm /133 \\) \\\r\n   -name '*gpg' -print0)\r\n\
+      }\r\n```\r\n\r\nNothing should be returned.\r\n\r\n2. Run the following script to verify key files\
+      \ ending in `.list` or `.sources`, that include the `signed-by` option, are mode `0644` or more\
+      \ restrictive, are owned by the user `root`, and group owned by the group `root`:\r\n\r\n```\r\n\
+      #!/usr/bin/env bash\r\n\r\n{\r\n   while IFS= read -r -d $'\\0' l_file; do\r\n      grep -PRiLs\
+      \ -- '^([^#\\n\\r]+)?\\bSigned-By\\b' \"$l_file\" && \\\r\n      stat -Lc 'File: %n Mode: (%#a)\
+      \ User: (%U) Group: (%G)' \"$l_file\"\r\n   done < <(find -L /etc/apt/sources.list.d/ -mount -xdev\
+      \ -type f \\\r\n   \\( ! -user root -o ! -group root -o -perm /133 \\) \\\r\n   \\( -name '*.list'\
+      \ -o -name '*.sources' \\) -print0)\r\n}\r\n```\r\n\r\nNothing should be returned."
+    remediation_guidance: "Run the following commands to update the access to any file(s) returned in\
+      \ the audit steps above:\r\n\r\n```\r\n# chown root:root \"/absolute/path/to/file\"\r\n# chmod \
+      \ u-x,go-wx \"/absolute/path/to/file\"\r\n```\r\n\r\n_Example_\r\n```\r\n# chown root:root /usr/share/keyrings/debian-archive-trixie-security-automatic.gpg\r\
+      \n# chmod  u-x,go-wx /usr/share/keyrings/debian-archive-trixie-security-automatic.gpg\r\n```\r\n\
+      \r\n**Note**: APT first checks keys specified with the `signed-by` option in a repository's `.sources`\
+      \ or `.list` files. If no key is specified there, it falls back to administrator-managed keyrings\
+      \ in `/etc/apt/trusted.gpg.d`, then system-wide keyrings in `/usr/share/keyrings`."
+    additional_information: ''
+    default_value: "```\r\nAccess: (644/-rw-r--r--) Uid: ( 0/ root) Gid: ( 0/ root)\r\n```"
+    artifacts_count: 7
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -6,6 +6,10 @@ profile:
     providing business services. Only controls explicitly classified as safe
     or safe_with_precheck may enter the automatic remediation workflow.
 
+  applies_to:
+    benchmark_id: cis-ubuntu-24.04
+    benchmark_version: "2.0.0"
+
   defaults:
     classification: investigate
     require_approval_for_unknown: true

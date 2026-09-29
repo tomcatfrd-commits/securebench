@@ -18,10 +18,10 @@ and custom benchmarks can all use the same abstraction.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import StrEnum
 from types import MappingProxyType
-from typing import Mapping
 
 
 class SafetyClassification(StrEnum):
@@ -45,6 +45,7 @@ class RollbackCapability(StrEnum):
 class ControlSeverity(StrEnum):
     """Security severity assigned to a benchmark control."""
 
+    UNSPECIFIED = "unspecified"
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -159,6 +160,11 @@ class Control:
 
     rollback_capability: RollbackCapability
 
+    # SHA-256 of the source control definition. This binds transactions and
+    # rollback records to the exact content that was evaluated and executed.
+    definition_digest: str = ""
+    benchmark_version: str = ""
+
     dependencies: tuple[str, ...] = ()
     conflicts: tuple[str, ...] = ()
 
@@ -199,6 +205,18 @@ class Control:
             raise TypeError(
                 "rollback_capability must be a RollbackCapability"
             )
+
+        if not isinstance(self.definition_digest, str):
+            raise TypeError("definition_digest must be a string")
+
+        if self.definition_digest and not (
+            len(self.definition_digest) == 64
+            and all(character in "0123456789abcdef" for character in self.definition_digest)
+        ):
+            raise ValueError("definition_digest must be a lowercase SHA-256 digest")
+
+        if not isinstance(self.benchmark_version, str):
+            raise TypeError("benchmark_version must be a string")
 
         self._validate_relationships()
 

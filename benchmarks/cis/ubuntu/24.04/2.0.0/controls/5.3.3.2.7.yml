@@ -1,0 +1,67 @@
+control:
+  id: CIS-5.3.3.2.7
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure password quality checking is enforced
+  description: "The `pam_pwquality` module can be configured to either reject a password if it fails the\
+    \ checks, or only print a warning.\r\n\r\nThis is configured by setting the `enforcing= ` argument.\
+    \ If nonzero, a password will be rejected if it fails the checks, otherwise only a warning message\
+    \ will be provided.\r\n\r\nThis setting applies only to the pam_pwquality module and possibly other\
+    \ applications that explicitly change their behavior based on it. It does not affect pwmake(1) and\
+    \ pwscore(1)."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_3_2_7.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_3_2_7.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_3_2_7.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_3_2_7.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.3.2.7
+      url: https://workbench.cisecurity.org/sections/4177285/recommendations/7047758
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - IA-5
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.4.2.7-Ensure password quality checking
+      is enforced
+    rationale: Strong passwords help protect systems from password attacks. Types of password attacks
+      include dictionary attacks, which attempt to use common words and phrases, and brute force attacks,
+      which try every possible combination of characters. Also attackers may try to obtain the account
+      database so they can use tools to discover the accounts and passwords.
+    impact: ''
+    audit_guidance: "Run the following command to verify that `enforcing=0` has not been set in a `pwquality`\
+      \ configuration file:\r\n\r\n```\r\n# grep -PHsi -- '^\\h*enforcing\\h*=\\h*0\\b' /etc/security/pwquality.conf\
+      \ /etc/security/pwquality.conf.d/*.conf\r\n```\r\n\r\nNothing should be returned\r\n\r\nRun the\
+      \ following command to verify that the `enforcing=0` argument has not been set on the `pam_pwquality`\
+      \ module:\r\n\r\n```\r\n# grep -PHsi -- '^\\h*password\\h+[^#\\n\\r]+\\h+pam_pwquality\\.so\\h+([^#\\\
+      n\\r]+\\h+)?enforcing=0\\b' /etc/pam.d/common-password\r\n```\r\n\r\nNothing should be returned"
+    remediation_guidance: "Run the following command:\r\n\r\n```\r\n# grep -Pl -- '\\bpam_pwquality\\\
+      .so\\h+([^#\\n\\r]+\\h+)?enforcing=0\\b' /usr/share/pam-configs/*\r\n```\r\n\r\nEdit any returned\
+      \ files and remove the `enforcing=0` argument from the `pam_pwquality.so` line(s)\r\n\r\nEdit `/etc/security/pwquality.conf`\
+      \ and all files ending in `.conf` in the `/etc/security/pwquality.conf.d/` directory and remove\
+      \ or comment out any line containing the `enforcing = 0` argument:\r\n\r\n_Example:_ \r\n\r\n```\r\
+      \n# sed -ri 's/^\\s*enforcing\\s*=\\s*0/# &/' /etc/security/pwquality.conf /etc/security/pwquality.conf.d/*.conf\r\
+      \n```"
+    additional_information: ''
+    default_value: enforcing=1
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

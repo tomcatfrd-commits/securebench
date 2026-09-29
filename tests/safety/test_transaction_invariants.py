@@ -1,342 +1,308 @@
 from __future__ import annotations
 
-from securebench.core.control import (
-    Control,
-    ControlSeverity,
-    RollbackCapability,
-)
-from securebench.core.result import ExecutionResult, ExecutionStatus
+from collections.abc import Mapping
+
+import pytest
+
 from securebench.core.transaction import (
     ChangeRecord,
     ChangeStatus,
     Transaction,
     TransactionStatus,
 )
-from securebench.rollback.engine import RollbackEngine
 
 
-def make_control(
-    *,
-    control_id: str = "TEST-1",
-    rollback_capability: RollbackCapability = RollbackCapability.GUARANTEED,
-) -> Control:
-    return Control(
-        control_id=control_id,
+def make_transaction(
+    transaction_id: str = "tx-001",
+) -> Transaction:
+    return Transaction(
+        transaction_id=transaction_id,
+        profile_id="test-profile",
         benchmark_id="test-benchmark",
-        title="Test control",
-        description="Test control description.",
-        platform="ubuntu-24.04",
-        severity=ControlSeverity.MEDIUM,
-        audit="audit.test",
-        remediation="remediation.test",
-        rollback="rollback.test",
-        verification="verification.test",
-        rollback_capability=rollback_capability,
+        host="production-01",
     )
 
 
 def make_change(
-    *,
-    control_id: str = "TEST-1",
-    host: str = "test-host",
     change_id: str = "change-001",
-    status: ChangeStatus = ChangeStatus.SUCCESS,
+    *,
+    status: ChangeStatus = ChangeStatus.PENDING,
 ) -> ChangeRecord:
     return ChangeRecord(
         change_id=change_id,
-        control_id=control_id,
-        host=host,
+        control_id="TEST-1",
+        host="production-01",
         status=status,
+        before={"value": "old"},
+        after={"value": "new"},
+        details={"source": "test"},
+        rollback_data={"value": "old"},
         message="Test change.",
     )
 
 
-class RecordingRollbackProvider:
-    def __init__(
-        self,
-        *,
-        success: bool = True,
-    ) -> None:
-        self.success = success
-        self.calls: list[tuple[str, str, str]] = []
+def test_new_transaction_starts_pending() -> None:
+    transaction = make_transaction()
 
-    def rollback(
-        self,
-        control,
-        host: str,
-        change: ChangeRecord,
-    ) -> ExecutionResult:
-        self.calls.append(
-            (
-                control.control_id,
-                host,
-                change.change_id,
-            )
-        )
+    assert transaction.status is TransactionStatus.PENDING
+    assert transaction.change_count == 0
+    assert transaction.changes == ()
 
-        if self.success:
-            return ExecutionResult(
-                control_id=control.control_id,
-                host=host,
-                status=ExecutionStatus.SUCCESS,
-                changed=True,
-                message="Rollback completed.",
-            )
 
-        return ExecutionResult(
-            control_id=control.control_id,
-            host=host,
-            status=ExecutionStatus.FAILED,
-            changed=False,
-            message="Rollback failed.",
+def test_transaction_id_is_required() -> None:
+    with pytest.raises(ValueError):
+        Transaction(
+            transaction_id="",
+            profile_id="test-profile",
+            benchmark_id="test-benchmark",
+            host="production-01",
         )
 
 
-def test_rollback_only_targets_successful_changes() -> None:
-    control = make_control()
+def test_transaction_id_cannot_be_whitespace() -> None:
+    with pytest.raises(ValueError):
+        Transaction(
+            transaction_id="   ",
+            profile_id="test-profile",
+            benchmark_id="test-benchmark",
+            host="production-01",
+        )
 
-    transaction = Transaction(
-        transaction_id="txn-001",
-        host="test-host",
+
+def test_change_ids_must_be_unique() -> None:
+    transaction = make_transaction()
+
+    transaction.add_change(make_change("change-001"))
+
+    with pytest.raises(ValueError):
+        transaction.add_change(make_change("change-001"))
+
+
+def test_transaction_rejects_non_change_record() -> None:
+    transaction = make_transaction()
+
+    with pytest.raises(TypeError):
+        transaction.add_change(object())  # type: ignore[arg-type]
+
+
+def test_changes_are_exposed_as_immutable_tuple() -> None:
+    transaction = make_transaction()
+    transaction.add_change(make_change())
+
+    changes = transaction.changes
+
+    assert isinstance(changes, tuple)
+    assert len(changes) == 1
+
+
+def test_returned_change_collection_cannot_modify_transaction() -> None:
+    transaction = make_transaction()
+    transaction.add_change(make_change())
+
+    changes = transaction.changes
+
+    with pytest.raises(AttributeError):
+        changes.append(make_change("change-002"))  # type: ignore[attr-defined]
+
+    assert transaction.change_count == 1
+
+
+def test_get_change_returns_requested_change() -> None:
+    transaction = make_transaction()
+    expected = make_change("change-001")
+
+    transaction.add_change(expected)
+
+    actual = transaction.get_change("change-001")
+
+    assert actual is expected
+
+
+def test_get_missing_change_raises_key_error() -> None:
+    transaction = make_transaction()
+
+    with pytest.raises(KeyError, match="missing"):
+        transaction.get_change("missing")
+
+
+def test_successful_change_is_reported() -> None:
+    transaction = make_transaction()
+
+    transaction.add_change(
+        make_change(
+            status=ChangeStatus.SUCCESS,
+        )
     )
 
-    successful = make_change(
-        change_id="change-success",
-        status=ChangeStatus.SUCCESS,
-    )
-    failed = make_change(
-        change_id="change-failed",
-        status=ChangeStatus.FAILED,
-    )
-    pending = make_change(
-        change_id="change-pending",
-        status=ChangeStatus.PENDING,
+    assert transaction.successful_changes == (transaction.changes[0],)
+    assert transaction.failed_changes == ()
+
+
+def test_failed_change_is_reported() -> None:
+    transaction = make_transaction()
+
+    transaction.add_change(
+        make_change(
+            status=ChangeStatus.FAILED,
+        )
     )
 
-    transaction.add_change(successful)
-    transaction.add_change(failed)
-    transaction.add_change(pending)
+    assert transaction.failed_changes == (transaction.changes[0],)
+    assert transaction.successful_changes == ()
+
+
+def test_transaction_cannot_commit_with_failed_changes() -> None:
+    transaction = make_transaction()
+
+    transaction.add_change(
+        make_change(
+            status=ChangeStatus.FAILED,
+        )
+    )
+
+    with pytest.raises(ValueError):
+        transaction.mark_committed()
+
+    assert transaction.status is TransactionStatus.PENDING
+
+
+def test_transaction_can_commit_after_successful_changes() -> None:
+    transaction = make_transaction()
+
+    transaction.add_change(
+        make_change(
+            status=ChangeStatus.SUCCESS,
+        )
+    )
+
+    transaction.mark_committed()
+
+    assert transaction.status is TransactionStatus.COMMITTED
+
+
+def test_empty_transaction_can_commit() -> None:
+    transaction = make_transaction()
+
+    transaction.mark_committed()
+
+    assert transaction.status is TransactionStatus.COMMITTED
+
+
+def test_rollback_required_state_is_explicit() -> None:
+    transaction = make_transaction()
+
     transaction.mark_rollback_required()
 
-    provider = RecordingRollbackProvider()
-    engine = RollbackEngine(provider)
-
-    result = engine.rollback_transaction(
-        transaction=transaction,
-        controls={control.control_id: control},
-    )
-
-    assert result.success is True
-    assert provider.calls == [
-        ("TEST-1", "test-host", "change-success"),
-    ]
-
-    assert successful.status is ChangeStatus.ROLLED_BACK
-    assert failed.status is ChangeStatus.FAILED
-    assert pending.status is ChangeStatus.PENDING
-
-
-def test_rollback_uses_reverse_order() -> None:
-    control = make_control()
-
-    transaction = Transaction(
-        transaction_id="txn-002",
-        host="test-host",
-    )
-
-    first = make_change(change_id="change-001")
-    second = make_change(change_id="change-002")
-    third = make_change(change_id="change-003")
-
-    transaction.add_change(first)
-    transaction.add_change(second)
-    transaction.add_change(third)
-    transaction.mark_rollback_required()
-
-    provider = RecordingRollbackProvider()
-    engine = RollbackEngine(provider)
-
-    result = engine.rollback_transaction(
-        transaction=transaction,
-        controls={control.control_id: control},
-    )
-
-    assert result.success is True
-
-    assert provider.calls == [
-        ("TEST-1", "test-host", "change-003"),
-        ("TEST-1", "test-host", "change-002"),
-        ("TEST-1", "test-host", "change-001"),
-    ]
-
-
-def test_failed_rollback_stops_further_rollback() -> None:
-    control = make_control()
-
-    transaction = Transaction(
-        transaction_id="txn-003",
-        host="test-host",
-    )
-
-    first = make_change(change_id="change-001")
-    second = make_change(change_id="change-002")
-    third = make_change(change_id="change-003")
-
-    transaction.add_change(first)
-    transaction.add_change(second)
-    transaction.add_change(third)
-    transaction.mark_rollback_required()
-
-    class FailSecondRollbackProvider(RecordingRollbackProvider):
-        def rollback(
-            self,
-            control,
-            host: str,
-            change: ChangeRecord,
-        ) -> ExecutionResult:
-            self.calls.append(
-                (
-                    control.control_id,
-                    host,
-                    change.change_id,
-                )
-            )
-
-            if change.change_id == "change-002":
-                return ExecutionResult(
-                    control_id=control.control_id,
-                    host=host,
-                    status=ExecutionStatus.FAILED,
-                    changed=False,
-                    message="Rollback failed.",
-                )
-
-            return ExecutionResult(
-                control_id=control.control_id,
-                host=host,
-                status=ExecutionStatus.SUCCESS,
-                changed=True,
-                message="Rollback completed.",
-            )
-
-    provider = FailSecondRollbackProvider()
-    engine = RollbackEngine(provider)
-
-    result = engine.rollback_transaction(
-        transaction=transaction,
-        controls={control.control_id: control},
-    )
-
-    assert result.success is False
-
-    assert provider.calls == [
-        ("TEST-1", "test-host", "change-003"),
-        ("TEST-1", "test-host", "change-002"),
-    ]
-
-    assert third.status is ChangeStatus.ROLLED_BACK
-    assert second.status is ChangeStatus.ROLLBACK_REQUIRED
-    assert first.status is ChangeStatus.SUCCESS
     assert transaction.status is TransactionStatus.ROLLBACK_REQUIRED
 
 
-def test_unsupported_rollback_is_denied() -> None:
-    control = make_control(
-        rollback_capability=RollbackCapability.UNSUPPORTED,
+def test_rollback_required_can_be_set_after_successful_change() -> None:
+    transaction = make_transaction()
+
+    transaction.add_change(
+        make_change(
+            status=ChangeStatus.SUCCESS,
+        )
     )
 
-    transaction = Transaction(
-        transaction_id="txn-004",
-        host="test-host",
-    )
-
-    change = make_change()
-    transaction.add_change(change)
     transaction.mark_rollback_required()
 
-    provider = RecordingRollbackProvider()
-    engine = RollbackEngine(provider)
-
-    result = engine.rollback_transaction(
-        transaction=transaction,
-        controls={control.control_id: control},
-    )
-
-    assert result.success is False
-    assert provider.calls == []
-    assert change.status is ChangeStatus.ROLLBACK_REQUIRED
     assert transaction.status is TransactionStatus.ROLLBACK_REQUIRED
 
 
-def test_missing_control_fails_closed() -> None:
-    transaction = Transaction(
-        transaction_id="txn-005",
-        host="test-host",
-    )
+def test_transaction_can_be_marked_rolled_back() -> None:
+    transaction = make_transaction()
 
-    change = make_change()
-    transaction.add_change(change)
-    transaction.mark_rollback_required()
-
-    provider = RecordingRollbackProvider()
-    engine = RollbackEngine(provider)
-
-    result = engine.rollback_transaction(
-        transaction=transaction,
-        controls={},
-    )
-
-    assert result.success is False
-    assert provider.calls == []
-    assert change.status is ChangeStatus.SUCCESS
-    assert transaction.status is TransactionStatus.ROLLBACK_REQUIRED
-
-
-def test_empty_transaction_does_not_invoke_provider() -> None:
-    transaction = Transaction(
-        transaction_id="txn-006",
-        host="test-host",
+    transaction.add_change(
+        make_change(
+            status=ChangeStatus.SUCCESS,
+        )
     )
 
     transaction.mark_rollback_required()
+    transaction.mark_rolled_back()
 
-    provider = RecordingRollbackProvider()
-    engine = RollbackEngine(provider)
-
-    result = engine.rollback_transaction(
-        transaction=transaction,
-        controls={},
-    )
-
-    assert result.success is True
-    assert provider.calls == []
     assert transaction.status is TransactionStatus.ROLLED_BACK
 
 
-def test_rollback_does_not_modify_control_definition() -> None:
-    control = make_control()
+def test_rolled_back_transaction_cannot_be_committed() -> None:
+    transaction = make_transaction()
 
-    transaction = Transaction(
-        transaction_id="txn-007",
-        host="test-host",
-    )
-
-    change = make_change()
-    transaction.add_change(change)
     transaction.mark_rollback_required()
+    transaction.mark_rolled_back()
 
-    provider = RecordingRollbackProvider()
-    engine = RollbackEngine(provider)
+    with pytest.raises(ValueError):
+        transaction.mark_committed()
 
-    original_title = control.title
-    original_dependencies = control.dependencies
-    original_rollback = control.rollback
+    assert transaction.status is TransactionStatus.ROLLED_BACK
 
-    engine.rollback_transaction(
-        transaction=transaction,
-        controls={control.control_id: control},
+
+def test_transaction_status_cannot_be_changed_by_mutating_returned_change() -> None:
+    transaction = make_transaction()
+
+    change = make_change(
+        status=ChangeStatus.SUCCESS,
+    )
+    transaction.add_change(change)
+
+    transaction.mark_committed()
+
+    change.status = ChangeStatus.ROLLED_BACK
+
+    assert transaction.status is TransactionStatus.COMMITTED
+
+
+def test_change_record_rejects_empty_change_id() -> None:
+    with pytest.raises(ValueError):
+        ChangeRecord(
+            change_id="",
+            control_id="TEST-1",
+            host="production-01",
+        )
+
+
+def test_change_record_rejects_empty_control_id() -> None:
+    with pytest.raises(ValueError):
+        ChangeRecord(
+            change_id="change-001",
+            control_id="",
+            host="production-01",
+        )
+
+
+def test_change_record_rejects_empty_host() -> None:
+    with pytest.raises(ValueError):
+        ChangeRecord(
+            change_id="change-001",
+            control_id="TEST-1",
+            host="",
+        )
+
+
+def test_change_record_rejects_invalid_status() -> None:
+    with pytest.raises(TypeError):
+        ChangeRecord(
+            change_id="change-001",
+            control_id="TEST-1",
+            host="production-01",
+            status="success",  # type: ignore[arg-type]
+        )
+
+
+def test_change_record_preserves_mapping_data() -> None:
+    before: Mapping[str, object] = {"mode": "0644"}
+    after: Mapping[str, object] = {"mode": "0600"}
+    rollback_data: Mapping[str, object] = {"mode": "0644"}
+
+    change = ChangeRecord(
+        change_id="change-001",
+        control_id="TEST-1",
+        host="production-01",
+        before=before,
+        after=after,
+        rollback_data=rollback_data,
     )
 
-    assert control.title == original_title
-    assert control.dependencies == original_dependencies
-    assert control.rollback == original_rollback
+    assert change.before == before
+    assert change.after == after
+    assert change.rollback_data == rollback_data

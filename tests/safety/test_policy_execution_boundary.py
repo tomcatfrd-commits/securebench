@@ -1,22 +1,18 @@
 from __future__ import annotations
 
-from securebench.core.control import (
+from securebench.core import (
+    AuditResult,
+    ComplianceStatus,
     Control,
     ControlSeverity,
+    Profile,
+    ProfileRule,
     RollbackCapability,
     SafetyClassification,
 )
-from securebench.core.profile import Profile, ProfileRule
 from securebench.policy.classifier import ControlClassifier
 from securebench.policy.engine import PolicyEngine
-from securebench.remediation.planner import (
-    PlanAction,
-    RemediationPlanner,
-)
-from securebench.core.result import (
-    AuditResult,
-    ComplianceStatus,
-)
+from securebench.remediation.planner import PlanAction, RemediationPlanner
 
 
 def make_control(
@@ -62,176 +58,138 @@ def make_profile(
     )
 
 
-def make_failed_audit() -> AuditResult:
+def make_audit(
+    *,
+    status: ComplianceStatus,
+    control_id: str = "TEST-1",
+    host: str = "production-01",
+) -> AuditResult:
     return AuditResult(
-        control_id="TEST-1",
-        host="production-01",
-        status=ComplianceStatus.FAIL,
+        control_id=control_id,
+        host=host,
+        status=status,
         evidence=(),
     )
 
 
-def test_safe_control_can_enter_remediation_workflow() -> None:
+def evaluate(
+    control: Control,
+    profile: Profile,
+):
+    return PolicyEngine().evaluate(control, profile)
+
+
+def plan_for(
+    control: Control,
+    profile: Profile,
+    audit: AuditResult,
+):
+    policy_engine = PolicyEngine()
+    planner = RemediationPlanner(policy_engine=policy_engine)
+
+    evaluation = policy_engine.evaluate(control, profile)
+
+    return evaluation, planner.plan(
+        (audit,),
+        (evaluation,),
+    )
+
+
+def test_safe_control_is_allowed_and_becomes_remediation() -> None:
     control = make_control()
     profile = make_profile(SafetyClassification.SAFE)
 
-    classifier = ControlClassifier()
-    policy_engine = PolicyEngine()
-    planner = RemediationPlanner(
-        policy_engine=policy_engine,
-    )
-
-    classification = classifier.classify(control, profile)
-    evaluation = policy_engine.evaluate(
+    evaluation, plan = plan_for(
         control,
         profile,
-    )
-    plan = planner.plan(
-        (
-            make_failed_audit(),
-        ),
-        (
-            evaluation,
-        ),
+        make_audit(status=ComplianceStatus.FAIL),
     )
 
-    assert classification.automatically_remediable is True
     assert evaluation.allowed is True
+    assert evaluation.can_execute_without_approval is True
+    assert evaluation.requires_precheck is False
+    assert evaluation.requires_approval is False
     assert plan.items[0].action is PlanAction.REMEDIATE
 
 
-def test_safe_with_precheck_never_becomes_direct_remediation() -> None:
+def test_safe_with_precheck_is_allowed_but_requires_precheck() -> None:
     control = make_control()
-    profile = make_profile(
-        SafetyClassification.SAFE_WITH_PRECHECK,
-    )
+    profile = make_profile(SafetyClassification.SAFE_WITH_PRECHECK)
 
-    policy_engine = PolicyEngine()
-    planner = RemediationPlanner(
-        policy_engine=policy_engine,
-    )
-
-    evaluation = policy_engine.evaluate(
+    evaluation, plan = plan_for(
         control,
         profile,
-    )
-    plan = planner.plan(
-        (
-            make_failed_audit(),
-        ),
-        (
-            evaluation,
-        ),
+        make_audit(status=ComplianceStatus.FAIL),
     )
 
+    assert evaluation.allowed is True
     assert evaluation.requires_precheck is True
+    assert evaluation.can_execute_without_approval is False
     assert plan.items[0].action is PlanAction.PRECHECK
-    assert plan.items[0].action is not PlanAction.REMEDIATE
 
 
-def test_approval_required_control_never_becomes_direct_remediation() -> None:
+def test_approval_required_never_becomes_direct_remediation() -> None:
     control = make_control()
     profile = make_profile(
         SafetyClassification.APPROVAL_REQUIRED,
         require_approval=True,
     )
 
-    policy_engine = PolicyEngine()
-    planner = RemediationPlanner(
-        policy_engine=policy_engine,
-    )
-
-    evaluation = policy_engine.evaluate(
+    evaluation, plan = plan_for(
         control,
         profile,
-    )
-    plan = planner.plan(
-        (
-            make_failed_audit(),
-        ),
-        (
-            evaluation,
-        ),
+        make_audit(status=ComplianceStatus.FAIL),
     )
 
+    assert evaluation.allowed is True
     assert evaluation.requires_approval is True
+    assert evaluation.can_execute_without_approval is False
     assert plan.items[0].action is PlanAction.APPROVAL_REQUIRED
-    assert plan.items[0].action is not PlanAction.REMEDIATE
 
 
-def test_investigate_control_cannot_enter_remediation() -> None:
+def test_investigate_control_is_blocked() -> None:
     control = make_control()
     profile = make_profile(
         SafetyClassification.INVESTIGATE,
         enabled=False,
     )
 
-    policy_engine = PolicyEngine()
-    planner = RemediationPlanner(
-        policy_engine=policy_engine,
-    )
-
-    evaluation = policy_engine.evaluate(
+    evaluation, plan = plan_for(
         control,
         profile,
-    )
-    plan = planner.plan(
-        (
-            make_failed_audit(),
-        ),
-        (
-            evaluation,
-        ),
+        make_audit(status=ComplianceStatus.FAIL),
     )
 
     assert evaluation.allowed is False
+    assert evaluation.can_execute_without_approval is False
     assert plan.items[0].action is PlanAction.INVESTIGATE
-    assert plan.items[0].action is not PlanAction.REMEDIATE
 
 
-def test_prohibited_control_cannot_enter_remediation() -> None:
+def test_prohibited_control_is_blocked() -> None:
     control = make_control()
     profile = make_profile(
         SafetyClassification.PROHIBITED,
         enabled=False,
     )
 
-    policy_engine = PolicyEngine()
-    planner = RemediationPlanner(
-        policy_engine=policy_engine,
-    )
-
-    evaluation = policy_engine.evaluate(
+    evaluation, plan = plan_for(
         control,
         profile,
-    )
-    plan = planner.plan(
-        (
-            make_failed_audit(),
-        ),
-        (
-            evaluation,
-        ),
+        make_audit(status=ComplianceStatus.FAIL),
     )
 
     assert evaluation.allowed is False
+    assert evaluation.can_execute_without_approval is False
     assert plan.items[0].action is PlanAction.INVESTIGATE
-    assert plan.items[0].action is not PlanAction.REMEDIATE
 
 
-def test_best_effort_rollback_is_not_allowed_by_default() -> None:
+def test_best_effort_rollback_is_denied_by_default() -> None:
     control = make_control(
         rollback_capability=RollbackCapability.BEST_EFFORT,
     )
-    profile = make_profile(
-        SafetyClassification.SAFE,
-        allow_best_effort_rollback=False,
-    )
+    profile = make_profile(SafetyClassification.SAFE)
 
-    evaluation = PolicyEngine().evaluate(
-        control,
-        profile,
-    )
+    evaluation = evaluate(control, profile)
 
     assert evaluation.allowed is False
 
@@ -245,122 +203,120 @@ def test_best_effort_rollback_requires_explicit_profile_permission() -> None:
         allow_best_effort_rollback=True,
     )
 
-    evaluation = PolicyEngine().evaluate(
-        control,
-        profile,
-    )
+    evaluation = evaluate(control, profile)
 
     assert evaluation.allowed is True
+    assert evaluation.can_execute_without_approval is True
 
 
 def test_unsupported_rollback_blocks_automatic_remediation() -> None:
     control = make_control(
         rollback_capability=RollbackCapability.UNSUPPORTED,
     )
-    profile = make_profile(
-        SafetyClassification.SAFE,
-    )
+    profile = make_profile(SafetyClassification.SAFE)
 
-    evaluation = PolicyEngine().evaluate(
-        control,
-        profile,
-    )
+    evaluation = evaluate(control, profile)
 
     assert evaluation.allowed is False
+    assert evaluation.can_execute_without_approval is False
 
 
-def test_policy_cannot_upgrade_investigate_to_safe() -> None:
+def test_policy_deny_takes_precedence_over_precheck() -> None:
+    control = make_control(
+        rollback_capability=RollbackCapability.UNSUPPORTED,
+    )
+    profile = make_profile(SafetyClassification.SAFE_WITH_PRECHECK)
+
+    evaluation = evaluate(control, profile)
+
+    assert evaluation.allowed is False
+    assert evaluation.requires_precheck is False
+    assert evaluation.requires_approval is False
+
+
+def test_policy_preserves_control_identity() -> None:
+    control = make_control()
+    profile = make_profile(SafetyClassification.SAFE)
+
+    evaluation = evaluate(control, profile)
+
+    assert evaluation.control is control
+    assert evaluation.control_id == control.control_id
+
+
+def test_investigate_classification_cannot_be_upgraded_by_policy() -> None:
     control = make_control()
     profile = make_profile(
         SafetyClassification.INVESTIGATE,
         enabled=False,
     )
 
-    classification = ControlClassifier().classify(
-        control,
-        profile,
-    )
+    classification = ControlClassifier().classify(control, profile)
 
     assert classification.classification is SafetyClassification.INVESTIGATE
     assert classification.automatically_remediable is False
 
 
-def test_policy_cannot_upgrade_prohibited_to_approval() -> None:
+def test_prohibited_classification_cannot_be_upgraded_to_approval() -> None:
     control = make_control()
     profile = make_profile(
         SafetyClassification.PROHIBITED,
         enabled=False,
     )
 
-    classification = ControlClassifier().classify(
-        control,
-        profile,
-    )
+    classification = ControlClassifier().classify(control, profile)
 
     assert classification.classification is SafetyClassification.PROHIBITED
     assert classification.requires_approval is False
     assert classification.automatically_remediable is False
 
 
-def test_compliant_control_never_enters_remediation() -> None:
+def test_compliant_control_is_skipped_even_when_policy_allows_remediation() -> None:
     control = make_control()
-    profile = make_profile(
-        SafetyClassification.SAFE,
-    )
+    profile = make_profile(SafetyClassification.SAFE)
 
-    policy_engine = PolicyEngine()
-    planner = RemediationPlanner(
-        policy_engine=policy_engine,
-    )
-
-    evaluation = policy_engine.evaluate(
+    evaluation, plan = plan_for(
         control,
         profile,
+        make_audit(status=ComplianceStatus.PASS),
     )
 
-    compliant_audit = AuditResult(
-        control_id="TEST-1",
-        host="production-01",
-        status=ComplianceStatus.PASS,
-        evidence=(),
-    )
-
-    plan = planner.plan(
-        (compliant_audit,),
-        (evaluation,),
-    )
-
-    assert plan.items[0].action is PlanAction.SKIP
-    assert plan.items[0].action is not PlanAction.REMEDIATE
+    assert evaluation.allowed is True
+    assert plan.items == ()
 
 
-def test_unknown_audit_status_does_not_enter_remediation() -> None:
+def test_unknown_audit_status_never_becomes_remediation() -> None:
     control = make_control()
-    profile = make_profile(
-        SafetyClassification.SAFE,
-    )
+    profile = make_profile(SafetyClassification.SAFE)
 
-    policy_engine = PolicyEngine()
-    planner = RemediationPlanner(
-        policy_engine=policy_engine,
-    )
-
-    evaluation = policy_engine.evaluate(
+    evaluation, plan = plan_for(
         control,
         profile,
+        make_audit(status=ComplianceStatus.UNKNOWN),
     )
 
-    unknown_audit = AuditResult(
-        control_id="TEST-1",
-        host="production-01",
-        status=ComplianceStatus.UNKNOWN,
-        evidence=(),
+    assert evaluation.allowed is True
+    assert plan.items == ()
+
+
+def test_failed_audit_is_required_for_remediation() -> None:
+    control = make_control()
+    profile = make_profile(SafetyClassification.SAFE)
+
+    _, plan = plan_for(
+        control,
+        profile,
+        make_audit(status=ComplianceStatus.FAIL),
     )
 
-    plan = planner.plan(
-        (unknown_audit,),
-        (evaluation,),
-    )
+    assert plan.items[0].action is PlanAction.REMEDIATE
 
-    assert plan.items[0].action is PlanAction.INVESTIGATE
-    assert plan.items[0].action is not PlanAction.REMEDIATE
+
+def test_policy_evaluation_does_not_execute_remediation() -> None:
+    control = make_control()
+    profile = make_profile(SafetyClassification.SAFE)
+
+    evaluation = evaluate(control, profile)
+
+    assert evaluation.allowed is True
+    assert evaluation.decision.value == "allow"

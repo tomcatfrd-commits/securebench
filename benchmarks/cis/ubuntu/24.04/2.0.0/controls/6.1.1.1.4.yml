@@ -1,0 +1,76 @@
+control:
+  id: CIS-6.1.1.1.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure journald log file access is configured
+  description: Journald will create logfiles that do not already exist on the system. This setting controls
+    what permissions will be applied to these newly created files.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_1_1_1_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_1_1_1_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_1_1_1_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_1_1_1_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.1.1.1.4
+      url: https://workbench.cisecurity.org/sections/4177234/recommendations/7047485
+    assessment_status: manual
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      - AU-12
+      - AU-2
+      - MP-2
+      - SI-5
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      - T1083
+      - T1083.000
+      mitre_tactics:
+      - TA0007
+      mitre_mitigations:
+      - M1022
+    parent: CIS _6_System Logging Main | 2.2.1.1.4-Ensure journald log file access is configured
+    rationale: It is important to ensure that log files have the correct permissions to ensure that sensitive
+      data is archived and protected.
+    impact: ''
+    audit_guidance: "First determine if there is an override file `/etc/tmpfiles.d/systemd.conf`. If so,\
+      \ this file will override all default settings as defined in `/usr/lib/tmpfiles.d/systemd.conf`\
+      \ and should be inspected.\r\n\r\nIf no override file exists, inspect the default `/usr/lib/tmpfiles.d/systemd.conf`\
+      \ against the site specific requirements.\r\n\r\nEnsure that file permissions are mode `0640` or\
+      \ more restrictive.\r\n\r\nRun the following script to verify if an override file exists or not\
+      \ and if the files permissions are mode `0640` or more restrictive:\r\n```\r\n#!/usr/bin/env bash\r\
+      \n\r\n{\r\nconfig_files=(/etc/tmpfiles.d/systemd.conf /usr/lib/tmpfiles.d/systemd.conf)  \r\nwarn=()\r\
+      \nfor file in \"${config_files[@]}\"; do\r\n  [ -f \"$file\" ] || continue\r\n  while read -r type\
+      \ path perm _; do\r\n    if [[ \"$type\" == \"f\" && \"$perm\" =~ ^0?[0-7]{3,4}$ ]]; then\r\n  \
+      \    perm=\"${perm#0}\"\r\n      if [ -f \"$path\" ]; then\r\n        actual=$(stat -c \"%a\" \"\
+      $path\" 2>/dev/null)\r\n        if [[ -n \"$actual\" && \"$actual\" -gt 640 ]]; then\r\n       \
+      \   warn+=(\"File: $path | Perm: $actual (expected max: 640) | Defined in: $file\")\r\n        fi\r\
+      \n      fi\r\n    fi\r\n  done < \"$file\"\r\ndone\r\nif [ \"${#warn[@]}\" -eq 0 ]; then\r\n  echo\
+      \ \"No files with permissions more permissive than 0640.\"\r\nelse\r\n  echo -e \" *** REVIEW ***\"\
+      \r\n  printf \"%s\\n\" \"${warn[@]}\"\r\nfi\r\n}\r\n```"
+    remediation_guidance: If the default configuration is not appropriate for the site specific requirements,
+      copy `/usr/lib/tmpfiles.d/systemd.conf` to `/etc/tmpfiles.d/systemd.conf` and modify as required.
+      Requirements is either `0640` or site policy if that is less restrictive.
+    additional_information: "See `man 5 tmpfiles.d` for detailed information on the permission sets for\
+      \ the relevant log files.\r\nFurther information with examples can be found at https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"
+    default_value: ''
+    artifacts_count: 0
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

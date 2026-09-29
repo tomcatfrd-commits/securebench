@@ -1,0 +1,62 @@
+control:
+  id: CIS-1.6.10
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to sshd warning banner is configured
+  description: The sshd warning banner must be sent to the remote user before authentication is permitted.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_6_10.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_6_10.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_6_10.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_6_10.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.6.10
+      url: https://workbench.cisecurity.org/sections/4177288/recommendations/7047750
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      - CM-6
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _1_Configure Command Line Warning Banners Main | 1.2.10-Ensure access to sshd warning
+      banner is configured
+    rationale: If the sshd warning banner file does not have correct access permissions, it could be modified
+      by unauthorized users to present incorrect or misleading content. An attacker who can write to the
+      banner file could remove legal warning language required for compliance, or inject content designed
+      to mislead users. The file should be owned by `root:root` and not writable by group or others.
+    impact: No operational impact. Tightening permissions on the banner file to `root:root 644` does not
+      affect SSH connectivity or authentication.
+    audit_guidance: "Run the following command and verify the sshd warning banner file access is `644`\
+      \ or more restrictive, `Uid` and `Gid` are both `0/root`:\r\n```\r\n# banner=$(sshd -T | grep -Pi\
+      \ -- '^banner\\h+\\/\\H+') && stat -Lc 'Access: (%#a/%A)  Uid: ( %u/ %U) Gid: { %g/ %G)' $banner\
+      \ 2>/dev/null\r\n```\r\n\r\nVerify output includes:\r\n\r\n```\r\nAccess: (0644/-rw-r--r--)  Uid:\
+      \ ( 0/ root) Gid: ( 0/ root)\r\n  -- OR --\r\nNothing is returned\r\n```\r\n\r\nIf no output is\
+      \ returned, the `Banner` directive is not set — verify rule 1.6.5 (Ensure sshd Banner is configured)\
+      \ is also addressed."
+    remediation_guidance: "Run the following commands to set the correct owner and permissions on the\
+      \ configured banner file. Replace ` ` with the actual path returned by `sshd -T | grep banner`:\r\
+      \n\r\n```\r\n# chown root:root # chmod u-x,go-wx ```\r\n\r\nExample using the default banner path:\r\
+      \n\r\n```\r\n# chown root:root /etc/issue.net\r\n# chmod 644 /etc/issue.net\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

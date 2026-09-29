@@ -1,0 +1,76 @@
+control:
+  id: CIS-5.1.12
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure sshd KexAlgorithms is configured
+  description: "Key exchange is any method in cryptography by which cryptographic keys are exchanged between\
+    \ two parties, allowing use of a cryptographic algorithm. If the sender and receiver wish to exchange\
+    \ encrypted messages, each must be equipped to encrypt messages to be sent and decrypt messages received\r\
+    \n\r\nMore information about the openSSH server configuration is available in the \"Configure SSH\
+    \ Server\" section overview."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_1_12.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_1_12.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_1_12.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_1_12.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.1.12
+      url: https://workbench.cisecurity.org/sections/4177236/recommendations/7047553
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - SC-8
+      cis_v8:
+      - '3.1'
+      cis_v7:
+      - '14.4'
+      mitre_techniques:
+      - T1040
+      - T1040.000
+      - T1557
+      - T1557.000
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1041
+    parent: CIS _5_Configure SSH Server Main | 2.2.13-Ensure sshd KexAlgorithms is configured
+    rationale: Key exchange methods that are considered weak should be removed. A key exchange method
+      may be weak because too few bits are used, or the hashing algorithm is considered too weak.  Using
+      weak algorithms could expose connections to man-in-the-middle attacks
+    impact: ''
+    audit_guidance: "Run the following command to verify none of the \"weak\" Key Exchange algorithms\
+      \ are being used:\r\n\r\n```\r\n# sshd -T | grep -Pi -- 'kexalgorithms\\h+([^#\\n\\r]+,)?(diffie-hellman-group1-sha1|diffie-hellman-group14-sha1|diffie-hellman-group-exchange-sha1)\\\
+      b'\r\n```\r\n\r\nNothing should be returned.\r\n\r\n>**Note:** If anything is returned, review the\
+      \ list of Key Exchange Algorithms. The following are considered \"weak\" Key Exchange Algorithms,\
+      \ and should not be used:\r\n\r\n```\r\ndiffie-hellman-group1-sha1\r\ndiffie-hellman-group14-sha1\r\
+      \ndiffie-hellman-group-exchange-sha1\r\n```"
+    remediation_guidance: "Create or edit a `*.conf` file in the `/etc/ssh/sshd_config.d/` and add/modify\
+      \ the `KexAlgorithms` line to contain a comma separated list of the site unapproved (weak) KexAlgorithms\
+      \ preceded with a `-` above any `Include` entries:\r\n\r\n_Example:_\r\n\r\n```\r\nKexAlgorithms\
+      \ -diffie-hellman-group1-sha1,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1\r\n\
+      ```\r\n\r\n>**Note:** First occurrence of an option takes precedence. If Include locations are enabled,\
+      \ used, and order of precedence is understood in your environment, the entry may be created in a\
+      \ file in Include location."
+    additional_information: "The supported algorithms are:\r\n\r\n```\r\ndiffie-hellman-group1-sha1\r\n\
+      diffie-hellman-group14-sha1\r\ndiffie-hellman-group14-sha256\r\ndiffie-hellman-group16-sha512\r\n\
+      diffie-hellman-group18-sha512\r\ndiffie-hellman-group-exchange-sha1\r\ndiffie-hellman-group-exchange-sha256\r\
+      \necdh-sha2-nistp256\r\necdh-sha2-nistp384\r\necdh-sha2-nistp521\r\ncurve25519-sha256\r\ncurve25519-sha256@libssh.org\r\
+      \nsntrup761x25519-sha512\r\nsntrup761x25519-sha512@openssh.com\r\nmlkem768x25519-sha256 # Only supported\
+      \ by version 9.9 and greater\r\n```"
+    default_value: "Version 9.0 - 9.8: KexAlgorithms sntrup761x25519-sha512,sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521\r\
+      \n\r\nVersion 9.9 and greater: KexAlgorithms mlkem768x25519-sha256,sntrup761x25519-sha512,sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521"
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

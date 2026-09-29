@@ -1,0 +1,26 @@
+---
+- name: Remediate CIS-1.1.1.1 cramfs availability
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Unload cramfs when currently loaded
+      ansible.builtin.shell: |
+        set -o pipefail
+        if lsmod | awk '$1 == "cramfs" { found=1 } END { exit !found }'; then
+          modprobe -r cramfs
+        fi
+      args:
+        executable: /bin/bash
+      changed_when: true
+
+    - name: Disable future cramfs loading
+      ansible.builtin.copy:
+        dest: /etc/modprobe.d/60-securebench-cramfs.conf
+        content: |
+          # Managed by SecureBench for CIS-1.1.1.1
+          install cramfs /bin/false
+          blacklist cramfs
+        owner: root
+        group: root
+        mode: "0644"

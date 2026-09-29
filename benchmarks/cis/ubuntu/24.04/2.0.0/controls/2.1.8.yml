@@ -1,0 +1,79 @@
+control:
+  id: CIS-2.1.8
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure ftp server services are not in use
+  description: The File Transfer Protocol (FTP) provides networked computers with the ability to transfer
+    files. `vsftpd`  is  the  Very  Secure  File  Transfer Protocol Daemon.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_1_8.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_1_8.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_1_8.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_1_8.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.1.8
+      url: https://workbench.cisecurity.org/sections/4177245/recommendations/7047548
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1203
+      - T1203.000
+      - T1210
+      - T1210.000
+      - T1543
+      - T1543.002
+      mitre_tactics:
+      - TA0008
+      mitre_mitigations:
+      - M1042
+    parent: CIS _2_Configure Server Services Main | 2.1.8-Ensure ftp server services are not in use
+    rationale: FTP does not protect the confidentiality of data or authentication credentials. It is recommended
+      SFTP be used if file transfer is required. Unless there is a need to run the system as a FTP server
+      (for example, to allow anonymous downloads), it is recommended that the package be deleted to reduce
+      the potential attack surface.
+    impact: "There may be packages that are dependent on the `vsftpd` package.  If the `vsftpd` package\
+      \ is removed, these dependent packages will be removed as well. Before removing the `vsftpd` package,\
+      \ review any dependent packages to determine if they are required on the system.\r\n\r\n**- IF -**\
+      \ a dependent package is required: stop and mask the `vsftpd.service`  leaving the `vsftpd` package\
+      \ installed."
+    audit_guidance: "Run the following command to verify the `vsftpd` package is not installed:\r\n\r\n\
+      ```\r\n# dpkg-query -s vsftpd &>/dev/null && echo  \"vsftpd is installed\"\r\n```\r\n\r\nNothing\
+      \ should be returned.\r\n\r\n**- OR -** \r\n\r\n**- IF -** the package is required for dependencies:\r\
+      \n\r\nRun the following command to verify `vsftpd` service is not enabled:\r\n\r\n```\r\n# systemctl\
+      \ is-enabled vsftpd.service 2>/dev/null | grep 'enabled'\r\n```\r\n\r\nNothing should be returned.\r\
+      \n\r\n\r\nRun the following command to verify the `vsftpd` service is not active:\r\n\r\n```\r\n\
+      # systemctl is-active vsftpd.service 2>/dev/null | grep '^active'\r\n```\r\nNothing should be returned.\r\
+      \n\r\n\r\n**Note:** \r\n- Other ftp server packages may exist. They should also be audited, if not\
+      \ required and authorized by local site policy\r\n - If the package is required for a dependency:\r\
+      \n   - Ensure the dependent package is approved by local site policy\r\n   - Ensure stopping and\
+      \ masking the service and/or socket meets local site policy"
+    remediation_guidance: "Run the following commands to stop `vsftpd.service` and remove the `vsftpd`\
+      \ package:\r\n\r\n```\r\n# systemctl stop vsftpd.service\r\n# apt purge vsftpd\r\n```\r\n\r\n**-\
+      \ OR -**\r\n\r\n**- IF -** the `vsftpd` package is required as a dependency:\r\n\r\nRun the following\
+      \ commands to stop and mask the `vsftpd.service`:\r\n\r\n```\r\n# systemctl stop vsftpd.service\r\
+      \n# systemctl mask vsftpd.service\r\n```\r\n\r\n**Note:** Other ftp server packages may exist. If\
+      \ not required and authorized by local site policy, they should also be removed. If the package\
+      \ is required for a dependency, the service should be stopped and masked."
+    additional_information: Additional FTP servers also exist and should be audited.
+    default_value: ''
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

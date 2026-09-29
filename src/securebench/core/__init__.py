@@ -6,6 +6,7 @@ configuration loaders used throughout SecureBench.
 """
 
 from .benchmark import Benchmark
+from .catalog import BenchmarkCatalog, BenchmarkReference
 from .control import (
     Control,
     ControlSeverity,
@@ -43,12 +44,15 @@ from .transaction import (
     Transaction,
     TransactionStatus,
 )
+from .transaction_store import TransactionStore
 
 __all__ = [
     "AuditError",
     "AuditResult",
     "Benchmark",
+    "BenchmarkCatalog",
     "BenchmarkError",
+    "BenchmarkReference",
     "ChangeRecord",
     "ChangeStatus",
     "ComplianceStatus",
@@ -74,6 +78,7 @@ __all__ = [
     "Transaction",
     "TransactionError",
     "TransactionStatus",
+    "TransactionStore",
     "VerificationError",
     "VerificationResult",
 ]

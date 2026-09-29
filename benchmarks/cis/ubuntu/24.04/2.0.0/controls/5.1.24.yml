@@ -1,0 +1,60 @@
+control:
+  id: CIS-5.1.24
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure sshd ListenAddress is configured
+  description: "The `ListenAddress` parameter specifies the local addresses sshd(8) should listen on.\
+    \  The following forms may be used:\r\n\r\n```\r\nListenAddress hostname|address [rdomain domain]\r\
+    \nListenAddress hostname:port [rdomain domain]\r\nListenAddress IPv4_address:port [rdomain domain]\r\
+    \nListenAddress [hostname|address]:port [rdomain domain]\r\n```\r\nThe optional rdomain qualifier\
+    \ requests sshd(8) listen in an explicit routing domain.  If port is not specified, sshd will listen\
+    \ on the address and all Port options specified.  The default is to listen on all local addresses\
+    \ on the current default routing domain. Multiple `ListenAddress` options are permitted.  For more\
+    \ information on routing domains, see rdomain(4)."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_1_24.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_1_24.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_1_24.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_1_24.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.1.24
+      url: https://workbench.cisecurity.org/sections/4177236/recommendations/7047639
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _5_Configure SSH Server Main | 2.2.25-Ensure sshd ListenAddress is configured
+    rationale: Restricting sshd to specific IP address(es) reduces unnecessary network exposure and limits
+      access to approved interfaces only, minimizing the system's attack surface.
+    impact: If the `ListenAddress` is set incorrectly (wrong IP, missing interface IP, or binding only
+      to an address not reachable by intended clients), remote SSH access may be disrupted. Ensure out-of-band/console
+      access exists before making changes.
+    audit_guidance: "Run the following command to verify `ListenAddress` is set:\r\n```\r\n# sshd -T |\
+      \ grep listenaddress\r\n```\r\nVerify output includes a private network interface\r\n\r\n_Example\
+      \ Output_\r\n```\r\nlistenaddress 192.168.1.14:22\r\n```"
+    remediation_guidance: "Create or edit a `*.conf` file in the `/etc/ssh/sshd_config.d/` directory to\
+      \ set the `ListenAddress` parameter to a private network interface above any Include entry as follows:\r\
+      \n_Example:_\r\n\r\n```\r\nListenAddress 192.168.1.14:22\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

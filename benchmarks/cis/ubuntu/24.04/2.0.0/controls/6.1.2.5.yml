@@ -1,0 +1,71 @@
+control:
+  id: CIS-6.1.2.5
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure rsyslog is configured to send logs to a remote log host
+  description: '`rsyslog` supports the ability to send log events it gathers to a remote log host or to
+    receive messages from remote hosts, thus enabling centralized log management.'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_1_2_5.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_1_2_5.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_1_2_5.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_1_2_5.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.1.2.5
+      url: https://workbench.cisecurity.org/sections/4177249/recommendations/7047531
+    assessment_status: manual
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AU-6
+      cis_v8:
+      - '8.2'
+      cis_v7:
+      - '6.2'
+      - '6.3'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      - T1562
+      - T1562.006
+      mitre_tactics:
+      - TA0040
+      mitre_mitigations:
+      - M1029
+    parent: CIS _6_System Logging Main | 2.2.2.5-Ensure rsyslog is configured to send logs to a remote
+      log host
+    rationale: Storing log data on a remote host protects log integrity from local attacks. If an attacker
+      gains root access on the local system, they could tamper with or remove log data that is stored
+      on the local system.
+    impact: ''
+    audit_guidance: "Review the `/etc/rsyslog.conf` and `/etc/rsyslog.d/*.conf` files and verify that\
+      \ logs are sent to a central host:\r\n\r\n**basic format**\r\n\r\n```\r\n# grep \"^*.*[^I][^I]*@\"\
+      \ /etc/rsyslog.conf /etc/rsyslog.d/*.conf\r\n```\r\n\r\nOutput should include `@@ `:\r\n\r\n_Example:_\r\
+      \n```\r\n*.* @@loghost.example.com\r\n```\r\n\r\n**advanced format**\r\n\r\n```\r\n# grep -Psi --\
+      \ '^\\s*([^#]+\\s+)?action\\(([^#]+\\s+)?\\btarget=\\\"?[^#\"]+\\\"?\\b' /etc/rsyslog.conf /etc/rsyslog.d/*.conf\r\
+      \n```\r\n\r\nOutput should include `target= `:\r\n\r\n_Example:_\r\n```\r\n*.* action(type=\"omfwd\"\
+      \ target=\"loghost.example.com\" port=\"514\" protocol=\"tcp\"\r\n```"
+    remediation_guidance: "Edit the `/etc/rsyslog.conf` and `/etc/rsyslog.d/*.conf` files and add the\
+      \ following line (where `loghost.example.com` is the name of your central log host). The `target`\
+      \ directive may either be a fully qualified domain name or an IP address.\r\n\r\n_Example:_\r\n\
+      ```\r\n*.* action(type=\"omfwd\" target=\"loghost.example.com\" port=\"514\" protocol=\"tcp\"\r\n\
+      \           action.resumeRetryCount=\"100\"\r\n           queue.type=\"LinkedList\" queue.size=\"\
+      1000\")\r\n```\r\n\r\nRun the following command to reload `rsyslog.service`:\r\n\r\n```\r\n# systemctl\
+      \ reload-or-restart rsyslog.service\r\n```"
+    additional_information: In addition, see the [rsyslog documentation](https://www.rsyslog.com/doc/master/tutorials/tls.html)
+      for implementation details of TLS.
+    default_value: ''
+    artifacts_count: 0
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

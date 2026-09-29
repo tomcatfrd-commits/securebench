@@ -1,0 +1,64 @@
+control:
+  id: CIS-2.2.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure rsh client is not installed
+  description: The `rsh-client` package contains the client commands for the rsh services.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_2_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_2_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_2_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_2_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.2.2
+      url: https://workbench.cisecurity.org/sections/4177275/recommendations/7047671
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1040
+      - T1040.000
+      - T1203
+      - T1203.000
+      - T1543
+      - T1543.002
+      mitre_tactics:
+      - TA0008
+      mitre_mitigations:
+      - M1041
+      - M1042
+    parent: CIS _2_Configure Client Services Main | 2.1.3-Ensure rsh client is not installed
+    rationale: These legacy clients contain numerous security exposures and have been replaced with the
+      more secure SSH package. Even if the server is removed, it is best to ensure the clients are also
+      removed to prevent users from inadvertently attempting to use these commands and therefore exposing
+      their credentials. Note that removing the `rsh-client` package removes the clients for `rsh` , `rcp`
+      and `rlogin` .
+    impact: Many insecure service clients are used as troubleshooting tools and in testing environments.
+      Uninstalling them can inhibit capability to test and troubleshoot. If they are required it is advisable
+      to remove the clients after use to prevent accidental or intentional misuse.
+    audit_guidance: "Verify `rsh-client`  is not installed. Use the following command to provide the needed\
+      \ information:\r\n```\r\n# dpkg-query -s rsh-client &>/dev/null && echo \"rsh-client is installed\"\
+      \r\n```\r\n\r\nNothing should be returned."
+    remediation_guidance: "Uninstall `rsh`:\r\n```\r\n# apt purge rsh-client\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

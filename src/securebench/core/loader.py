@@ -8,6 +8,7 @@ validation, not for making remediation decisions.
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -113,6 +114,7 @@ class ConfigurationLoader:
             self._load_control(
                 control_file,
                 expected_benchmark_id=benchmark_id,
+                expected_benchmark_version=version,
             )
             for control_file in control_files
         ]
@@ -207,6 +209,25 @@ class ConfigurationLoader:
             ProfileError,
         )
 
+        applies_to = profile_data.get("applies_to", {})
+        if applies_to is None:
+            applies_to = {}
+        if not isinstance(applies_to, dict):
+            raise ProfileError("'profile.applies_to' must be a mapping")
+
+        benchmark_id = applies_to.get("benchmark_id")
+        benchmark_version = applies_to.get("benchmark_version")
+        for field_name, value in (
+            ("benchmark_id", benchmark_id),
+            ("benchmark_version", benchmark_version),
+        ):
+            if value is not None and (
+                not isinstance(value, str) or not value.strip()
+            ):
+                raise ProfileError(
+                    f"'profile.applies_to.{field_name}' must be a non-empty string"
+                )
+
         raw_rules = profile_data.get(
             "rules",
             {},
@@ -279,6 +300,8 @@ class ConfigurationLoader:
                 rules=rules,
                 allow_best_effort_rollback=allow_best_effort_rollback,
                 require_approval_for_unknown=require_approval_for_unknown,
+                benchmark_id=benchmark_id,
+                benchmark_version=benchmark_version,
             )
         except ValueError as exc:
             raise ProfileError(
@@ -290,6 +313,7 @@ class ConfigurationLoader:
         control_file: Path,
         *,
         expected_benchmark_id: str,
+        expected_benchmark_version: str,
     ) -> Control:
         """Load one control definition from YAML."""
 
@@ -418,6 +442,10 @@ class ConfigurationLoader:
                 rollback=rollback,
                 verification=verification,
                 rollback_capability=rollback_capability,
+                definition_digest=hashlib.sha256(
+                    control_file.read_bytes()
+                ).hexdigest(),
+                benchmark_version=expected_benchmark_version,
                 dependencies=dependencies,
                 conflicts=conflicts,
                 metadata=metadata,

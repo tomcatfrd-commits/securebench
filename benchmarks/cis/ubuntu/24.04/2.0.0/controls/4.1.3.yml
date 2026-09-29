@@ -1,0 +1,64 @@
+control:
+  id: CIS-4.1.3
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure ufw incoming default is configured
+  description: The default policy for incoming traffic determines if connections attempting to reach your
+    server from external sources will be allowed without requiring specific `UFW` rules.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.4_1_3.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.4_1_3.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.4_1_3.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.4_1_3.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 4.1.3
+      url: https://workbench.cisecurity.org/sections/4177247/recommendations/7047502
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - SC-7
+      cis_v8:
+      - '4.4'
+      - '4.5'
+      cis_v7:
+      - '9.4'
+      mitre_techniques:
+      - T1562
+      - T1562.004
+      mitre_tactics:
+      - TA0011
+      mitre_mitigations:
+      - M1031
+      - M1037
+    parent: CIS _4_Host Based Firewall Main | 2.1.1.3-Ensure ufw incoming default is configured
+    rationale: With a default accept policy the firewall will accept any packet that is not configured
+      to be denied. It is easier to allow list acceptable usage than to deny list unacceptable usage.
+    impact: "Any port or protocol without a explicit allow before the default deny will be blocked. A\
+      \ deny policy silently drops packs causing an eventual time out with no response while a 'reject'\
+      \ policy sends an immediate and explicit \"connection refused\" or \"destination unreachable\" message\
+      \ in response.\r\n\r\nThe following is and example of a command to create a rule to allow connection\
+      \ to the ssh server on the host. This rule should be considered before applying the default deny.\r\
+      \n\r\n_Example:_\r\n\r\n```\r\n# ufw allow ssh\r\n```"
+    audit_guidance: "Run the following command to verify that the default policy for `incoming` is `deny`\
+      \ or `reject`:\r\n\r\n```\r\n# ufw status verbose | awk -F',' '$1~/Default/ {print $1}'\r\n```\r\
+      \n\r\n_Example output:_\r\n\r\n```\r\nDefault: deny (incoming)\r\n```"
+    remediation_guidance: "Run the following command to set the default for `incoming` to `deny`:\r\n\r\
+      \n```\r\n# ufw default deny incoming\r\n```\r\n\r\n**Warning:** Any port or protocol without a explicit\
+      \ allow before the default deny will be blocked."
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 5
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

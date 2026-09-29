@@ -1,0 +1,86 @@
+control:
+  id: CIS-2.1.6
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure web server services are not in use
+  description: Web servers provide the ability to host web site content.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_1_6.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_1_6.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_1_6.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_1_6.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.1.6
+      url: https://workbench.cisecurity.org/sections/4177245/recommendations/7047524
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1203
+      - T1203.000
+      - T1210
+      - T1210.000
+      - T1543
+      - T1543.002
+      mitre_tactics:
+      - TA0008
+      mitre_mitigations:
+      - M1042
+    parent: CIS _2_Configure Server Services Main | 2.1.6-Ensure web server services are not in use
+    rationale: Unless there is an approved local site requirement to host web content, web server packages
+      should be removed to reduce the potential attack surface. Web servers introduce listening network
+      services, process untrusted remote input, and commonly expose additional attack surface through
+      modules and plugins. If a web server package cannot be removed due to a package dependency, all
+      associated services and sockets must be stopped and masked.
+    impact: Removal of a web server package will prevent the system from hosting web services. If a web
+      server package is required for a dependency, stopping and masking its service and socket prevents
+      it from running while retaining the package. If the masked service is later legitimately required,
+      it must be unmasked before it can be started.
+    audit_guidance: "Run the following command to verify `apache2` is not installed:\r\n\r\n```\r\n# dpkg-query\
+      \ -s apache2 &>/dev/null && echo \"apache2 is installed\"\r\n```\r\n\r\nNothing should be returned.\r\
+      \n\r\nRun the following command to verify `nginx` is not installed:\r\n\r\n```\r\n# dpkg-query -s\
+      \ nginx &>/dev/null && echo \"nginx is installed\"\r\n```\r\n\r\nNothing should be returned.\r\n\
+      \r\n**- OR -**\r\n\r\n**- IF -** a package is installed **and** is required for dependencies:\r\n\
+      \r\n**- IF -** the apache2 package is required for dependencies:\r\n\r\nRun the following command\
+      \ to verify `apache2.socket` and `apache2.service` `UnitFileState` is not `enabled` and `ActiveState`\
+      \ is not `active`:\r\n\r\n```\r\n# systemctl show apache2.socket apache2.service -p UnitFileState,ActiveState\
+      \ | grep -Pi '=(enabled|active)'\r\n\r\nNothing should be returned\r\n```\r\n\r\n**- IF -** the\
+      \ nginx package is required for dependencies:\r\n\r\nRun the following command to verify `nginx.service`\
+      \ `UnitFileState` is not `enabled` and `ActiveState` is not `active`:\r\n\r\n```\r\n# systemctl\
+      \ show nginx.service -p UnitFileState,ActiveState | grep -Pi '=(enabled|active)'\r\n\r\nNothing\
+      \ should be returned\r\n```\r\n\r\n**Note:** Other web server packages may exist on the system.\
+      \ They should be audited in the same manner if not required and authorized by local site policy."
+    remediation_guidance: "Run the following commands to stop `apache2.socket`, `apache2.service` and\
+      \ remove the `apache2` package:\r\n\r\n```\r\n# systemctl stop apache2.socket apache2.service\r\n\
+      # apt purge apache2\r\n```\r\n\r\nRun the following commands to stop `nginx.service` and remove\
+      \ the `nginx` package:\r\n\r\n```\r\n# systemctl stop nginx.service\r\n# apt purge nginx\r\n```\r\
+      \n\r\n**- OR -**\r\n\r\n**- IF -** a package is installed **and** is required for dependencies:\r\
+      \n\r\n**- IF -** the apache2 package is required for dependencies:\r\n\r\nRun the following commands\
+      \ to stop and mask `apache2.socket` and `apache2.service`:\r\n\r\n```\r\n# systemctl stop apache2.socket\
+      \ apache2.service\r\n# systemctl mask apache2.socket apache2.service\r\n```\r\n\r\n**- IF -** the\
+      \ nginx package is required for dependencies:\r\n\r\nRun the following commands to stop and mask\
+      \ `nginx.service`:\r\n\r\n```\r\n# systemctl stop nginx.service\r\n# systemctl mask nginx.service\r\
+      \n```\r\n\r\n**Note:** Other web server packages may exist. If not required and authorized by local\
+      \ site policy, they should also be removed or masked."
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 8
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

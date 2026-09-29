@@ -1,0 +1,77 @@
+control:
+  id: CIS-5.3.3.4.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure pam_unix includes use_authtok
+  description: '`use_authtok` - When password changing enforce the module to set the new password to the
+    one provided by a previously stacked password module'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_3_4_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_3_4_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_3_4_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_3_4_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.3.4.4
+      url: https://workbench.cisecurity.org/sections/4177293/recommendations/7047780
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - IA-5
+      cis_v8:
+      - '3.11'
+      cis_v7:
+      - '16.4'
+      mitre_techniques:
+      - T1003
+      - T1003.008
+      - T1110
+      - T1110.002
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1041
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.4.5.4-Ensure pam_unix includes use_authtok
+    rationale: '`use_authtok` allows multiple pam modules to confirm a new password before it is accepted.'
+    impact: ''
+    audit_guidance: "Run the following command to verify that `use_authtok` is set on the pam_unix.so\
+      \ module lines in the password stack:\r\n\r\n```\r\n# grep -PH -- '^\\h*password\\h+([^#\\n\\r]+)\\\
+      h+pam_unix\\.so\\h+([^#\\n\\r]+\\h+)?use_authtok\\b' /etc/pam.d/common-password\r\n```\r\n\r\nOutput\
+      \ should be similar to:\r\n\r\n```\r\n/etc/pam.d/common-password:password   [success=1 default=ignore]\
+      \   pam_unix.so obscure use_authtok try_first_pass yescrypt\r\n```\r\n\r\nVerify that the line(s)\
+      \ include `use_authtok`"
+    remediation_guidance: "Run the following command:\r\n\r\n```\r\n# awk '/Password-Type:/{ f = 1;next\
+      \ } /-Type:/{ f = 0 } f {if (/pam_unix\\.so/) print FILENAME}' /usr/share/pam-configs/*\r\n```\r\
+      \n\r\nEdit any returned files add `use_authtok` to the `pam_unix` line in the `Password` section\
+      \ under `Password:` subsection:\r\n\r\n**Note:** The if the file's `Password` section includes a\
+      \ `Password-Initial:` subsection, `use_authtok` should not be added to the `pam_unix` line in the\
+      \ `Password-Initial:` subsection\r\n\r\n_Example File:_\r\n\r\n```\r\nName: Unix authentication\r\
+      \nDefault: yes\r\nPriority: 256\r\nAuth-Type: Primary # <- Start of \"Auth\" section\r\nAuth:\r\n\
+      \        [success=end default=ignore]    pam_unix.so try_first_pass\r\nAuth-Initial:\r\n       \
+      \ [success=end default=ignore]    pam_unix.so\r\nAccount-Type: Primary # <- Start of \"Account\"\
+      \ section\r\nAccount:\r\n        [success=end new_authtok_reqd=done default=ignore]      pam_unix.so\r\
+      \nAccount-Initial:\r\n        [success=end new_authtok_reqd=done default=ignore]      pam_unix.so\r\
+      \nSession-Type: Additional  # <- Start of \"Session\" section\r\nSession:\r\n        required  \
+      \      pam_unix.so\r\nSession-Initial:\r\n        required        pam_unix.so\r\nPassword-Type:\
+      \ Primary # <- Start of \"Password\" section\r\nPassword:\r\n        [success=end default=ignore]\
+      \    pam_unix.so obscure use_authtok try_first_pass yescrypt # <- **ensure line includes use_authtok**\r\
+      \nPassword-Initial:\r\n        [success=end default=ignore]    pam_unix.so obscure yescrypt # <-\
+      \ **Password-Initial: subsection does not include use_authtok\r\n```\r\n\r\nRun the following command\
+      \ to update the files in the `/etc/pam.d/` directory:\r\n\r\n```\r\n# pam-auth-update --enable ```\r\
+      \n\r\n_Example:_\r\n\r\n```\r\n# pam-auth-update --enable unix\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

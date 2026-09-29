@@ -1,0 +1,80 @@
+control:
+  id: CIS-2.1.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure autofs services are not in use
+  description: '`autofs` allows automatic mounting of devices, typically including CD/DVDs and USB drives.'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_1_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_1_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_1_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_1_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.1.1
+      url: https://workbench.cisecurity.org/sections/4177245/recommendations/7047479
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - MP-7
+      - SI-3
+      cis_v8:
+      - '10.3'
+      cis_v7:
+      - '8.5'
+      mitre_techniques:
+      - T1068
+      - T1068.000
+      - T1203
+      - T1203.000
+      - T1211
+      - T1211.000
+      - T1212
+      - T1212.000
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _2_Configure Server Services Main | 2.1.1-Ensure autofs services are not in use
+    rationale: With automounting enabled anyone with physical access could attach a USB drive or disc
+      and have its contents available in the filesystem even if they lacked permissions to mount it themselves.
+    impact: "The use of portable hard drives is very common for workstation users. If your organization\
+      \ allows the use of portable storage or media on workstations and physical access controls to workstations\
+      \ is considered adequate there is little value add in turning off automounting.\r\n\r\nThere may\
+      \ be packages that are dependent on the `autofs` package.  If the `autofs` package is removed, these\
+      \ dependent packages will be removed as well. Before removing the `autofs` package, review any dependent\
+      \ packages to determine if they are required on the system.\r\n\r\n**- IF -** a dependent package\
+      \ is required: stop and mask the `autofs.service`  leaving the `autofs` package installed."
+    audit_guidance: "As a preference `autofs` should not be installed unless other packages depend on\
+      \ it.\r\n\r\nRun the following command to verify `autofs` is not installed:\r\n```\r\n# dpkg-query\
+      \ -s autofs &>/dev/null && echo \"autofs is installed\"\r\n```\r\n\r\nNothing should be returned.\r\
+      \n\r\n**- OR -** \r\n\r\n**- IF -** the package is required for dependencies:\r\n\r\nRun the following\
+      \ command to verify `autofs.service` is not enabled:\r\n\r\n```\r\n# systemctl is-enabled autofs.service\
+      \ 2>/dev/null | grep 'enabled'\r\n\r\nNothing should be returned\r\n```\r\n\r\nRun the following\
+      \ command to verify the `autofs.service` is not active:\r\n\r\n```\r\n# systemctl is-active autofs.service\
+      \ 2>/dev/null | grep '^active'\r\n\r\nNothing should be returned\r\n```\r\n\r\n**Note:** If the\
+      \ package is required for a dependency\r\n - Ensure the dependent package is approved by local site\
+      \ policy\r\n - Ensure stopping and masking the service and/or socket meets local site policy"
+    remediation_guidance: "Run the following commands to stop `autofs.service` and remove the `autofs`\
+      \ package:\r\n\r\n```\r\n# systemctl stop autofs.service\r\n# apt purge autofs\r\n```\r\n\r\n**-\
+      \ OR -**\r\n\r\n**- IF -** the `autofs` package is required as a dependency:\r\n\r\nRun the following\
+      \ commands to stop and mask `autofs.service`:\r\n\r\n```\r\n# systemctl stop autofs.service\r\n\
+      # systemctl mask autofs.service\r\n```"
+    additional_information: This control should align with the tolerance of the use of portable drives
+      and optical media in the organization. On a server, requiring an admin to manually mount media can
+      be part of defense-in-depth to reduce the risk of unapproved software or information being introduced
+      or proprietary software or information being exfiltrated. If admins commonly use flash drives and
+      Server access has sufficient physical controls, requiring manual mounting may not increase security.
+    default_value: ''
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

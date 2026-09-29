@@ -1,0 +1,74 @@
+control:
+  id: CIS-2.1.9
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure dnsmasq services are not in use
+  description: '`dnsmasq` is a lightweight tool that provides DNS caching, DNS forwarding and DHCP (Dynamic
+    Host Configuration Protocol) services.'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_1_9.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_1_9.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_1_9.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_1_9.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.1.9
+      url: https://workbench.cisecurity.org/sections/4177245/recommendations/7047555
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1203
+      - T1203.000
+      - T1210
+      - T1210.000
+      - T1543
+      - T1543.002
+      mitre_tactics:
+      - TA0008
+      mitre_mitigations:
+      - M1042
+    parent: CIS _2_Configure Server Services Main | 2.1.9-Ensure dnsmasq services are not in use
+    rationale: Unless a system is specifically designated to act as a DNS caching, DNS forwarding and/or
+      DHCP server, it is recommended that the package be removed to reduce the potential attack surface.
+    impact: "There may be packages that are dependent on the `dnsmasq` package.  If the `dnsmasq` package\
+      \ is removed, these dependent packages will be removed as well. Before removing the `dnsmasq` package,\
+      \ review any dependent packages to determine if they are required on the system.\r\n\r\n**- IF -**\
+      \ a dependent package is required: stop and mask the `dnsmasq.service`  leaving the `dnsmasq` package\
+      \ installed."
+    audit_guidance: "Run one of the following commands to verify `dnsmasq` is not installed:\r\n\r\n```\r\
+      \n# dpkg-query -s dnsmasq &>/dev/null && echo \"dnsmasq is installed\"\r\n```\r\n\r\nNothing should\
+      \ be returned.\r\n\r\n**- OR -** \r\n\r\n**- IF -** the package is required for dependencies:\r\n\
+      \r\nRun the following command to verify `dnsmasq.service` is not enabled:\r\n\r\n```\r\n# systemctl\
+      \ is-enabled dnsmasq.service 2>/dev/null | grep 'enabled'\r\n\r\nNothing should be returned\r\n\
+      ```\r\n\r\nRun the following command to verify the `dnsmasq.service` is not active:\r\n\r\n```\r\
+      \n# systemctl is-active dnsmasq.service 2>/dev/null | grep '^active'\r\n\r\nNothing should be returned\r\
+      \n```\r\n\r\n**Note:** If the package is required for a dependency\r\n - Ensure the dependent package\
+      \ is approved by local site policy\r\n - Ensure stopping and masking the service and/or socket meets\
+      \ local site policy"
+    remediation_guidance: "Run the following commands to stop `dnsmasq.service` and remove `dnsmasq` package:\r\
+      \n\r\n```\r\n# systemctl stop dnsmasq.service\r\n# apt purge dnsmasq\r\n```\r\n\r\n**- OR -**\r\n\
+      \r\n**- IF -** the `dnsmasq` package is required as a dependency:\r\n\r\nRun the following commands\
+      \ to stop and mask the `dnsmasq.service`:\r\n\r\n```\r\n# systemctl stop dnsmasq.service\r\n# systemctl\
+      \ mask dnsmasq.service\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

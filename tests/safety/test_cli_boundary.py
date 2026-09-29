@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from securebench.cli.main import build_parser
+from pathlib import Path
+
+from securebench.cli.main import build_parser, main
 
 
 def test_cli_exposes_expected_top_level_commands() -> None:
@@ -170,3 +172,20 @@ def test_cli_does_not_accept_unknown_arguments() -> None:
         raise AssertionError(
             "CLI accepted an unknown remediation-related argument."
         )
+
+
+def test_benchmark_list_reports_exact_registered_version(capsys) -> None:
+    project_root = Path(__file__).resolve().parents[2]
+
+    result = main(
+        [
+            "benchmark",
+            "list",
+            "--catalog",
+            str(project_root / "benchmarks" / "index.yml"),
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert result == 0
+    assert "cis-ubuntu-24.04\t2.0.0\tubuntu-24.04" in output

@@ -1,0 +1,68 @@
+control:
+  id: CIS-2.2.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure telnet client is not installed
+  description: The `telnet` and `inetutils-telnet` packages contain the `telnet` client, which allows
+    users to start connections to other systems via the telnet protocol.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_2_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_2_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_2_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_2_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.2.4
+      url: https://workbench.cisecurity.org/sections/4177275/recommendations/7047677
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-11
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1040
+      - T1040.000
+      - T1203
+      - T1203.000
+      - T1543
+      - T1543.002
+      mitre_tactics:
+      - TA0006
+      - TA0008
+      mitre_mitigations:
+      - M1041
+      - M1042
+    parent: CIS _2_Configure Client Services Main | 2.1.5-Ensure telnet client is not installed
+    rationale: The `telnet` protocol is insecure and unencrypted. The use of an unencrypted transmission
+      medium could allow an unauthorized user to steal credentials. The `ssh` package provides an encrypted
+      session and stronger security and is included in most Linux distributions.
+    impact: Many insecure service clients are used as troubleshooting tools and in testing environments.
+      Uninstalling them can inhibit capability to test and troubleshoot. If they are required it is advisable
+      to remove the clients after use to prevent accidental or intentional misuse.
+    audit_guidance: "1. Run the following command to verify the `telnet` package is not installed:\r\n\
+      \r\n```\r\n# dpkg-query -s telnet &>/dev/null && echo \"telnet package is installed\"\r\n```\r\n\
+      \r\nNothing should be returned\r\n\r\n2. Run the following command to verify the `inetutils-telnet`\
+      \ package is not installed:\r\n\r\n```\r\n# dpkg-query -s inetutils-telnet &>/dev/null && echo \"\
+      inetutils-telnet package is installed\"\r\n```\r\n\r\nNothing should be returned."
+    remediation_guidance: "Run the following command to uninstall and purge the `telnet` and/or `inetutils-telnet`\
+      \ package(s):\r\n\r\n```\r\n# apt purge telnet inetutils-telnet\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

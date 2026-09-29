@@ -1,0 +1,118 @@
+control:
+  id: CIS-5.3.3.2.3
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure password complexity is configured
+  description: "Password complexity can be set through:\r\n- `minclass` - The minimum number of classes\
+    \ of characters required in a new password. (digits, uppercase, lowercase, others). e.g. `minclass\
+    \ = 4` requires digits, uppercase, lower case, and special characters. \r\n- `dcredit` - The maximum\
+    \ credit for having digits in the new password. If less than `0` it is the minimum number of digits\
+    \ in the new password. e.g. `dcredit = -1` requires at least one digit\r\n- `ucredit` - The maximum\
+    \ credit for having uppercase characters in the new password. If less than `0` it is the minimum number\
+    \ of uppercase characters in the new password. e.g. `ucredit = -1` requires at least one uppercase\
+    \ character\r\n- `ocredit` - The maximum credit for having other characters in the new password. If\
+    \ less than `0` it is the minimum number of other characters in the new password. e.g. `ocredit =\
+    \ -1` requires at least one special character\r\n- `lcredit` - The maximum credit for having lowercase\
+    \ characters in the new password.  If less than `0` it is the minimum number of lowercase characters\
+    \ in the new password. e.g. `lcredit = -1` requires at least one lowercase character"
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_3_2_3.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_3_2_3.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_3_2_3.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_3_2_3.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.3.2.3
+      url: https://workbench.cisecurity.org/sections/4177285/recommendations/7047732
+    assessment_status: manual
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - IA-5
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques:
+      - T1110
+      - T1110.001
+      - T1110.002
+      - T1110.003
+      - T1178.001
+      - T1178.002
+      - T1178.003
+      - T1178.004
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1027
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.4.2.3-Ensure password complexity is configured
+    rationale: "Strong passwords protect systems from being hacked through brute force methods.\r\n\r\n\
+      Requiring at least one non-alphabetic character increases the search space beyond pure dictionary\
+      \ words, which makes the resulting password harder to crack.\r\n\r\nForcing users to choose an excessively\
+      \ complex password, e.g. some combination of upper-case, lower-case, numbers, and special characters,\
+      \ has a negative impact. It places an extra burden on users and many will use predictable patterns\
+      \ (for example, a capital letter in the first position, followed by lowercase letters, then one\
+      \ or two numbers, and a “special character” at the end). Attackers know this, so dictionary attacks\
+      \ will often contain these common patterns and use the most common substitutions like, $ for s,\
+      \ @ for a, 1 for l, 0 for o."
+    impact: "**CIS password complexity requirements may differ from other frameworks or policies, adherence\
+      \ to site-specific policy is imperative.**\r\n\r\nPasswords that are too complex in nature make\
+      \ it harder for users to remember, leading to bad practices. In addition, composition requirements\
+      \ provide no defense against common attack types such as social engineering or insecure storage\
+      \ of passwords."
+    audit_guidance: "Run the following command to verify:\r\n- `dcredit`, `ucredit`, `lcredit`, and `ocredit`\
+      \ are not set to a value greater than `0`\r\n- Complexity conforms to local site policy:\r\n\r\n\
+      ```\r\n# grep -Psi -- '^\\h*(minclass|[dulo]credit)\\b' /etc/security/pwquality.conf /etc/security/pwquality.conf.d/*.conf\r\
+      \n```\r\n\r\n_Example output:_\r\n\r\n```\r\n/etc/security/pwquality.conf.d/50-pwcomplexity.conf:minclass\
+      \ = 3\r\n/etc/security/pwquality.conf.d/50-pwcomplexity.conf:ucredit = -2\r\n/etc/security/pwquality.conf.d/50-pwcomplexity.conf:lcredit\
+      \ = -2\r\n/etc/security/pwquality.conf.d/50-pwcomplexity.conf:dcredit = -1\r\n/etc/security/pwquality.conf.d/50-pwcomplexity.conf:ocredit\
+      \ = 0\r\n```\r\n\r\nThe example represents a requirement of three character classes, with passwords\
+      \ requiring two upper case, two lower case, and one numeric character.\r\n\r\nRun the following\
+      \ command to verify that module arguments in the configuration file(s) are not being overridden\
+      \ by arguments in `/etc/pam.d/common-password`:\r\n\r\n```\r\n# grep -Psi -- '^\\h*password\\h+(requisite|required|sufficient)\\\
+      h+pam_pwquality\\.so\\h+([^#\\n\\r]+\\h+)?(minclass=\\d*|[dulo]credit=-?\\d*)\\b' /etc/pam.d/common-password\r\
+      \n```\r\n\r\nNothing should be returned\r\n\r\n**Note:**\r\n- settings should be configured in only\
+      \ **one** location for clarity\r\n- Settings observe an order of precedence:\r\n  - module arguments\
+      \ override the settings in the `/etc/security/pwquality.conf` configuration file\r\n  - settings\
+      \ in the `/etc/security/pwquality.conf` configuration file override settings in a `.conf` file in\
+      \ the `/etc/security/pwquality.conf.d/` directory\r\n  - settings in a `.conf` file in the `/etc/security/pwquality.conf.d/`\
+      \ directory are read in canonical order, with last read file containing the setting taking precedence\r\
+      \n- It is recommended that settings be configured in a `.conf` file in the `/etc/security/pwquality.conf.d/`\
+      \ directory for clarity, convenience, and durability."
+    remediation_guidance: "**Note: CIS password complexity requirements may differ from other frameworks\
+      \ or policies, adherence to site-specific policy is imperative.**\r\n\r\nRun the following command:\r\
+      \n\r\n```\r\n# grep -Pl -- '\\bpam_pwquality\\.so\\h+([^#\\n\\r]+\\h+)?(minclass|[dulo]credit)\\\
+      b' /usr/share/pam-configs/*\r\n```\r\n\r\nEdit any returned files and remove the `minclass`, `dcredit`,\
+      \ `ucredit`, `lcredit`, and `ocredit` arguments from the `pam_pwquality.so` line(s)\r\n\r\nCreate\
+      \ or modify a file ending in `.conf` in the `/etc/security/pwquality.conf.d/` directory or the file\
+      \ `/etc/security/pwquality.conf` and add or modify the following line(s) to set complexity according\
+      \ to local site policy:\r\n\r\n- `minclass = _N_`\r\n- `dcredit = _N_` # Value should be either\
+      \ `0` or a number proceeded by a minus (`-`) symbol\r\n- `ucredit = -1` # Value should be either\
+      \ `0` or a number proceeded by a minus (`-`) symbol\r\n- `ocredit = -1` # Value should be either\
+      \ `0` or a number proceeded by a minus (`-`) symbol\r\n- `lcredit = -1` # Value should be either\
+      \ `0` or a number proceeded by a minus (`-`) symbol\r\n\r\n_Example 1 - Set `minclass = 3`:_\r\n\
+      \r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   sed -ri 's/^\\s*minclass\\s*=/# &/' /etc/security/pwquality.conf\r\
+      \n   sed -ri 's/^\\s*[dulo]credit\\s*=/# &/' /etc/security/pwquality.conf\r\n   [ ! -d /etc/security/pwquality.conf.d/\
+      \ ] && mkdir /etc/security/pwquality.conf.d/\r\n   printf '\\n%s' \"minclass = 3\" > /etc/security/pwquality.conf.d/50-pwcomplexity.conf\r\
+      \n}\r\n```\r\n\r\n_Example 2 - set `dcredit = -1`, `ucredit = -1`, and `lcredit = -1`:_\r\n\r\n\
+      ```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   sed -ri 's/^\\s*minclass\\s*=/# &/' /etc/security/pwquality.conf\r\
+      \n   sed -ri 's/^\\s*[dulo]credit\\s*=/# &/' /etc/security/pwquality.conf\r\n   [ ! -d /etc/security/pwquality.conf.d/\
+      \ ] && mkdir /etc/security/pwquality.conf.d/\r\n   printf '%s\\n' \"dcredit = -1\" \"ucredit = -1\"\
+      \ \"lcredit = -1\" > /etc/security/pwquality.conf.d/50-pwcomplexity.conf\r\n}\r\n```"
+    additional_information: ''
+    default_value: "minclass = 0\r\n\r\ndcredit = 0\r\n\r\nucredit = 0\r\n\r\nocredit = 0\r\n\r\nlcredit\
+      \ = 0"
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

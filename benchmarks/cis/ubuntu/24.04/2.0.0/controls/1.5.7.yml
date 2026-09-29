@@ -1,0 +1,56 @@
+control:
+  id: CIS-1.5.7
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure Automatic Error Reporting is configured
+  description: The Apport Error Reporting Service automatically generates crash reports for debugging
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_5_7.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_5_7.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_5_7.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_5_7.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.5.7
+      url: https://workbench.cisecurity.org/sections/4177281/recommendations/7047707
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _1_Configure Additional Process Hardening Main | 2.2.7-Ensure Automatic Error Reporting
+      is configured
+    rationale: Apport collects potentially sensitive data, such as core dumps, stack traces, and log files.
+      They can contain passwords, credit card numbers, serial numbers, and other private material.
+    impact: ''
+    audit_guidance: "Run the following command to verify that the Apport Error Reporting Service is not\
+      \ enabled:\r\n\r\n```\r\n#  dpkg-query -s apport &> /dev/null && grep -Psi -- '^\\h*enabled\\h*=\\\
+      h*[^0]\\b' /etc/default/apport\r\n```\r\n\r\nNothing should be returned\r\n\r\nRun the following\
+      \ command to verify that the apport service is not active:\r\n\r\n```\r\n# systemctl is-active apport.service\
+      \ | grep '^active'\r\n```\r\n\r\nNothing should be returned"
+    remediation_guidance: "Edit `/etc/default/apport` and add or edit the enabled parameter to equal `0`:\r\
+      \n\r\n```\r\nenabled=0\r\n```\r\n\r\nRun the following commands to stop and mask the apport service\r\
+      \n\r\n```\r\n# systemctl stop apport.service\r\n# systemctl mask apport.service\r\n```\r\n\r\n**-\
+      \ OR -**\r\n\r\nRun the following command to remove the apport package:\r\n\r\n```\r\n# apt purge\
+      \ apport\r\n```"
+    additional_information: ''
+    default_value: enabled=1
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

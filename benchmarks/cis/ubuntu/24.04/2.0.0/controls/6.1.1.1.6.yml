@@ -1,0 +1,87 @@
+control:
+  id: CIS-6.1.1.1.6
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure journald Storage is configured
+  description: Data from journald may be stored in volatile memory or persisted locally on the server.  Logs
+    in memory will be lost upon a system reboot.  By persisting logs to local disk on the server they
+    are protected from loss due to a reboot.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_1_1_1_6.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_1_1_1_6.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_1_1_1_6.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_1_1_1_6.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.1.1.1.6
+      url: https://workbench.cisecurity.org/sections/4177234/recommendations/7047492
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AU-12
+      - AU-3
+      cis_v8:
+      - '8.2'
+      cis_v7:
+      - '6.2'
+      - '6.3'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      - T1562
+      - T1562.006
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1022
+    parent: CIS _6_System Logging Main | 2.2.1.1.6-Ensure journald Storage is configured
+    rationale: Writing log data to disk will provide the ability to forensically reconstruct events which
+      may have impacted the operations or security of a system even after a system crash or reboot.
+    impact: ''
+    audit_guidance: "Run the following script to verify `Storage` is set to `persistent`:\r\n\r\n```\r\
+      \n#!/usr/bin/env bash\r\n\r\n{\r\n   l_analyze_cmd=\"$(readlink -e /bin/systemd-analyze || \\\r\n\
+      \   readlink -e /usr/bin/systemd-analyze)\"\r\n   l_conf_file=\"systemd/journald.conf\" l_block=\"\
+      Journal\"\r\n   l_option=\"Storage\" l_option_value=\"persistent\" a_output=()\r\n   while IFS=\
+      \ read -r l_file; do\r\n      l_file=\"${l_file//# /}\"\r\n      l_opt=\"$(awk '/\\['\"$l_block\"\
+      '\\]/{a=1;next}/\\[/{a=0}a' \"$l_file\" \\\r\n      2>/dev/null | grep -Poi '^\\h*'\"$l_option\"\
+      '\\h*=\\h*\\H+\\b' | tail -n 1)\"\r\n         l_option_value=\"$(cut -d= -f2 <<< \"$l_opt\" | xargs)\"\
+      \r\n      [ -n \"$l_option_value\" ] && \\\r\n      a_output+=(\" - \\\"$l_option\\\" is set to:\
+      \ \\\"$l_option_value\\\"\" \\\r\n      \"    in: \\\"$l_file\\\"\")\r\n   done < <(\"$l_analyze_cmd\"\
+      \ cat-config \"$l_conf_file\" | tac | \\\r\n   grep -Pio '^\\h*#\\h*\\/[^#\\n\\r\\h]+\\.conf\\b')\r\
+      \n   if [ \"${#a_output[@]}\" -le \"0\" ]; then\r\n      l_file=\"$(readlink -e /etc/\"$l_conf_file\"\
+      \ || \\\r\n      readlink -e /usr/lib/\"$l_conf_file\")\"\r\n      l_opt=\"$(awk '/\\['\"$l_block\"\
+      '\\]/{a=1;next}/\\[/{a=0}a' \"$l_file\" \\\r\n      2>/dev/null | grep -Poim 1 '^(\\h*#)?\\h*'\"\
+      $l_option\"'\\h*=\\h*\\H+\\b')\"\r\n      l_option_value=\"$(cut -d= -f2 <<< \"${l_opt//# /}\" |\
+      \ xargs)\"\r\n      [ -n \"$l_option_value\" ] && \\\r\n      a_output+=(\" - The default value:\
+      \ \\\"${l_opt//#/}\\\"\" \\\r\n      \"    is being used in the configuration\")\r\n   fi\r\n  \
+      \ [ \"${#a_output[@]}\" -gt \"0\" ] && printf '%s\\n' \"\" \"${a_output[@]}\" \"\"\r\n}\r\n```"
+    remediation_guidance: "Set the following parameter in the `[Journal]` section in `/etc/systemd/journald.conf`\
+      \ or a file in `/etc/systemd/journald.conf.d/` ending in `.conf`:\r\n\r\n```\r\nStorage=persistent\r\
+      \n```\r\n\r\n_Example:_\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   [ ! -d /etc/systemd/journald.conf.d/\
+      \ ] && mkdir -p /etc/systemd/journald.conf.d/\r\n   if grep -Psq -- '^\\h*\\[Journal\\]' /etc/systemd/journald.conf.d/60-journald.conf;\
+      \ then\r\n      printf '%s\\n' \"Storage=persistent\" >> /etc/systemd/journald.conf.d/60-journald.conf\r\
+      \n   else\r\n      printf '%s\\n' \"\" \"[Journal]\" \"Storage=persistent\" >> /etc/systemd/journald.conf.d/60-journald.conf\r\
+      \n   fi\r\n}\r\n```\r\n\r\n**Note:** Drop-in configuration files have higher precedence and override\
+      \ the main configuration file. Files in the `*.conf.d/` configuration subdirectories are sorted\
+      \ by their filename in lexicographic order, regardless of in which of the subdirectories they reside.\
+      \ When multiple files specify the same option, for options which accept just a single value, the\
+      \ entry in the file sorted last takes precedence, and for options which accept a list of values,\
+      \ entries are collected as they occur in the sorted files.\r\n\r\nRun to following command to update\
+      \ the parameters in the service:\r\n\r\n```\r\n# systemctl reload-or-restart systemd-journald\r\n\
+      ```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,64 @@
+control:
+  id: CIS-5.4.1.6
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure all users last password change date is in the past
+  description: All users should have a password change date in the past.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_4_1_6.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_4_1_6.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_4_1_6.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_4_1_6.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.4.1.6
+      url: https://workbench.cisecurity.org/sections/4177295/recommendations/7047791
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques:
+      - T1078
+      - T1078.001
+      - T1078.002
+      - T1078.003
+      - T1078.004
+      - T1110
+      - T1110.001
+      - T1110.002
+      - T1110.003
+      - T1110.004
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _5_Configure shadow password suite parameters Main | 1.1.1.6-Ensure all users last password
+      change date is in the past
+    rationale: If a user's recorded password change date is in the future, then they could bypass any
+      set password expiration.
+    impact: ''
+    audit_guidance: "Run the following script and verify nothing is returned:\r\n\r\n```\r\n#!/usr/bin/env\
+      \ bash\r\n\r\n{\r\n   while IFS= read -r l_user; do\r\n      l_change=$(date -u -d \"$(chage --list\
+      \ $l_user | grep '^Last password change' | cut -d: -f2 | grep -v 'never$')\" +%s)\r\n      if [[\
+      \ \"$l_change\" -gt \"$(date +%s)\" ]]; then\r\n         echo \"User: \\\"$l_user\\\" last password\
+      \ change was \\\"$(chage --list $l_user | grep '^Last password change' | cut -d: -f2)\\\"\"\r\n\
+      \      fi\r\n   done < <(awk -F: '$2~/^\\$.+\\$/{print $1}' /etc/shadow)\r\n}\r\n```"
+    remediation_guidance: Investigate any users with a password change date in the future and correct
+      them.  Locking the account, expiring the password, or resetting the password manually may be appropriate.
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

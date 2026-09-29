@@ -1,0 +1,5 @@
+benchmarks:
+- id: cis-ubuntu-24.04
+  version: 2.0.0
+  platform: ubuntu-24.04
+  path: cis/ubuntu/24.04/2.0.0/benchmark.yml

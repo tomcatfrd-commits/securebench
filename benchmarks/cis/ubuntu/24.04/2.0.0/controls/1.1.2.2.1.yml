@@ -1,0 +1,68 @@
+control:
+  id: CIS-1.1.2.2.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure /dev/shm is tmpfs or a separate partition
+  description: The `/dev/shm` directory is a world-writable directory that can function as shared memory
+    that facilitates inter process communication (IPC).
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_1_2_2_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_1_2_2_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_1_2_2_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_1_2_2_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.1.2.2.1
+      url: https://workbench.cisecurity.org/sections/4177254/recommendations/7047534
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1499
+      - T1499.001
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1022
+    parent: CIS _1_Configure Filesystem Partitions Main | 1.1.2.1-Ensure /dev/shm is tmpfs or a separate
+      partition
+    rationale: "Making `/dev/shm` its own file system allows an administrator to set additional mount\
+      \ options such as the `noexec` option on the mount, making `/dev/shm` useless for an attacker to\
+      \ install executable code. It would also prevent an attacker from establishing a hard link to a\
+      \ system `setuid` program and wait for it to be updated. Once the program was updated, the hard\
+      \ link would be broken and the attacker would have his own copy of the program. If the program happened\
+      \ to have a security vulnerability, the attacker could continue to exploit the known flaw.\r\n\r\
+      \nThis can be accomplished by mounting `tmpfs` to `/dev/shm`."
+    impact: "Since the `/dev/shm` directory is intended to be world-writable, there is a risk of resource\
+      \ exhaustion if it is not bound to a separate partition.\r\n\r\n`/dev/shm` utilizing `tmpfs` can\
+      \ be resized using the `size={size}` parameter in the relevant entry in `/etc/fstab`."
+    audit_guidance: "**- IF -** `/dev/shm` is to be used on the system, run the following command and\
+      \ verify the output shows that `/dev/shm` is mounted. Particular requirements pertaining to mount\
+      \ options are covered in ensuing sections.\r\n\r\n```\r\n# findmnt -kn /dev/shm\r\n```\r\n\r\n_Example\
+      \ output:_\r\n\r\n```\r\n/dev/shm   tmpfs  tmpfs  rw,nosuid,nodev,noexec,relatime,seclabel\r\n```"
+    remediation_guidance: "For specific configuration requirements of the `/dev/shm` mount for your environment,\
+      \ modify `/etc/fstab`.\r\n\r\n_Example:_\r\n\r\n```\r\ntmpfs\t/dev/shm\ttmpfs     defaults,rw,nosuid,nodev,noexec,relatime,size=2G\
+      \  0 0\r\n```\r\n\r\n**Note:** Using Btrfs subvolumes instead of traditional disk partitions changes\
+      \ how disk space is allocated and enforced, quotas may need to be configured to enforce storage\
+      \ limits and prevent resource exhaustion."
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

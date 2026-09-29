@@ -1,0 +1,70 @@
+control:
+  id: CIS-5.3.3.2.8
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure password quality is enforced for the root user
+  description: "If the `pwquality` `enforce_for_root` option is enabled, the module will return error\
+    \ on failed check even if the user changing the password is root. \r\n\r\nThis option is off by default\
+    \ which means that just the message about the failed check is printed but root can change the password\
+    \ anyway. \r\n\r\n**Note:** The root is not asked for an old password so the checks that compare the\
+    \ old and new password are not performed."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_3_2_8.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_3_2_8.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_3_2_8.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_3_2_8.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.3.2.8
+      url: https://workbench.cisecurity.org/sections/4177285/recommendations/7047762
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - IA-5
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.4.2.8-Ensure password quality is enforced
+      for the root user
+    rationale: "Use of a complex password helps to increase the time and resources required to compromise\
+      \ the password. Password complexity, or strength, is a measure of the effectiveness of a password\
+      \ in resisting attempts at guessing and brute-force attacks.\r\n\r\nPassword complexity is one factor\
+      \ of several that determines how long it takes to crack a password. The more complex the password,\
+      \ the greater the number of possible combinations that need to be tested before the password is\
+      \ compromised."
+    impact: ''
+    audit_guidance: "Run the following command to verify that the `enforce_for_root` option is enabled\
+      \ in a pwquality configuration file:\r\n\r\n```\r\n# grep -Psi -- '^\\h*enforce_for_root\\b' /etc/security/pwquality.conf\
+      \ /etc/security/pwquality.conf.d/*.conf\r\n```\r\n\r\n_Example output:_\r\n\r\n```\r\n/etc/security/pwquality.conf.d/50-pwroot.conf:enforce_for_root\r\
+      \n```\r\n\r\n**Note:** \r\n- Settings observe an order of precedence:\r\n  - module arguments override\
+      \ the settings in the `/etc/security/pwquality.conf` configuration file\r\n  - settings in the `/etc/security/pwquality.conf`\
+      \ configuration file override settings in a `.conf` file in the `/etc/security/pwquality.conf.d/`\
+      \ directory\r\n  - settings in a `.conf` file in the `/etc/security/pwquality.conf.d/` directory\
+      \ are read in canonical order, with last read file containing the setting taking precedence\r\n\
+      - It is recommended that settings be configured in a `.conf` file in the `/etc/security/pwquality.conf.d/`\
+      \ directory for clarity, convenience, and durability."
+    remediation_guidance: "Edit or add the following line in a `*.conf` file in `/etc/security/pwquality.conf.d`\
+      \ or in   `/etc/security/pwquality.conf`:\r\n\r\n_Example:_\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\
+      \r\n{\r\n   [ ! -d /etc/security/pwquality.conf.d/ ] && mkdir /etc/security/pwquality.conf.d/\r\n\
+      \   printf '\\n%s\\n' \"enforce_for_root\" > /etc/security/pwquality.conf.d/50-pwroot.conf\r\n}\r\
+      \n```"
+    additional_information: ''
+    default_value: disabled
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

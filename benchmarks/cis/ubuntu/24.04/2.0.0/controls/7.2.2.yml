@@ -1,0 +1,62 @@
+control:
+  id: CIS-7.2.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure /etc/shadow password fields are not empty
+  description: An account with an empty password field means that anybody may log in as that user without
+    providing a password.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.7_2_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.7_2_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.7_2_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.7_2_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 7.2.2
+      url: https://workbench.cisecurity.org/sections/4177259/recommendations/7047590
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-6
+      - IA-5
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques:
+      - T1078
+      - T1078.001
+      - T1078.003
+      mitre_tactics:
+      - TA0003
+      mitre_mitigations:
+      - M1027
+    parent: CIS _7_Local User and Group Settings Main | 2.1.2-Ensure /etc/shadow password fields are not
+      empty
+    rationale: All accounts must have passwords or be locked to prevent the account from being used by
+      an unauthorized user.
+    impact: ''
+    audit_guidance: "Run the following command and verify that no output is returned:\r\n\r\n```\r\n#\
+      \ awk -F: '($2 == \"\" ) { print $1 \" does not have a password \"}' /etc/shadow\r\n```"
+    remediation_guidance: "If any accounts in the `/etc/shadow` file do not have a password, run the following\
+      \ command to lock the account until it can be determined why it does not have a password:\r\n\r\n\
+      ```\r\n# passwd -l ```\r\n\r\nAlso, check to see if the account is logged in and investigate what\
+      \ it is being used for to determine if it needs to be forced off."
+    additional_information: "```\r\nRed Hat Enterprise Linux 8 Security Technical Implementation Guide\r\
+      \nVersion 1, Release: 14 Benchmark Date: 24 APR 2024\r\n\r\nVul ID: V-251706\r\nRule ID: SV-251706r809342\r\
+      \nSTIG ID: RHEL-08-010121\r\nSeverity: CAT II\r\n```"
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

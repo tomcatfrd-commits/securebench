@@ -1,0 +1,79 @@
+control:
+  id: CIS-5.4.2.6
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure root user umask is configured
+  description: "The user file-creation mode mask (`umask`) is used to determine the file permission for\
+    \ newly created directories and files. In Linux, the default permissions for any newly created directory\
+    \ is 0777 (`rwxrwxrwx`), and for any newly created file it is 0666 (`rw-rw-rw-`). The `umask` modifies\
+    \ the default Linux permissions by restricting (masking) these permissions. The `umask` is not simply\
+    \ subtracted, but is processed bitwise. Bits set in the `umask` are cleared in the resulting file\
+    \ mode.\r\n\r\n`umask` can be set with either `Octal` or `Symbolic` values:\r\n- `Octal` (Numeric)\
+    \ Value - Represented by either three or four digits. ie `umask 0027` or `umask 027`.  If a four digit\
+    \ umask is used, the first digit is ignored. The remaining three digits effect the resulting permissions\
+    \ for user, group, and world/other respectively.\r\n- `Symbolic` Value - Represented by a comma separated\
+    \ list for User `u`, group `g`, and world/other `o`.  The permissions listed are not masked by `umask`.\
+    \ ie a `umask` set by `umask u=rwx,g=rx,o=` is the `Symbolic` equivalent of the `Octal` `umask 027`.\
+    \  This `umask` would set a newly created directory with file mode `drwxr-x---` and a newly created\
+    \ file with file mode `rw-r-----`.\r\n\r\n**root user Shell Configuration Files:**\r\n- `/root/.profile`\
+    \ - Is executed to configure the root users' shell before the initial command prompt. **Is only read\
+    \ by login shells.**\r\n- `/root/.bashrc` - Is executed for interactive shells. **only read by a shell\
+    \ that's both interactive and non-login**\r\n\r\n`umask` is set by order of precedence. If `umask`\
+    \ is set in multiple locations, this order of precedence will determine the system's default `umask`.\r\
+    \n \r\n**Order of precedence:**\r\n1. `/root/.profile`\r\n2. `/root/.bashrc`\r\n3. The system default\
+    \ umask"
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_4_2_6.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_4_2_6.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_4_2_6.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_4_2_6.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.4.2.6
+      url: https://workbench.cisecurity.org/sections/4177297/recommendations/7047797
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      - MP-2
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1083
+      mitre_tactics:
+      - TA0007
+      mitre_mitigations: []
+    parent: CIS _5_Configure root and system accounts and environment Main | 1.1.2.6-Ensure root user
+      umask is configured
+    rationale: Setting a secure value for `umask` ensures that users make a conscious choice about their
+      file permissions. A permissive `umask` value could result in directories or files with excessive
+      permissions that can be read and/or written to by unauthorized users.
+    impact: ''
+    audit_guidance: "Run the following command to verify that the `root` user files, `/root/.profile`\
+      \ and `/root/.bashrc`, do not include a `umask` that is less restrictive than `0027`:\r\n\r\n```\r\
+      \n# grep -Psi -- '^\\h*umask\\h+((\\d{1,2}(\\d[^7]|[^2-7]\\d)\\b)|(u=[rwx]{1,3},)?(((g=[rx]?[rx]?w[rx]?[rx]?\\\
+      b)(,o=[rwx]{1,3})?)|((g=[wrx]{1,3},)?o=[wrx]{1,3}\\b)))' /root/.profile /root/.bashrc\r\n```\r\n\
+      \r\nNothing should be returned."
+    remediation_guidance: "Edit `/root/.profile` and `/root/.bashrc` and either:\r\n- remove, comment\
+      \ out, or update any line with `umask`.\r\n\r\n**- OR -**\r\n- update any line that includes `umask`\
+      \ to a value of `0027` or more restrictive.\r\n\r\n_Example:_\r\n\r\n```\r\numask 027\r\n```\r\n\
+      \r\n**Note:** the Recommendation \"Ensure default user umask is configured\" includes guidance to\
+      \ set the default umask"
+    additional_information: ''
+    default_value: System default `umask`
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

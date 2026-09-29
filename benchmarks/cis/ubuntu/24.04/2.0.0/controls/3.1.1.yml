@@ -1,0 +1,75 @@
+control:
+  id: CIS-3.1.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure IPv6 status is identified
+  description: "Internet Protocol Version 6 (IPv6) is the most recent version of Internet Protocol (IP).\
+    \ It's designed to supply IP addressing and additional security to support the predicted growth of\
+    \ connected devices. IPv6 is based on 128-bit addressing and can support 340 undecillion, which is\
+    \ 340,282,366,920,938,463,463,374,607,431,768,211,456 unique addresses.\r\n\r\nFeatures of IPv6\r\n\
+    - Hierarchical addressing and routing infrastructure\r\n- Statefull and Stateless configuration\r\n\
+    - Support for quality of service (QoS)\r\n- An ideal protocol for neighboring node interaction"
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.3_1_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.3_1_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.3_1_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.3_1_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 3.1.1
+      url: https://workbench.cisecurity.org/sections/4177243/recommendations/7047477
+    assessment_status: manual
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1557
+      - T1557.000
+      - T1595
+      - T1595.001
+      - T1595.002
+      mitre_tactics:
+      - TA0008
+      mitre_mitigations:
+      - M1042
+    parent: CIS _3_Configure Network Devices Main | 2.1.1-Ensure IPv6 status is identified
+    rationale: "IETF RFC 4038 recommends that applications are built with an assumption of dual stack.\
+      \ It is recommended that IPv6 be enabled and configured in accordance with Benchmark recommendations.\r\
+      \n\r\n**- IF -** dual stack and IPv6 are not used in your environment, IPv6 may be disabled to reduce\
+      \ the attack surface of the system, and recommendations pertaining to IPv6 can be skipped.\r\n\r\
+      \n**Note:** It is recommended that IPv6 be enabled and configured unless this is against local site\
+      \ policy"
+    impact: "IETF RFC 4038 recommends that applications are built with an assumption of dual stack.\r\n\
+      \r\nWhen enabled, IPv6 will require additional configuration to reduce risk to the system."
+    audit_guidance: "Run the following script to identify if IPv6 is enabled on the system:\r\n\r\n```\r\
+      \n#!/usr/bin/env bash\r\n\r\n{\r\n   l_output=\"\"\r\n   ! grep -Pqs -- '^\\h*0\\b' /sys/module/ipv6/parameters/disable\
+      \ && l_output=\"- IPv6 is not enabled\"\r\n   if sysctl net.ipv6.conf.all.disable_ipv6 | grep -Pqs\
+      \ -- \"^\\h*net\\.ipv6\\.conf\\.all\\.disable_ipv6\\h*=\\h*1\\b\" && \\\r\n      sysctl net.ipv6.conf.default.disable_ipv6\
+      \ | grep -Pqs -- \"^\\h*net\\.ipv6\\.conf\\.default\\.disable_ipv6\\h*=\\h*1\\b\"; then\r\n    \
+      \  l_output=\"- IPv6 is not enabled\"\r\n   fi\r\n   [ -z \"$l_output\" ] && l_output=\"- IPv6 is\
+      \ enabled\"\r\n   echo -e \"\\n$l_output\\n\"\r\n}\r\n```"
+    remediation_guidance: Enable or disable IPv6 in accordance with system requirements and local site
+      policy
+    additional_information: Having more addresses has grown in importance with the expansion of smart
+      devices and connectivity. IPv6 provides more than enough globally unique IP addresses for every
+      networked device currently on the planet, helping ensure providers can keep pace with the expected
+      proliferation of IP-based devices.
+    default_value: IPv6 is enabled
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

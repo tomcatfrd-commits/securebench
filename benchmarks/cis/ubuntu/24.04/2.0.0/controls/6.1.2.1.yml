@@ -1,0 +1,64 @@
+control:
+  id: CIS-6.1.2.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure rsyslog is installed
+  description: The `rsyslog` software is recommended in environments where `journald` does not meet operation
+    requirements.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_1_2_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_1_2_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_1_2_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_1_2_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.1.2.1
+      url: https://workbench.cisecurity.org/sections/4177249/recommendations/7047501
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AU-12
+      - AU-2
+      - AU-3
+      cis_v8:
+      - '8.2'
+      cis_v7:
+      - '6.2'
+      - '6.3'
+      mitre_techniques:
+      - T1005
+      - T1005.000
+      - T1070
+      - T1070.002
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1029
+      - M1057
+    parent: CIS _6_System Logging Main | 2.2.2.1-Ensure rsyslog is installed
+    rationale: The security enhancements of `rsyslog` such as connection-oriented (i.e. TCP) transmission
+      of logs, the option to log to database formats, and the encryption of log data en route to a central
+      logging server) justify installing and configuring the package.
+    impact: ''
+    audit_guidance: "**- IF -** `rsyslog` is being used for logging on the system:\r\n\r\nRun the following\
+      \ command to verify `rsyslog` is installed:\r\n\r\n```\r\n# dpkg-query -s rsyslog &>/dev/null &&\
+      \ echo \"rsyslog is installed\"\r\n```\r\n\r\nVerify the output matches:\r\n\r\n```\r\nrsyslog is\
+      \ installed\r\n```"
+    remediation_guidance: "Run the following command to install `rsyslog`:\r\n\r\n```\r\n# apt install\
+      \ rsyslog\r\n```"
+    additional_information: ''
+    default_value: Installed
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

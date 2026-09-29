@@ -1,0 +1,77 @@
+control:
+  id: CIS-5.1.23
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure sshd post-quantum cryptography key exchange algorithms are configured
+  description: "OpenSSH has integrated post-quantum cryptography (PQC) to secure SSH connections against\
+    \ potential attacks from future quantum computers. This includes the adoption of hybrid key agreement\
+    \ algorithms that combine classical cryptographic methods with quantum-resistant ones.\r\n\r\nMore\
+    \ information about the openSSH server configuration is available in the \"Configure SSH Server\"\
+    \ section overview."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_1_23.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_1_23.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_1_23.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_1_23.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.1.23
+      url: https://workbench.cisecurity.org/sections/4177236/recommendations/7047637
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '3.1'
+      cis_v7:
+      - '14.4'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _5_Configure SSH Server Main | 2.2.24-Ensure sshd post-quantum cryptography key exchange
+      algorithms are configured
+    rationale: "PQC helps secure SSH connections against potential attacks from future quantum computers\
+      \ providing protection against both classical and quantum adversaries.\r\n\r\nThe combination of\
+      \ established classical algorithms with the forward-looking security of PQC algorithms, offers a\
+      \ robust solution during the transition phase to fully quantum-resistant cryptography."
+    impact: "A restrictive list of key exchange algorithms available to the SSH server may prevent some\
+      \ clients from being able to connect.\r\n\r\nIncluding a non-supported key exchange algorithm in\
+      \ the `kexalgorithms` option, may prevent the SSH server from starting.\r\n\r\n>**Note:** The list\
+      \ of supported key exchange algorithms may also be obtained using the `ssh -Q KexAlgorithms` command."
+    audit_guidance: "1. Run the following command to determine the version of openSSH-server:\r\n\r\n\
+      ```\r\n# \"$(readlink -e /usr/sbin/sshd || readlink -e /sbin/sshd)\" -V 2>&1 | \\\r\ngrep -Psio\
+      \ 'openssh_\\d+\\.\\d+' | awk -F'_' '{print $2}'\r\n```\r\n\r\n2. Verify post-quantum cryptography\
+      \ kexalgorithm(s) are available:\r\n\r\nRun the following command to verify the `sntrup761x25519-sha512`\
+      \ post-quantum key agreement algorithm is available:\r\n\r\n```\r\n# \"$(readlink -e /usr/sbin/sshd\
+      \ || readlink -e /sbin/sshd)\" -T | \\\r\nawk '($1==\"kexalgorithms\" && $2~/sntrup761x25519-sha512/)\
+      \ {print $2}'\r\n```\r\n\r\nVerify output includes `sntrup761x25519-sha512`\r\n\r\n**- IF -** openSSH-server\
+      \ version is `9.9` or greater, run the following command to verify the `mlkem768x25519-sha256` post-quantum\
+      \ key agreement algorithm is also available:\r\n\r\n```\r\n# \"$(readlink -e /usr/sbin/sshd || readlink\
+      \ -e /sbin/sshd)\" -T | \\\r\nawk '($1==\"kexalgorithms\" && $2~/mlkem768x25519-sha256/) {print\
+      \ $2}'/) {print $2}'\r\n```\r\n\r\nVerify output includes `mlkem768x25519-sha256`"
+    remediation_guidance: "Create or edit a `*.conf` file in the `/etc/ssh/sshd_config.d/` and add/modify\
+      \ the `KexAlgorithms` line above any `Include` and `Match` statements.\r\n\r\n_Example:_\r\n\r\n\
+      ```\r\nKexAlgorithms -diffie-hellman-group1-sha1,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1\r\
+      \n```\r\n\r\n>**Note:** If local site policy has stricter requirements, add any additional MACs\
+      \ that are not authorized by local site policy to the list in the example."
+    additional_information: "OpenSSH 9.0: Introduced `sntrup761x25519-sha512` as the first post-quantum\
+      \ key agreement algorithm, which is a hybrid scheme combining Streamlined NTRU Prime with X25519.\r\
+      \n\r\nOpenSSH 9.9: Added `mlkem768x25519-sha256` as another hybrid post-quantum key agreement algorithm.\r\
+      \n\r\nOpenSSH 10.0: Made `mlkem768x25519-sha256` the default key agreement algorithm. This algorithm\
+      \ combines ML-KEM (a NIST-standardized key encapsulation mechanism, also known as Kyber) with the\
+      \ classical X25519 elliptic curve method."
+    default_value: "Version 9.0 - 9.8: kexalgorithms sntrup761x25519-sha512,sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521\r\
+      \n\r\nVersion 9.9 and greater: kexalgorithms mlkem768x25519-sha256,sntrup761x25519-sha512,sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521"
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

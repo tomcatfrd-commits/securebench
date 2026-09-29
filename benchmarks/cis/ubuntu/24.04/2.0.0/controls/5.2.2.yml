@@ -1,0 +1,71 @@
+control:
+  id: CIS-5.2.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure sudo commands use pty
+  description: '`sudo` can be configured to run only from a pseudo terminal (`pseudo-pty`).'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_2_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_2_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_2_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_2_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.2.2
+      url: https://workbench.cisecurity.org/sections/4177269/recommendations/7047645
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-6
+      cis_v8:
+      - '5.4'
+      cis_v7:
+      - '4.3'
+      mitre_techniques:
+      - T1078
+      - T1078.003
+      - T1548
+      - T1548.003
+      mitre_tactics:
+      - TA0001
+      - TA0003
+      mitre_mitigations:
+      - M1026
+      - M1028
+    parent: CIS _5_Configure privilege escalation Main | 2.1.2-Ensure sudo commands use pty
+    rationale: Attackers can run a malicious program using `sudo` which would fork a background process
+      that remains even when the main program has finished executing.
+    impact: '**WARNING:** Editing the `sudo` configuration incorrectly can cause `sudo` to stop functioning.
+      Always use `visudo` to modify `sudo` configuration files.'
+    audit_guidance: "Verify that `sudo` can only run other commands from a pseudo terminal.\r\n\r\nRun\
+      \ the following command to verify `Defaults use_pty` is set:\r\n\r\n```\r\n# grep -rPi -- '^\\h*Defaults\\\
+      h+([^#\\n\\r]+,\\h*)?use_pty\\b' /etc/sudoers*\r\n```\r\n\r\nVerify the output matches:\r\n\r\n\
+      ```\r\n/etc/sudoers:Defaults use_pty\r\n```\r\n\r\nRun the follow command to to verify `Defaults\
+      \ !use_pty` is not set:\r\n\r\n```\r\n# grep -rPi -- '^\\h*Defaults\\h+([^#\\n\\r]+,\\h*)?!use_pty\\\
+      b' /etc/sudoers*\r\n```\r\n\r\nNothing should be returned"
+    remediation_guidance: "Edit the file `/etc/sudoers` with `visudo` or a file in `/etc/sudoers.d/` with\
+      \ `visudo -f ` and add the following line:\r\n\r\n```\r\nDefaults use_pty\r\n```\r\n\r\nEdit the\
+      \ file `/etc/sudoers` with `visudo` and any files in `/etc/sudoers.d/` with `visudo -f ` and remove\
+      \ any occurrence of `!use_pty`\r\n\r\n**Note:** \r\n- sudo will read each file in `/etc/sudoers.d`,\
+      \ skipping file names that end in `~` or contain a `.` character to avoid causing problems with\
+      \ package manager or editor temporary/backup files. \r\n- Files are parsed in sorted lexical order.\
+      \ That is, `/etc/sudoers.d/01_first` will be parsed before `/etc/sudoers.d/10_second`. \r\n- Be\
+      \ aware that because the sorting is lexical, not numeric, `/etc/sudoers.d/1_whoops` would be loaded\
+      \ after `/etc/sudoers.d/10_second`. \r\n- Using a consistent number of leading zeroes in the file\
+      \ names can be used to avoid such problems."
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 4
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

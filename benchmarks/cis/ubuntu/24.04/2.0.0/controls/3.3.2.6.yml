@@ -1,0 +1,118 @@
+control:
+  id: CIS-3.3.2.6
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure net.ipv6.conf.default.accept_source_route is configured
+  description: "The `accept_source_route` option causes network interfaces to accept packets with the\
+    \ Strict Source Route (SSR) or Loose Source Routing (LSR) option set.\r\n\r\n`net.ipv6.conf.default.accept_source_route`\
+    \ controls accepting of all IPv6 packets with the SSR or LSR option set on newly added network interfaces.\r\
+    \n\r\nIn networking, source routing allows a sender to partially or fully specify the route packets\
+    \ take through a network. In contrast, non-source routed packets travel a path determined by routers\
+    \ in the network. In some cases, systems may not be routable or reachable from some locations (e.g.\
+    \ private addresses vs. Internet routable), and so source routed packets would need to be used.\r\n\
+    \r\nMore information about the kernel parameter configuration files, their location, and load preference\
+    \ is available in the \"Configure Network Kernel Parameters\" section overview.\r\n\r\n>**Note: If\
+    \ IPv6 has been disabled this recommendation is not applicable.**"
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.3_3_2_6.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.3_3_2_6.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.3_3_2_6.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.3_3_2_6.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 3.3.2.6
+      url: https://workbench.cisecurity.org/sections/4177263/recommendations/7047624
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-6
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1590
+      - T1590.005
+      mitre_tactics:
+      - TA0007
+      mitre_mitigations: []
+    parent: CIS _3_Configure Network Kernel Parameters Main | 1.1.2.6-Ensure net.ipv6.conf.default.accept_source_route
+      is configured
+    rationale: Setting `net.ipv6.conf.default.accept_source_route` to `0` disables the system from accepting
+      source routed packets. Assume this system was capable of routing packets to Internet routable addresses
+      on one interface and private addresses on another interface. Assume that the private addresses were
+      not routable to the Internet routable addresses and vice versa. Under normal routing circumstances,
+      an attacker from the Internet routable addresses could not use the system as a way to reach the
+      private address systems. If, however, source routed packets were allowed, they could be used to
+      gain access to the private address systems as the route could be specified, rather than rely on
+      routing protocols that did not allow this routing.
+    impact: ''
+    audit_guidance: ">**- IF IPv6 is enabled on the system -**\r\n\r\nVerify `net.ipv6.conf.default.accept_source_route`\
+      \ is set to `0`.\r\n\r\n1. Run the following command to verify `net.ipv6.conf.default.accept_source_route`\
+      \ is set to `0` in the running configuration:\r\n\r\n```\r\n# sysctl net.ipv6.conf.default.accept_source_route\r\
+      \n```\r\n\r\nVerify output is:\r\n\r\n```\r\nnet.ipv6.conf.default.accept_source_route = 0\r\n```\r\
+      \n\r\n2. Run the following script to verify `net.ipv6.conf.default.accept_source_route = 0` is set\
+      \ in a file being used by systemd sysctl to configure `net.ipv6.conf.default.accept_source_route`:\r\
+      \n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   l_parameter_name=\"net.ipv6.conf.default.accept_source_route\"\
+      \ \r\n   l_grep=\"${l_parameter_name//./(\\\\.|\\\\/)}\" a_output=() a_files=()\r\n   l_systemdsysctl=\"\
+      $(readlink -e /lib/systemd/systemd-sysctl \\\r\n   || readlink -e /usr/lib/systemd/systemd-sysctl)\"\
+      \r\n   l_ufw_file=\"$([ -f /etc/default/ufw ] && \\\r\n   awk -F= '/^\\s*IPT_SYSCTL=/ {print $2}'\
+      \ /etc/default/ufw)\"\r\n   [ -f \"$(readlink -e \"$l_ufw_file\")\" ] && \\\r\n   a_files+=(\"$l_ufw_file\"\
+      ); a_files+=(\"/etc/sysctl.conf\")\r\n   while IFS= read -r l_fname; do\r\n      l_file=\"$(readlink\
+      \ -e \"${l_fname//# /}\")\"\r\n      [ -n \"$l_file\" ] && ! grep -Psiq -- '(^|\\h+)'\"$l_file\"\
+      '\\b' \\\r\n      <<< \"${a_files[*]}\" && a_files+=(\"$l_file\")\r\n   done < <(\"$l_systemdsysctl\"\
+      \ --cat-config | tac | \\\r\n   grep -Psio -- '^\\h*#\\h*\\/[^#\\n\\r\\h]+\\.conf\\b')\r\n   for\
+      \ l_file in \"${a_files[@]}\"; do\r\n      l_opt=\"$(grep -Psio '^\\h*'\"$l_grep\"'\\h*=\\h*\\H+\\\
+      b' \"$l_file\" | tail -n 1)\"\r\n      l_option_value=\"$(cut -d= -f2 <<< \"$l_opt\" | xargs)\"\r\
+      \n      [ -n \"$l_option_value\" ] && \\\r\n      a_output+=(\" - \\\"$l_parameter_name = $l_option_value\\\
+      \" is set in: \\\"$l_file\\\"\")\r\n   done\r\n   [ \"${#a_output[@]}\" -gt \"0\" ] && printf '%s\\\
+      n' \"\" \"${a_output[@]}\" \"\"\r\n}\r\n```\r\n\r\nVerify output includes `net.ipv6.conf.default.accept_source_route\
+      \ = 0`.\r\n\r\n_Example output:_\r\n\r\n```\r\n - \"net.ipv6.conf.default.accept_source_route =\
+      \ 0\" is set in: \"/etc/sysctl.d/60-ipv6_sysctl.conf\"\r\n```\r\n\r\n>**Note:** If multiple lines\
+      \ with `net.ipv6.conf.default.accept_source_route =` are returned.\r\n>- The first line includes\
+      \ the value being used by `systemd sysctl`. If this is a correct value, this is considered a passing\
+      \ state. If the file listed is not in the `/etc/sysctl.d/` directory, it is highly recommended to\
+      \ follow the remediation procedure to create a `.conf` file in the `/etc/sysctl.d/` directory with\
+      \ the correct setting to prevent a potential change due to an update to the system.\r\n>- Any files\
+      \ in the `/etc/sysctl.d/` directory that include an incorrect value should be modified to comment\
+      \ out or change the incorrect value to minimize the potential of the incorrect value being used\
+      \ by `systemd sysctl` due to system configuration changes."
+    remediation_guidance: "1. Review all files being used by systemd sysctl and comment out or remove\
+      \ all `net.ipv6.conf.default.accept_source_route` lines that are not `net.ipv6.conf.default.accept_source_route=0`.\r\
+      \n\r\n_Example script:_\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   l_option=\"net.ipv6.conf.default.accept_source_route\"\
+      \ l_value=\"0\"\r\n   l_grep=\"${l_option//./(\\\\.|\\\\/)}\" a_files=()\r\n   l_systemdsysctl=\"\
+      $(readlink -e /lib/systemd/systemd-sysctl \\\r\n   || readlink -e /usr/lib/systemd/systemd-sysctl)\"\
+      \r\n   l_ufw_file=\"$([ -f /etc/default/ufw ] && \\\r\n   awk -F= '/^\\s*IPT_SYSCTL=/ {print $2}'\
+      \ /etc/default/ufw)\"\r\n   [ -f \"$(readlink -e \"$l_ufw_file\")\" ] && \\\r\n   a_files+=(\"$l_ufw_file\"\
+      ); a_files+=(\"/etc/sysctl.conf\")\r\n   while IFS= read -r l_fname; do\r\n      l_file=\"$(readlink\
+      \ -e \"${l_fname//# /}\")\"\r\n      [ -n \"$l_file\" ] && ! grep -Psiq -- '(^|\\h+)'\"$l_file\"\
+      '\\b' \\\r\n      <<< \"${a_files[*]}\" && a_files+=(\"$l_file\")\r\n   done < <(\"$l_systemdsysctl\"\
+      \ --cat-config | tac | \\\r\n   grep -Psio -- '^\\h*#\\h*\\/[^#\\n\\r\\h]+\\.conf\\b')\r\n   for\
+      \ l_file in \"${a_files[@]}\"; do\r\n      grep -Psio -- '\\h*'\"$l_grep\"'\\h*=\\h*\\H+\\b' \"\
+      $l_file\" \\\r\n      | grep -Psivq -- '^\\h*'\"$l_grep\"'\\h*=\\h*'\"$l_value\"'\\b' && \\\r\n\
+      \      sed -ri '/^\\s*'\"$l_grep\"'\\s*=\\s*(1[0-9]*)/s/^/# /' \"$l_file\"\r\n   done\r\n}\r\n```\r\
+      \n\r\n2. Create or edit a file in the `/etc/sysctl.d/` directory ending in `.conf`and edit or add\
+      \ the following line:\r\n\r\n```\r\nnet.ipv6.conf.default.accept_source_route = 0\r\n```\r\n\r\n\
+      _Example:_\r\n\r\n```\r\n# [ ! -d \"/etc/sysctl.d/\" ] && mkdir -p /etc/sysctl.d/\r\n# printf '%s\\\
+      n' \"\" \"net.ipv6.conf.default.accept_source_route = 0\" \\\r\n>> /etc/sysctl.d/60-ipv6_sysctl.conf\r\
+      \n```\r\n\r\n>**Note:** If the UFW file was the first file listed in the audit, the entry will be\
+      \ commented out as part of the first step, however updating Uncomplicated Firewall (UFW) may update\
+      \ this change. In this case the updated entry will supersede the entry being created as part of\
+      \ this step.\r\n\r\n3. Run the following command to load all sysctl configuration filles:\r\n\r\n\
+      ```\r\n# sysctl --system\r\n```"
+    additional_information: ''
+    default_value: net.ipv6.conf.default.accept_source_route = 0
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,110 @@
+control:
+  id: CIS-7.2.9
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure local interactive user home directories are configured
+  description: The user home directory is space defined for the particular user to set local environment
+    variables and to store personal files.  While the system administrator can establish secure permissions
+    for users' home directories, the users can easily override these. Users can be defined in `/etc/passwd`
+    without a home directory or with a home directory that does not actually exist.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.7_2_9.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.7_2_9.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.7_2_9.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.7_2_9.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 7.2.9
+      url: https://workbench.cisecurity.org/sections/4177259/recommendations/7047626
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-6
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1222
+      - T1222.002
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1022
+    parent: CIS _7_Local User and Group Settings Main | 2.1.8-Ensure local interactive user home directories
+      are configured
+    rationale: Since the user is accountable for files stored in the user home directory, the user must
+      be the owner of the directory. Group or world-writable user home directories may enable malicious
+      users to steal or modify other users' data or to gain another user's system privileges. If the user's
+      home directory does not exist or is unassigned, the user will be placed in "/" and will not be able
+      to write any files or have local environment variables set.
+    impact: ''
+    audit_guidance: "Run the following script to ensure:\r\n- local interactive user home directories\
+      \ exist\r\n- local interactive users own their home directories\r\n- local interactive user home\
+      \ directories are mode 750 or more restrictive\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n  \
+      \ a_output=() a_output2=() a_exists2=() a_mode2=() a_owner2=()\r\n   l_valid_shells=\"^($( awk -F\\\
+      / '$NF != \"nologin\" {print}' /etc/shells | sed -rn '/^\\//{s,/,\\\\\\\\/,g;p}' | paste -s -d '|'\
+      \ - ))$\"\r\n   l_mask='0027'; l_max=\"$( printf '%o' $(( 0777 & ~$l_mask)) )\"\r\n   l_users=\"\
+      $(awk -v pat=\"$l_valid_shells\" -F: '$(NF) ~ pat { print $1 \" \" $(NF-1) }' /etc/passwd | wc -l)\"\
+      \r\n   [ \"$l_users\" -gt 10000 ] && printf '%s\\n' \"\" \"  ** INFO **\" \\\r\n   \"  $l_users\
+      \ Local interactive users found on the system\" \"  This may be a long running check\" \"  **********\"\
+      \r\n   while IFS=\" \" read -r l_user l_home; do\r\n      if [ -d \"$l_home\" ]; then\r\n      \
+      \   while IFS=: read -r l_own l_mode; do\r\n            [ \"$l_user\" != \"$l_own\" ] && a_owner2+=(\"\
+      \  - User: \\\"$l_user\\\" Home \\\"$l_home\\\" is owned by: \\\"$l_own\\\"\")\r\n            [\
+      \ $(( $l_mode & $l_mask )) -gt 0 ] && a_mode2+=(\"  - User: \\\"$l_user\\\" Home \\\"$l_home\\\"\
+      \ is mode: \\\"$l_mode\\\"\" \\\r\n            \"    should be mode: \\\"$l_max\\\" or more restrictive\"\
+      )\r\n         done <<< \"$(stat -Lc '%U:%#a' \"$l_home\")\"\r\n      else\r\n         a_exists2+=(\"\
+      \  - User: \\\"$l_user\\\" Home Directory: \\\"$l_home\\\" Doesn't exist\")\r\n      fi\r\n   done\
+      \ <<< \"$(awk -v pat=\"$l_valid_shells\" -F: '$(NF) ~ pat { print $1 \" \" $(NF-1) }' /etc/passwd)\"\
+      \r\n   [ \"${#a_exists2[@]}\" -gt 0 ] && a_output2+=(\"${a_exists2[@]}\") || \\\r\n   a_output+=(\"\
+      \  - All interactive users home directories exist\")\r\n   [ \"${#a_mode2[@]}\" -gt 0 ] && a_output2+=(\"\
+      ${a_mode2[@]}\") || \\\r\n   a_output+=(\"  - All interactive users home directories are mode \\\
+      \"$l_max\\\" or more restrictive\")\r\n   [ \"${#a_owner2[@]}\" -gt 0 ] && a_output2+=(\"${a_owner2[@]}\"\
+      ) || \\\r\n   a_output+=(\"  - All interactive users own their home directory\")\r\n   if [ \"${#a_output2[@]}\"\
+      \ -le 0 ]; then\r\n      printf '%s\\n' \"\" \"- Audit Result:\" \"  ** PASS **\" \"${a_output[@]}\"\
+      \r\n   else\r\n      printf '%s\\n' \"\" \"- Audit Result:\" \"  ** FAIL **\" \" - Reason(s) for\
+      \ audit failure:\" \"${a_output2[@]}\"\r\n      [ \"${#a_output[@]}\" -gt 0 ] && printf '%s\\n'\
+      \ \"- Correctly set:\" \"${a_output[@]}\"\r\n   fi\r\n}\r\n```"
+    remediation_guidance: "If a local interactive users' home directory is undefined and/or doesn't exist,\
+      \ follow local site policy and perform one of the following:\r\n- Lock the user account\r\n- Remove\
+      \ the user from the system\r\n- Create a directory for the user. If undefined, edit `/etc/passwd`\
+      \ and add the absolute path to the directory to the last field of the user.\r\n\r\nRun the following\
+      \ script to:\r\n- Remove excessive permissions from local interactive users home directories\r\n\
+      - Update the home directory's owner\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   a_output=()\
+      \ a_output2=() a_exists2=() a_mode2=() a_owner2=()\r\n   l_valid_shells=\"^($( awk -F\\/ '$NF !=\
+      \ \"nologin\" {print}' /etc/shells | sed -rn '/^\\//{s,/,\\\\\\\\/,g;p}' | paste -s -d '|' - ))$\"\
+      \r\n   l_mask='0027'; l_max=\"$( printf '%o' $(( 0777 & ~$l_mask)) )\"\r\n   l_users=\"$(awk -v\
+      \ pat=\"$l_valid_shells\" -F: '$(NF) ~ pat { print $1 \" \" $(NF-1) }' /etc/passwd | wc -l)\"\r\n\
+      \   [ \"$l_users\" -gt 10000 ] && printf '%s\\n' \"\" \"  ** INFO **\" \\\r\n   \"  $l_users Local\
+      \ interactive users found on the system\" \"  This may be a long running process\" \"  **********\"\
+      \r\n   while IFS=\" \" read -r l_user l_home; do\r\n      if [ -d \"$l_home\" ]; then\r\n      \
+      \   while IFS=: read -r l_own l_mode; do\r\n            if [ \"$l_user\" != \"$l_own\" ]; then\r\
+      \n               a_owner2+=(\"  - User: \\\"$l_user\\\" Home \\\"$l_home\\\" is owned by: \\\"$l_own\\\
+      \"\" \\\r\n               \"    changing owner to: \\\"$l_user\\\"\") && chown \"$l_user\" \"$l_home\"\
+      \r\n            fi\r\n            if [ $(( $l_mode & $l_mask )) -gt 0 ]; then\r\n              \
+      \ a_mode2+=(\"  - User: \\\"$l_user\\\" Home \\\"$l_home\\\" is mode: \\\"$l_mode\\\"\" \\\r\n \
+      \              \"    changing to mode: \\\"$l_max\\\" or more restrictive\")\r\n               chmod\
+      \ g-w,o-rwx \"$l_home\"\r\n            fi\r\n         done <<< \"$(stat -Lc '%U:%#a' \"$l_home\"\
+      )\"\r\n      else\r\n         a_exists2+=(\"  - User: \\\"$l_user\\\" Home Directory: \\\"$l_home\\\
+      \" Doesn't exist\")\r\n      fi\r\n   done <<< \"$(awk -v pat=\"$l_valid_shells\" -F: '$(NF) ~ pat\
+      \ { print $1 \" \" $(NF-1) }' /etc/passwd)\"\r\n   [ \"${#a_exists2[@]}\" -gt 0 ] && a_output2+=(\"\
+      ${a_exists2[@]}\")\r\n   [ \"${#a_mode2[@]}\" -gt 0 ] && a_output2+=(\"${a_mode2[@]}\")\r\n   [\
+      \ \"${#a_owner2[@]}\" -gt 0 ] && a_output2+=(\"${a_owner2[@]}\")\r\n   if [ \"${#a_output2[@]}\"\
+      \ -gt 0 ]; then\r\n      printf '%s\\n' \"\" \"${a_output2[@]}\"\r\n   else\r\n      printf '%s\\\
+      n' \"\" \"- No changes required\"\r\n   fi\r\n}\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

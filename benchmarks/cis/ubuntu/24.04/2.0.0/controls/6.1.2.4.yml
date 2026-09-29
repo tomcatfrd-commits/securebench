@@ -1,0 +1,71 @@
+control:
+  id: CIS-6.1.2.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure rsyslog logging is configured
+  description: The `/etc/rsyslog.conf` and `/etc/rsyslog.d/*.conf` files specifies rules for logging and
+    which files are to be used to log certain classes of messages.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_1_2_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_1_2_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_1_2_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_1_2_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.1.2.4
+      url: https://workbench.cisecurity.org/sections/4177249/recommendations/7047530
+    assessment_status: manual
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AU-12
+      - AU-2
+      - AU-7
+      cis_v8:
+      - '8.2'
+      cis_v7:
+      - '6.2'
+      - '6.3'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1047
+    parent: CIS _6_System Logging Main | 2.2.2.4-Ensure rsyslog logging is configured
+    rationale: A great deal of important security-related information is sent via `rsyslog` (e.g., successful
+      and failed su attempts, failed login attempts, root login attempts, etc.).
+    impact: ''
+    audit_guidance: "Review the contents of `/etc/rsyslog.conf` and `/etc/rsyslog.d/*.conf` files to ensure\
+      \ appropriate logging is set. In addition, run the following command and verify that the log files\
+      \ are logging information as expected:\r\n\r\n```\r\n# ls -l /var/log/\r\n```"
+    remediation_guidance: "Edit the following lines in the `/etc/rsyslog.conf` and `/etc/rsyslog.d/*.conf`\
+      \ files as appropriate for your environment.\r\n\r\n>**Note:** The below configuration is shown\
+      \ for example purposes only. Due care should be given to how the organization wishes to store log\
+      \ data.\r\n\r\n```\r\n*.emerg                                  :omusrmsg:*\r\nauth,authpriv.*  \
+      \                        /var/log/secure\r\nmail.*                                  -/var/log/mail\r\
+      \nmail.info                               -/var/log/mail.info\r\nmail.warning                  \
+      \          -/var/log/mail.warn\r\nmail.err                                 /var/log/mail.err\r\n\
+      cron.*                                   /var/log/cron\r\n*.=warning;*.=err                    \
+      \   -/var/log/warn\r\n*.crit                                   /var/log/warn\r\n*.*;mail.none;news.none\
+      \                 -/var/log/messages\r\nlocal0,local1.*                         -/var/log/localmessages\r\
+      \nlocal2,local3.*                         -/var/log/localmessages\r\nlocal4,local5.*           \
+      \              -/var/log/localmessages\r\nlocal6,local7.*                         -/var/log/localmessages\r\
+      \n```\r\n\r\nRun the following command to reload the `rsyslogd` configuration:\r\n\r\n```\r\n# systemctl\
+      \ restart rsyslog\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 0
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

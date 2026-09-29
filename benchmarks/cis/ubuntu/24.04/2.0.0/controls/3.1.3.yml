@@ -1,0 +1,76 @@
+control:
+  id: CIS-3.1.3
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure bluetooth services are not in use
+  description: Bluetooth is a short-range wireless technology standard that is used for exchanging data
+    between devices over short distances. It employs UHF radio waves in the ISM bands, from 2.402 GHz
+    to 2.48 GHz. It is mainly used as an alternative to wire connections.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.3_1_3.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.3_1_3.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.3_1_3.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.3_1_3.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 3.1.3
+      url: https://workbench.cisecurity.org/sections/4177243/recommendations/7047488
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1011
+      - T1011.001
+      mitre_tactics:
+      - TA0010
+      mitre_mitigations:
+      - M1042
+    parent: CIS _3_Configure Network Devices Main | 2.1.2-Ensure bluetooth services are not in use
+    rationale: An attacker may be able to find a way to access or corrupt your data. One example of this
+      type of activity is `bluesnarfing`, which refers to attackers using a Bluetooth connection to steal
+      information off of your Bluetooth device. Also, viruses or other malicious code can take advantage
+      of Bluetooth technology to infect other devices. If you are infected, your data may be corrupted,
+      compromised, stolen, or lost.
+    impact: "Many personal electronic devices (PEDs) use Bluetooth technology. For example, you may be\
+      \ able to operate your computer with a wireless keyboard. Disabling Bluetooth will prevent these\
+      \ devices from connecting to the system.\r\n\r\nThere may be packages that are dependent on the\
+      \ `bluez` package.  If the `bluez` package is removed, these dependent packages will be removed\
+      \ as well. Before removing the `bluez` package, review any dependent packages to determine if they\
+      \ are required on the system.\r\n\r\n**-IF-** a dependent package is required: stop and mask `bluetooth.service`\
+      \ leaving the `bluez` package installed."
+    audit_guidance: "Run the following command to verify the `bluez` package is not installed:\r\n\r\n\
+      ```\r\n# dpkg-query -s bluez &>/dev/null && echo \"bluez is installed\" \r\n```\r\nNothing should\
+      \ be returned.\r\n\r\n**- OR -** \r\n\r\n**- IF -** the `bluez` package is required as a dependency:\r\
+      \n\r\nRun the following command to verify `bluetooth.service` is not enabled:\r\n\r\n```\r\n# systemctl\
+      \ is-enabled bluetooth.service 2>/dev/null | grep 'enabled'\r\n```\r\nNothing should be returned.\r\
+      \n\r\n\r\nRun the following command to verify `bluetooth.service` is not active:\r\n\r\n```\r\n\
+      # systemctl is-active bluetooth.service 2>/dev/null | grep '^active'\r\n```\r\nNothing should be\
+      \ returned.\r\n\r\n\r\n**Note:** If the package is required for a dependency\r\n - Ensure the dependent\
+      \ package is approved by local site policy\r\n - Ensure stopping and masking the service and/or\
+      \ socket meets local site policy"
+    remediation_guidance: "Run the following commands to stop `bluetooth.service`, and remove the `bluez`\
+      \ package:\r\n\r\n```\r\n# systemctl stop bluetooth.service\r\n# apt purge bluez\r\n```\r\n\r\n\
+      **- OR -**\r\n\r\n**- IF -** the `bluez` package is required as a dependency:\r\n\r\nRun the following\
+      \ commands to stop and mask `bluetooth.service`:\r\n\r\n```\r\n# systemctl stop bluetooth.service\r\
+      \n# systemctl mask bluetooth.service\r\n```\r\n\r\n**Note:** A reboot may be required"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

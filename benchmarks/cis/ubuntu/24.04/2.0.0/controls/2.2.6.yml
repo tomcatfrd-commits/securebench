@@ -1,0 +1,60 @@
+control:
+  id: CIS-2.2.6
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure ftp client is not installed
+  description: '`tnftp` an enhanced FTP client, is the user interface to the Internet standard File Transfer
+    Protocol.  The program allows a  user  to  transfer files to and from a remote network site.'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_2_6.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_2_6.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_2_6.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_2_6.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.2.6
+      url: https://workbench.cisecurity.org/sections/4177275/recommendations/7047685
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-11
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1203
+      - T1203.000
+      - T1543
+      - T1543.002
+      mitre_tactics:
+      - TA0008
+      mitre_mitigations:
+      - M1042
+    parent: CIS _2_Configure Client Services Main | 2.1.2-Ensure ftp client is not installed
+    rationale: Unless there is a need to run the system using Internet standard File Transfer Protocol
+      (for example, to allow anonymous downloads), it is recommended that the package be removed to reduce
+      the potential attack surface.
+    impact: ''
+    audit_guidance: "Run the following command to verify the `tnftp` and `ftp` packages are not installed:\r\
+      \n\r\n```\r\n# dpkg-query -l | awk '{print $2}' 2>&1 | grep -Pqs -- '^(ftp|tnftp)' && echo \"ftp\
+      \ is installed\"\r\nftp is installed\r\n```\r\n\r\nNothing should be returned."
+    remediation_guidance: "Run the following commands to uninstall the `tnftp` and `ftp` packages:\r\n\
+      \r\n```\r\n# apt purge ftp\r\n# apt purge tnftp\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

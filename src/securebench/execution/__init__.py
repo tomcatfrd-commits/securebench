@@ -17,12 +17,14 @@ from .base import (
     ExecutionBackend,
     ExecutionContext,
 )
+from .cis_ubuntu_2404 import CISUbuntu2404V200Provider
 
 __all__ = [
     "AnsibleExecutionBackend",
     "AnsibleExecutionError",
     "AnsibleExecutor",
     "AnsibleRunResult",
+    "CISUbuntu2404V200Provider",
     "ExecutionBackend",
     "ExecutionContext",
 ]

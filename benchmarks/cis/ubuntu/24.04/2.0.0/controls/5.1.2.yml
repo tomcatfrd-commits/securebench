@@ -1,0 +1,77 @@
+control:
+  id: CIS-5.1.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to SSH private host key files is configured
+  description: An SSH private key is one of two files used in SSH public key authentication.  In this
+    authentication method, the possession of the private key is proof of identity. Only a private key
+    that corresponds to a public key will be able to authenticate successfully. The private keys need
+    to be stored and handled carefully, and no copies of the private key should be distributed.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_1_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_1_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_1_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_1_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.1.2
+      url: https://workbench.cisecurity.org/sections/4177236/recommendations/7047478
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-6
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1552
+      - T1552.004
+      mitre_tactics:
+      - TA0003
+      - TA0006
+      mitre_mitigations:
+      - M1022
+    parent: CIS _5_Configure SSH Server Main | 2.2.2-Ensure access to SSH private host key files is configured
+    rationale: If an threat actor obtains the private SSH host key file, the host could be impersonated.
+    impact: If the private keys used by the openSSH server have the incorrect mode, owner, or group owner
+      the server service may not start.
+    audit_guidance: "Verify SSH private host key files are:\r\n- Mode `0600`.\r\n- Owned by the `root`\
+      \ user.\r\n- Group owned by the group `root`.\r\n\r\nRun the following script to generate a list\
+      \ of SSH private host key files:\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   l_sshd_cmd=\"\
+      $(readlink -e /usr/sbin/sshd || readlink -e /sbin/sshd)\"\r\n   l_keygen=\"$(readlink -e /usr/bin/ssh-keygen\
+      \ || readlink -e /bin/ssh-keygen)\"\r\n   l_sshd_config=\"$(readlink -e /etc/ssh/sshd_config)\"\r\
+      \n   l_sshd_args=(-T)\r\n   grep -qiE '^\\s*Match\\s+(User|Group|Host|LocalAddress|LocalPort|Address)'\
+      \ \\\r\n      \"$l_sshd_config\" 2>/dev/null && l_sshd_args+=(-C \"user=root,host=localhost,addr=127.0.0.1\"\
+      )\r\n   mapfile -t l_hostkeys < <(\"$l_sshd_cmd\" \"${l_sshd_args[@]}\" 2>/dev/null | awk '$1==\"\
+      hostkey\"{print $2}')\r\n   for l_file in \"${l_hostkeys[@]}\"; do\r\n      \"$l_keygen\" -lf \"\
+      $l_file\" &>/dev/null && \\\r\n         stat -Lc 'File: \"%n\" Mode: \"%#a\" Owner: \"%U\" Group:\
+      \ \"%G\"' \"$l_file\"\r\n   done\r\n}\r\n```\r\n\r\n_Example output:_\r\n\r\n```\r\nFile: \"/etc/ssh/ssh_host_rsa_key\"\
+      \ Mode: \"0600\"  Owner: \"root\" Group: \"root\"\r\nFile: \"/etc/ssh/ssh_host_ecdsa_key\" Mode:\
+      \ \"0600\"  Owner: \"root\" Group: \"root\"\r\nFile: \"/etc/ssh/ssh_host_ed25519_key\" Mode: \"\
+      0600\"  Owner: \"root\" Group: \"root\"\r\n```\r\n\r\nVerify all files in the output are:\r\n- Mode\
+      \ `0600`.\r\n- Owner by the user `root`.\r\n- Group owned by the group `root`."
+    remediation_guidance: "Update the access to the private keys being used by the open SSH server.\r\n\
+      - mode to `0600`.\r\n- owner to the user `root`.\r\n- group owner to the group `root`.\r\n\r\nRun\
+      \ the following script to update the access on the private keys used by the open SSH server:\r\n\
+      \r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   l_sshd_cmd=\"$(readlink -e /usr/sbin/sshd || readlink\
+      \ -e /sbin/sshd)\"\r\n   l_keygen=\"$(readlink -e /usr/bin/ssh-keygen || readlink -e /bin/ssh-keygen)\"\
+      \r\n   while IFS= read -r l_file; do \r\n      if \"$l_keygen\" -lf &>/dev/null \"$l_file\"; then\r\
+      \n         chown root:root \"$l_file\"\r\n         chmod 0600 \"$l_file\"\r\n      fi \r\n   done\
+      \ < <(\"$l_sshd_cmd\" -T | awk '$1==\"hostkey\" {print $2\".pub\"}' 2>/dev/null)\r\n}\r\n```"
+    additional_information: ''
+    default_value: 'Mode: "0600"  Owner: "root" Group: "root"'
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

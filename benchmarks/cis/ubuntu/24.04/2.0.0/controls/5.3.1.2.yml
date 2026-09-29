@@ -1,0 +1,57 @@
+control:
+  id: CIS-5.3.1.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure latest version of libpam-modules is installed
+  description: '`libpam-modules` is a package containing a set of Pluggable Authentication Modules (PAM)
+    which allows system administrators to configure different authentication methods for user logins,
+    providing flexibility in how users can access applications by using various authentication modules
+    to include password checks and other security mechanisms.'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_1_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_1_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_1_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_1_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.1.2
+      url: https://workbench.cisecurity.org/sections/4177274/recommendations/7047673
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '0'
+      cis_v7:
+      - '0'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.1.2-Ensure latest version of libpam-modules
+      is installed
+    rationale: "Older versions of the `libpam-modules` package may not include the latest security and\
+      \ feature patches and updates.\r\n\r\n**Note:** This Benchmark includes Recommendations that depend\
+      \ on newer `libpam-modules` features."
+    impact: ''
+    audit_guidance: "Run the following command to verify `libpam-modules` is installed:\r\n\r\n```\r\n\
+      # dpkg-query -s libpam-modules &>/dev/null && echo \"libpam-modules is installed\"\r\n\r\nlibpam-modules\
+      \ is installed\r\n```\r\n\r\nRun the following command to verify `libpam-modules` is the latest\
+      \ version:\r\n\r\n```\r\n# apt list --upgradable 2>&1 | grep -P '^libpam-modules\\b'\r\n```\r\n\r\
+      \nNothing should be returned"
+    remediation_guidance: "Run the following command to install the latest version of `libpam-modules`:\r\
+      \n\r\n```\r\n# apt install libpam-modules\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

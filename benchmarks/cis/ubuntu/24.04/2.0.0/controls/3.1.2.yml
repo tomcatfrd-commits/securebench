@@ -1,0 +1,91 @@
+control:
+  id: CIS-3.1.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure wireless interfaces are not available
+  description: Wireless networking is used when wired networks are unavailable. Wireless interfaces use
+    kernel modules loaded at runtime.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.3_1_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.3_1_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.3_1_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.3_1_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 3.1.2
+      url: https://workbench.cisecurity.org/sections/4177243/recommendations/7047482
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '15.4'
+      - '15.5'
+      mitre_techniques:
+      - T1011
+      - T1011.000
+      - T1595
+      - T1595.001
+      - T1595.002
+      mitre_tactics:
+      - TA0010
+      mitre_mitigations:
+      - M1028
+    parent: CIS _3_Configure Network Devices Main | 2.1.3-Ensure wireless interfaces are not available
+    rationale: '**- IF -** wireless is not required, wireless kernel modules should be disabled to reduce
+      the potential attack surface. Wireless interfaces can be used as a secondary network path to bypass
+      network monitoring, exfiltrate data, or introduce rogue access points that circumvent perimeter
+      controls. Servers and workstations that operate in wired-only environments have no operational need
+      for wireless capability.'
+    impact: Many laptop workstations and some desktop workstations require wireless connectivity for normal
+      operation. Applying this recommendation to such systems will disable wireless network access, which
+      may disrupt users. Verify that no wireless connectivity is operationally required before applying
+      remediation
+    audit_guidance: "Run the following script to verify no wireless interfaces are active on the system:\r\
+      \n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   l_output=\"\" l_output2=\"\"\r\n   module_chk()\r\
+      \n   {\r\n      # Check how module will be loaded\r\n      l_loadable=\"$(modprobe -n -v \"$l_mname\"\
+      )\"\r\n      if grep -Pq -- '^\\h*install \\/bin\\/(true|false)' <<< \"$l_loadable\"; then\r\n \
+      \        l_output=\"$l_output\\n - module: \\\"$l_mname\\\" is not loadable: \\\"$l_loadable\\\"\
+      \"\r\n      else\r\n         l_output2=\"$l_output2\\n - module: \\\"$l_mname\\\" is loadable: \\\
+      \"$l_loadable\\\"\"\r\n      fi\r\n      # Check is the module currently loaded\r\n      if ! lsmod\
+      \ | grep \"$l_mname\" > /dev/null 2>&1; then\r\n         l_output=\"$l_output\\n - module: \\\"\
+      $l_mname\\\" is not loaded\"\r\n      else\r\n         l_output2=\"$l_output2\\n - module: \\\"\
+      $l_mname\\\" is loaded\"\r\n      fi\r\n      # Check if the module is deny listed\r\n      if modprobe\
+      \ --showconfig | grep -Pq -- \"^\\h*blacklist\\h+$l_mname\\b\"; then\r\n         l_output=\"$l_output\\\
+      n - module: \\\"$l_mname\\\" is deny listed in: \\\"$(grep -Pl -- \"^\\h*blacklist\\h+$l_mname\\\
+      b\" /etc/modprobe.d/*)\\\"\"\r\n      else\r\n         l_output2=\"$l_output2\\n - module: \\\"\
+      $l_mname\\\" is not deny listed\"\r\n      fi\r\n   }\r\n   if [ -n \"$(find /sys/class/net/*/ -type\
+      \ d -name wireless)\" ]; then\r\n      l_dname=$(for driverdir in $(find /sys/class/net/*/ -type\
+      \ d -name wireless | xargs -0 dirname); do basename \"$(readlink -f \"$driverdir\"/device/driver/module)\"\
+      ;done | sort -u)\r\n      for l_mname in $l_dname; do\r\n         module_chk\r\n      done\r\n \
+      \  fi\r\n   # Report results. If no failures output in l_output2, we pass\r\n   if [ -z \"$l_output2\"\
+      \ ]; then\r\n      echo -e \"\\n- Audit Result:\\n  ** PASS **\"\r\n      if [ -z \"$l_output\"\
+      \ ]; then\r\n         echo -e \"\\n - System has no wireless NICs installed\"\r\n      else\r\n\
+      \         echo -e \"\\n$l_output\\n\"\r\n      fi\r\n   else\r\n      echo -e \"\\n- Audit Result:\\\
+      n  ** FAIL **\\n - Reason(s) for audit failure:\\n$l_output2\\n\"\r\n      [ -n \"$l_output\" ]\
+      \ && echo -e \"\\n- Correctly set:\\n$l_output\\n\"\r\n   fi\r\n}\r\n```"
+    remediation_guidance: "Run the following command to disable any wireless interfaces:\r\n\r\n```\r\n\
+      # find /lib/modules/`uname -r`/kernel/drivers/net/wireless -name '*.ko' -printf 'install %f /bin/false\\\
+      nblacklist %f\\n\\n' | sed 's/\\.ko//1' >> /etc/modprobe.d/blacklist-wireless.conf\r\n```\r\n\r\n\
+      **Note:** the `*.conf` file in `/etc/modprobe.d/` in the above command can renamed as needed.\r\n\
+      \r\nAfter running this command, reload module configurations and verify no wireless modules remain\
+      \ loaded:\r\n\r\n```\r\n# modprobe --showconfig | grep -E '(install|blacklist).*80211|wifi|wireless'\r\
+      \n# lsmod | grep -E '80211|wifi|wireless'\r\n```\r\n\r\nNothing should be returned by the `lsmod`\
+      \ command."
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

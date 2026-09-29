@@ -9,13 +9,11 @@ from securebench.core import (
     ControlSeverity,
     Profile,
     RollbackCapability,
-    SafetyClassification,
     Transaction,
 )
 from securebench.rollback import (
     RollbackEngine,
     RollbackExecution,
-    RollbackProvider,
 )
 
 
@@ -171,7 +169,10 @@ class TestRollbackEngine:
         assert result.success is False
         assert "unsupported" in result.message.lower()
         assert provider.calls == []
-        assert transaction.get_change("change-001").status is ChangeStatus.SUCCESS
+        assert (
+            transaction.get_change("change-001").status
+            is ChangeStatus.ROLLBACK_REQUIRED
+        )
 
     def test_best_effort_rollback_is_denied_by_default(self) -> None:
         provider = FakeRollbackProvider()
@@ -451,3 +452,44 @@ class TestRollbackExecution:
                 success=True,
                 message="",
             )
+
+
+def test_rollback_rejects_different_control_definition() -> None:
+    control = Control(
+        control_id="TEST-001",
+        benchmark_id="test-benchmark",
+        benchmark_version="2.0.0",
+        definition_digest="a" * 64,
+        title="Test control",
+        description="Test description",
+        platform="ubuntu-24.04",
+        severity=ControlSeverity.MEDIUM,
+        audit="test.audit",
+        remediation="test.remediate",
+        rollback="test.rollback",
+        verification="test.verify",
+        rollback_capability=RollbackCapability.GUARANTEED,
+    )
+    transaction = make_transaction()
+    change = ChangeRecord(
+        change_id="change-001",
+        control_id=control.control_id,
+        host="server01",
+        benchmark_id=control.benchmark_id,
+        benchmark_version=control.benchmark_version,
+        control_digest="b" * 64,
+        status=ChangeStatus.SUCCESS,
+    )
+    transaction.add_change(change)
+    provider = FakeRollbackProvider()
+
+    result = RollbackEngine(provider).rollback_control(
+        control=control,
+        host="server01",
+        transaction=transaction,
+    )
+
+    assert result.success is False
+    assert "definition" in result.message.lower()
+    assert provider.calls == []
+    assert change.status is ChangeStatus.ROLLBACK_REQUIRED

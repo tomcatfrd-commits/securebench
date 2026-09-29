@@ -1,0 +1,60 @@
+control:
+  id: CIS-1.1.2.7.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure nodev option set on /var/log/audit partition
+  description: The `nodev` mount option specifies that the filesystem cannot contain special devices.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_1_2_7_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_1_2_7_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_1_2_7_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_1_2_7_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.1.2.7.2
+      url: https://workbench.cisecurity.org/sections/4177264/recommendations/7047606
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7 (2)
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1200
+      - T1200.000
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1022
+    parent: CIS _1_Configure Filesystem Partitions Main | 1.1.7.2-Ensure nodev option set on /var/log/audit
+      partition
+    rationale: Since the `/var/log/audit` filesystem is not intended to support devices, set this option
+      to ensure that users cannot create a block or character special devices in `/var/log/audit`.
+    impact: ''
+    audit_guidance: "**- IF -** a separate partition exists for `/var/log/audit`, verify that the `nodev`\
+      \ option is set.\r\n\r\nRun the following command to verify that the `nodev` mount option is set.\r\
+      \n\r\n_Example:_\r\n\r\n```\r\n# findmnt -kn /var/log/audit | grep -v nodev\r\n\r\nNothing should\
+      \ be returned\r\n```"
+    remediation_guidance: "**- IF -** a separate partition exists for `/var/log/audit`.\r\n\r\nEdit the\
+      \ `/etc/fstab` file and add `nodev` to the fourth field (mounting options) for the `/var/log/audit`\
+      \ partition.\r\n\r\n_Example:_\r\n\r\n``` /var/log/audit defaults,rw,nosuid,nodev,noexec,relatime\
+      \  0 0\r\n```\r\n\r\nRun the following command to remount `/var/log/audit` with the configured options:\r\
+      \n\r\n```\r\n# mount -o remount /var/log/audit\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

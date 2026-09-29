@@ -1,0 +1,76 @@
+control:
+  id: CIS-4.1.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure ufw service is configured
+  description: "The service, `ufw.service`, manages UFW. This service is responsible for applying and\
+    \ maintaining firewall rules, controlling which network traffic is allowed in and out of the system.\r\
+    \n\r\n**Note:** \r\n- When running ufw enable or starting `ufw.service`, ufw will flush its chains.\
+    \ This is required so ufw can maintain a consistent state, but it may drop existing connections, eg\
+    \ ssh. ufw does support adding rules before enabling the firewall.\r\n- Once ufw is 'enabled', ufw\
+    \ will not flush the chains when adding or removing rules (but will when modifying a rule or changing\
+    \ the default policy)\r\n- By default ufw will prompt when enabling the firewall while running under\
+    \ ssh. This can be disabled by using `ufw --force enable`\r\n\r\n**Warning:** If a rule for openSSH\
+    \ server does not exist, and openSSH is used to administer the host, the ability to administer and/or\
+    \ connect to the host may be lost.\r\n\r\nExample command to create a rule to allow ssh:\r\n\r\n```\r\
+    \n# ufw allow proto tcp from any to any port 22\r\n```\r\n\r\nThis rule will allow connection to the\
+    \ ssh server from any location. It is highly recommended that this rule be modified to restrict ssh\
+    \ access to only required hosts and to follow local site policy.\r\n- The rules will still be flushed,\
+    \ but the ssh port will be open after enabling the firewall. Please note that once ufw is 'enabled',\
+    \ ufw will not flush the chains when adding or removing rules (but will when modifying a rule or changing\
+    \ the default policy)\r\n- By default, ufw will prompt when enabling the firewall while running under\
+    \ ssh. This can be disabled by using `ufw --force enable`"
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.4_1_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.4_1_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.4_1_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.4_1_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 4.1.2
+      url: https://workbench.cisecurity.org/sections/4177247/recommendations/7047490
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-17 (1)
+      cis_v8:
+      - '4.4'
+      - '4.5'
+      cis_v7:
+      - '9.4'
+      mitre_techniques:
+      - T1562
+      - T1562.004
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1018
+    parent: CIS _4_Host Based Firewall Main | 2.1.1.2-Ensure ufw service is configured
+    rationale: The ufw service must be enabled and running in order for ufw to protect the system
+    impact: Changing firewall settings while connected over network can result in being locked out of
+      the system.
+    audit_guidance: "Run the following command to verify `ufw.service` is enabled:\r\n\r\n```\r\n# systemctl\
+      \ is-enabled ufw.service\r\n\r\nenabled\r\n```\r\n\r\nRun the following command to verify `ufw.service`\
+      \ is active:\r\n\r\n```\r\n# systemctl is-active ufw.service\r\n\r\nactive\r\n```\r\n\r\nRun the\
+      \ following command to verify ufw is active\r\n\r\n```\r\n# ufw status\r\n\r\nStatus: active\r\n\
+      ```"
+    remediation_guidance: "Run the following command to unmask the `ufw.service`:\r\n\r\n```\r\n# systemctl\
+      \ unmask ufw.service\r\n```\r\n\r\nRun the following command to enable and start the `ufw.service`:\r\
+      \n\r\n```\r\n# systemctl --now enable ufw.service\r\n\r\nactive\r\n```\r\n\r\nRun the following\
+      \ command to enable `ufw`:\r\n\r\n```\r\n# ufw enable\r\n```"
+    additional_information: ''
+    default_value: Inactive
+    artifacts_count: 5
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

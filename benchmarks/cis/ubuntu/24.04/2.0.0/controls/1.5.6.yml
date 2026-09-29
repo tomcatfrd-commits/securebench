@@ -1,0 +1,62 @@
+control:
+  id: CIS-1.5.6
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure prelink is not installed
+  description: '`prelink` is a program that modifies ELF shared libraries and ELF dynamically linked binaries
+    in such a way that the time needed for the dynamic linker to perform relocations at startup significantly
+    decreases.'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_5_6.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_5_6.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_5_6.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_5_6.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.5.6
+      url: https://workbench.cisecurity.org/sections/4177281/recommendations/7047705
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-1
+      - CM-3
+      - CM-6
+      cis_v8:
+      - '3.14'
+      cis_v7:
+      - '14.9'
+      mitre_techniques:
+      - T1055
+      - T1055.009
+      - T1065
+      - T1065.001
+      mitre_tactics:
+      - TA0002
+      mitre_mitigations:
+      - M1050
+    parent: CIS _1_Configure Additional Process Hardening Main | 2.2.6-Ensure prelink is not installed
+    rationale: The prelinking feature can interfere with the operation of AIDE, because it changes binaries.
+      Prelinking can also increase the vulnerability of the system if a malicious user is able to compromise
+      a common library such as libc.
+    impact: ''
+    audit_guidance: "Verify `prelink`  is not installed:\r\n```\r\n# dpkg-query -s prelink &>/dev/null\
+      \ && echo \"prelink is installed\" \r\n```\r\nNothing should be returned."
+    remediation_guidance: "Run the following command to restore binaries to normal:\r\n\r\n```\r\n# prelink\
+      \ -ua\r\n```\r\n\r\nUninstall `prelink`  using the appropriate package manager or manual installation:\r\
+      \n\r\n```\r\n# apt purge prelink\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,67 @@
+control:
+  id: CIS-1.3.1.3
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure all AppArmor Profiles are enforcing
+  description: AppArmor profiles define what resources applications are able to access.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_3_1_3.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_3_1_3.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_3_1_3.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_3_1_3.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.3.1.3
+      url: https://workbench.cisecurity.org/sections/4177272/recommendations/7047678
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1068
+      - T1068.000
+      - T1565
+      - T1565.001
+      - T1565.003
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1048
+    parent: CIS _1_Mandatory Access Control Main | 2.1.1.3-Ensure all AppArmor Profiles are enforcing
+    rationale: Security configuration requirements vary from site to site. Some sites may mandate a policy
+      that is stricter than the default policy, which is perfectly acceptable. This item is intended to
+      ensure that any policies that exist on the system are activated.
+    impact: Setting AppArmor profiles to `enforce` mode removes the `unconfined` status, which can disrupt
+      application operation.  If these applications are required, the profile tuning may need to be tuned
+      to allow necessary functionality.
+    audit_guidance: "Run the following commands and verify that profiles are loaded and are not in complain\
+      \ mode:\r\n```\r\n# apparmor_status | grep profiles\r\n```\r\n\r\nReview output and ensure that\
+      \ profiles are loaded, and in enforce mode:\r\n\r\n```\r\n34 profiles are loaded.\r\n34 profiles\
+      \ are in enforce mode.\r\n0 profiles are in complain mode.\r\n2 processes have profiles defined.\r\
+      \n```\r\n\r\nRun the following command and verify that no processes are unconfined:\r\n```\r\napparmor_status\
+      \ | grep processes\r\n```\r\n\r\nReview the output and ensure no processes are unconfined:\r\n\r\
+      \n```\r\n2 processes have profiles defined.\r\n2 processes are in enforce mode.\r\n0 processes are\
+      \ in complain mode.\r\n0 processes are unconfined but have a profile defined.\r\n```"
+    remediation_guidance: "Run the following command to set all profiles to enforce mode:\r\n```\r\n#\
+      \ aa-enforce /etc/apparmor.d/*\r\n```\r\n**Note:** Any unconfined processes may need to have a profile\
+      \ created or activated for them and then be restarted"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

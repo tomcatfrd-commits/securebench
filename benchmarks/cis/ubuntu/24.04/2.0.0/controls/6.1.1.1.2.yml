@@ -1,0 +1,69 @@
+control:
+  id: CIS-6.1.1.1.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure systemd-journal-remote service is not in use
+  description: "Journald `systemd-journal-remote` supports the ability to receive messages from remote\
+    \ hosts, thus acting as a log server. Clients should not receive data from other hosts.\r\n\r\n**Note:**\
+    \ \r\n- The same package, `systemd-journal-remote`, is used for both sending logs to remote hosts\
+    \ and receiving incoming logs.\r\n- With regards to receiving logs, there are two services; `systemd-journal-remote.socket`\
+    \ and `systemd-journal-remote.service`."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_1_1_1_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_1_1_1_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_1_1_1_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_1_1_1_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.1.1.1.2
+      url: https://workbench.cisecurity.org/sections/4177234/recommendations/7047471
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AU-2
+      - AU-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      - T1562
+      - T1562.006
+      mitre_tactics:
+      - TA0040
+      mitre_mitigations:
+      - M1029
+    parent: CIS _6_System Logging Main | 2.2.1.1.2-Ensure systemd-journal-remote service is not in use
+    rationale: "If a client is configured to also receive data, thus turning it into a server, the client\
+      \ system is acting outside it's operational boundary.\r\n\r\n**Note:** This recommendation **only\
+      \ applies if `journald` is the chosen method for client side logging**. Do not apply this recommendation\
+      \ if `rsyslog` is used."
+    impact: ''
+    audit_guidance: "Run the following command to verify `systemd-journal-remote.socket` and `systemd-journal-remote.service`\
+      \ are not enabled:\r\n\r\n```\r\n# systemctl is-enabled systemd-journal-remote.socket systemd-journal-remote.service\
+      \ | grep -P -- '^enabled'\r\n```\r\nNothing should be returned\r\n\r\n\r\nRun the following command\
+      \ to verify `systemd-journal-remote.socket` and `systemd-journal-remote.service` are not active:\r\
+      \n\r\n```\r\n# systemctl is-active systemd-journal-remote.socket systemd-journal-remote.service\
+      \ | grep -P -- '^active'\r\n```\r\nNothing should be returned"
+    remediation_guidance: "Run the following commands to stop and mask `systemd-journal-remote.socket`\
+      \ and systemd-journal-remote.service:\r\n\r\n```\r\n# systemctl stop systemd-journal-remote.socket\
+      \ systemd-journal-remote.service\r\n# systemctl mask systemd-journal-remote.socket systemd-journal-remote.service\r\
+      \n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 6
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

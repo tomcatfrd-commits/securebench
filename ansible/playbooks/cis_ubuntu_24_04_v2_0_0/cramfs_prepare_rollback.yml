@@ -1,0 +1,63 @@
+---
+- name: Capture rollback state for CIS-1.1.1.1
+  hosts: all
+  become: true
+  gather_facts: false
+  vars:
+    securebench_state_path: "/var/lib/securebench/transactions/{{ securebench_transaction_id }}/CIS-1.1.1.1"
+    securebench_cramfs_config: /etc/modprobe.d/60-securebench-cramfs.conf
+  tasks:
+    - name: Validate transaction identifier
+      ansible.builtin.assert:
+        that:
+          - securebench_transaction_id is match('^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$')
+
+    - name: Create protected rollback state directory
+      ansible.builtin.file:
+        path: "{{ securebench_state_path }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Inspect the SecureBench cramfs configuration
+      ansible.builtin.stat:
+        path: "{{ securebench_cramfs_config }}"
+        checksum_algorithm: sha256
+      register: securebench_config_before
+
+    - name: Record whether the configuration existed
+      ansible.builtin.copy:
+        dest: "{{ securebench_state_path }}/config_existed"
+        content: "{{ securebench_config_before.stat.exists | bool | ternary('true', 'false') }}\n"
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: Back up the existing SecureBench configuration
+      ansible.builtin.copy:
+        src: "{{ securebench_cramfs_config }}"
+        dest: "{{ securebench_state_path }}/original.conf"
+        remote_src: true
+        owner: root
+        group: root
+        mode: preserve
+      when: securebench_config_before.stat.exists
+
+    - name: Detect whether cramfs was loaded
+      ansible.builtin.shell: |
+        set -o pipefail
+        lsmod | awk '$1 == "cramfs" { found=1 } END { exit !found }'
+      args:
+        executable: /bin/bash
+      register: securebench_cramfs_loaded
+      changed_when: false
+      failed_when: securebench_cramfs_loaded.rc not in [0, 1]
+
+    - name: Record whether cramfs was loaded
+      ansible.builtin.copy:
+        dest: "{{ securebench_state_path }}/module_loaded"
+        content: "{{ (securebench_cramfs_loaded.rc == 0) | ternary('true', 'false') }}\n"
+        owner: root
+        group: root
+        mode: "0600"

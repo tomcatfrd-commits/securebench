@@ -1,0 +1,78 @@
+---
+- name: Roll back CIS-1.1.1.1 cramfs remediation
+  hosts: all
+  become: true
+  gather_facts: false
+  vars:
+    securebench_cramfs_config: /etc/modprobe.d/60-securebench-cramfs.conf
+    securebench_state_path: "{{ securebench_rollback_data.state_path }}"
+  tasks:
+    - name: Validate rollback identity and path
+      ansible.builtin.assert:
+        that:
+          - securebench_rollback_data.transaction_id == securebench_transaction_id
+          - securebench_state_path == '/var/lib/securebench/transactions/' + securebench_transaction_id + '/CIS-1.1.1.1'
+
+    - name: Read configuration existence marker
+      ansible.builtin.slurp:
+        src: "{{ securebench_state_path }}/config_existed"
+      register: securebench_config_existed_raw
+
+    - name: Decode configuration existence marker
+      ansible.builtin.set_fact:
+        securebench_config_existed: >-
+          {{ (securebench_config_existed_raw.content | b64decode | trim) == 'true' }}
+
+    - name: Restore previous SecureBench configuration
+      ansible.builtin.copy:
+        src: "{{ securebench_state_path }}/original.conf"
+        dest: "{{ securebench_cramfs_config }}"
+        remote_src: true
+        owner: root
+        group: root
+        mode: preserve
+      when: securebench_config_existed
+
+    - name: Remove configuration created by SecureBench
+      ansible.builtin.file:
+        path: "{{ securebench_cramfs_config }}"
+        state: absent
+      when: not securebench_config_existed
+
+    - name: Read module state marker
+      ansible.builtin.slurp:
+        src: "{{ securebench_state_path }}/module_loaded"
+      register: securebench_module_loaded_raw
+
+    - name: Decode module state marker
+      ansible.builtin.set_fact:
+        securebench_module_was_loaded: >-
+          {{ (securebench_module_loaded_raw.content | b64decode | trim) == 'true' }}
+
+    - name: Restore loaded module state
+      ansible.builtin.command: modprobe cramfs
+      when: securebench_module_was_loaded
+      changed_when: true
+
+    - name: Verify restored configuration presence
+      ansible.builtin.stat:
+        path: "{{ securebench_cramfs_config }}"
+      register: securebench_restored_config
+
+    - name: Assert restored configuration presence matches original state
+      ansible.builtin.assert:
+        that:
+          - securebench_restored_config.stat.exists == securebench_config_existed
+
+    - name: Inspect backed-up configuration
+      ansible.builtin.stat:
+        path: "{{ securebench_state_path }}/original.conf"
+        checksum_algorithm: sha256
+      register: securebench_original_config
+      when: securebench_config_existed
+
+    - name: Assert restored configuration content matches the backup
+      ansible.builtin.assert:
+        that:
+          - securebench_restored_config.stat.checksum == securebench_original_config.stat.checksum
+      when: securebench_config_existed

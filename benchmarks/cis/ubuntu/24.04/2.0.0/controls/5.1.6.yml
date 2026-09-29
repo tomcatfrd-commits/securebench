@@ -1,0 +1,78 @@
+control:
+  id: CIS-5.1.6
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure sshd Ciphers are configured
+  description: "Secure Shell (SSH) ciphers are encryption algorithms used by the SSH protocol to secure\
+    \ data transmitted between a client and a server. They protect the privacy and integrity of the connection,\
+    \ using symmetric encryption to encrypt data after a secure session is established. During connection\
+    \ setup, the client and server negotiate to select the strongest available cipher that both support,\
+    \ ensuring the connection is as secure as possible\r\n\r\nMore information about the openSSH server\
+    \ configuration is available in the \"Configure SSH Server\" section overview."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_1_6.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_1_6.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_1_6.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_1_6.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.1.6
+      url: https://workbench.cisecurity.org/sections/4177236/recommendations/7047511
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - SC-8
+      cis_v8:
+      - '3.1'
+      cis_v7:
+      - '14.4'
+      mitre_techniques:
+      - T1040
+      - T1040.000
+      - T1557
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1041
+    parent: CIS _5_Configure SSH Server Main | 2.2.7-Ensure sshd Ciphers are configured
+    rationale: Weak ciphers that are used for authentication to the cryptographic module cannot be relied
+      upon to provide confidentiality or integrity, and system data may be compromised.
+    impact: A too restrictive list of ciphers can lead to the "no matching cipher found" error during
+      an SSH connection. This error indicates that the SSH client and server are unable to agree on a
+      common cipher to use for the secure communication. This typically occurs due to a mismatch in supported
+      ciphers or when older, less secure ciphers are disabled on one side but still expected by the other.
+    audit_guidance: "Run the following command to verify none of the \"weak\" ciphers are being used:\r\
+      \n\r\n```\r\n# sshd -T | grep -Pi -- '^ciphers\\h+\\\"?([^#\\n\\r]+,)?((3des|blowfish|cast128|aes(128|192|256))-cbc|arcfour(128|256)?|rijndael-cbc@lysator\\\
+      .liu\\.se)\\b'\r\n```\r\n\r\nNothing should be returned.\r\n\r\nRun the following command to determine\
+      \ if the `chacha20-poly1305@openssh.com` cipher is being used.\r\n\r\n```\r\n#  sshd -T 2>&1 | awk\
+      \ '($1==\"ciphers\" && $2~/chacha20-poly1305@openssh\\.com/){print}'\r\n```\r\n\r\nIf any line is\
+      \ returned, review `CVE-2023-48795` and verify the system has been patched."
+    remediation_guidance: ">**- IF -** `CVE-2023-48795` has been addressed, and it meets local site policy,\
+      \ `chacha20-poly1305` may be removed from the list of excluded ciphers.\r\n\r\nCreate or edit a\
+      \ file in `/etc/crypto-policies/policies/modules/` ending in `.pmod` and add or modify the the following\
+      \ line:\r\n\r\n```\r\ncipher@SSH = -3DES-CBC -AES-128-CBC -AES-192-CBC -AES-256-CBC -CHACHA20-POLY1305\r\
+      \n```\r\n\r\n_Example:_\r\n\r\n```\r\n# printf '%s\\n' \"# This is a subpolicy to disable weak ciphers\"\
+      \ \"# for the SSH protocol (libssh and OpenSSH)\" \"cipher@SSH = -3DES-CBC -AES-128-CBC -AES-192-CBC\
+      \ -AES-256-CBC -CHACHA20-POLY1305\" >> /etc/crypto-policies/policies/modules/NO-SSHWEAKCIPHERS.pmod\r\
+      \n```\r\n\r\n>**Note:** Some organizations may have stricter requirements for approved ciphers.\
+      \ Ensure that ciphers used are in compliance with site policy.\r\n\r\nRun the following command\
+      \ to update the system-wide cryptographic policy\r\n\r\n```\r\n# update-crypto-policies --set :\
+      \ : : ```\r\n\r\n_Example:_\r\n\r\n```\r\n# update-crypto-policies --set DEFAULT:NO-SHA1:NO-WEAKMAC:NO-SSHCBC:NO-SSHCHACHA20:NO-SSHWEAKCIPHERS\r\
+      \n```\r\n\r\nRun the following command to reload the openSSH server to make your cryptographic settings\
+      \ effective:\r\n\r\n```\r\n# systemctl reload-or-restart sshd\r\n```"
+    additional_information: ''
+    default_value: Ciphers aes256-gcm@openssh.com,chacha20-poly1305@openssh.com,aes256-ctr,aes128-gcm@openssh.com,aes128-ctr
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

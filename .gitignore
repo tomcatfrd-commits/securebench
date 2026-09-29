@@ -1,7 +1,11 @@
-.venv
-.idea
-.pytest_cache
-ra-output.txt
 /build/
+.codex*/
+/.pytest*/
 /src/securebench.egg-info/
+.venv/
+.idea/
+.pytest_cache/
+
+CIS Ubuntu Linux 24.04 LTS Benchmark (v2.0.0).csv
+ra-output.txt
 *.pyc

@@ -1,0 +1,83 @@
+control:
+  id: CIS-7.2.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure accounts in /etc/passwd use shadowed passwords
+  description: Local accounts can uses shadowed passwords.  With shadowed passwords, The passwords are
+    saved in shadow password file, `/etc/shadow`, encrypted by a salted one-way hash. Accounts with a
+    shadowed password have an `x` in the second field in `/etc/passwd`.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.7_2_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.7_2_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.7_2_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.7_2_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 7.2.1
+      url: https://workbench.cisecurity.org/sections/4177259/recommendations/7047585
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - IA-5
+      cis_v8:
+      - '3.11'
+      cis_v7:
+      - '16.4'
+      mitre_techniques:
+      - T1003
+      - T1003.008
+      mitre_tactics:
+      - TA0003
+      mitre_mitigations:
+      - M1027
+    parent: CIS _7_Local User and Group Settings Main | 2.1.1-Ensure accounts in /etc/passwd use shadowed
+      passwords
+    rationale: "The `/etc/passwd` file also contains information like user ID's and group ID's that are\
+      \ used by many system programs. Therefore, the `/etc/passwd` file must remain world readable. In\
+      \ spite of encoding the password with a randomly-generated one-way hash function, an attacker could\
+      \ still break the system if they got access to the `/etc/passwd` file. This can be mitigated by\
+      \ using shadowed passwords, thus moving the passwords in the `/etc/passwd` file to `/etc/shadow`.\
+      \ The `/etc/shadow` file is set so only root will be able to read and write. This helps mitigate\
+      \ the risk of an attacker gaining access to the encoded passwords with which to perform a dictionary\
+      \ attack.  \r\n\r\n**Note:**\r\n- All accounts must have passwords or be locked to prevent the account\
+      \ from being used by an unauthorized user.\r\n- A user account with an empty second field in `/etc/passwd`\
+      \ allows the account to be logged into by providing only the username."
+    impact: ''
+    audit_guidance: "Run the following command and verify that no output is returned:\r\n\r\n```\r\n#\
+      \ awk -F: '($2 != \"x\" ) { print \"User: \\\"\" $1 \"\\\" is not set to shadowed passwords \"}'\
+      \ /etc/passwd\r\n```"
+    remediation_guidance: "Run the following command to set accounts to use shadowed passwords and migrate\
+      \ passwords in `/etc/passwd` to `/etc/shadow`:\r\n\r\n```\r\n# pwconv\r\n```\r\n\r\nInvestigate\
+      \ to determine if the account is logged in and what it is being used for, to determine if it needs\
+      \ to be forced off."
+    additional_information: "The `pwconv` command creates shadow from `passwd` and an optionally existing\
+      \ `shadow`.\r\n- The `pwunconv` command creates `passwd` from `passwd` and `shadow` and then removes\
+      \ `shadow`.\r\n- The `grpconv` command creates `gshadow` from `group` and an optionally existing\
+      \ `gshadow`.\r\n- The `grpunconv` command creates `group` from `group` and `gshadow` and then removes\
+      \ `gshadow`.\r\n\r\nThese four programs all operate on the normal and shadow password and group\
+      \ files: `/etc/passwd`, `/etc/group`, `/etc/shadow`, and `/etc/gshadow`.\r\n\r\nEach program acquires\
+      \ the necessary locks before conversion. `pwconv` and `grpconv` are similar. First, entries in the\
+      \ shadowed file which don't exist in the main file are removed. Then, shadowed entries which don't\
+      \ have `x' as the password in the main file are updated. Any missing shadowed entries are added.\
+      \ Finally, passwords in the main file are replaced with `x'. These programs can be used for initial\
+      \ conversion as well to update the shadowed file if the main file is edited by hand.\r\n\r\n`pwconv`\
+      \ will use the values of `PASS_MIN_DAYS`, `PASS_MAX_DAYS`, and `PASS_WARN_AGE` from /etc/login.defs\
+      \ when adding new entries to /etc/shadow.\r\n\r\n`pwunconv` and `grpunconv` are similar. Passwords\
+      \ in the main file are updated from the shadowed file. Entries which exist in the main file but\
+      \ not in the shadowed file are left alone. Finally, the shadowed file is removed. Some password\
+      \ aging information is lost by `pwunconv`. It will convert what it can."
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

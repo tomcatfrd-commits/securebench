@@ -1,0 +1,79 @@
+control:
+  id: CIS-3.2.6
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure tipc kernel module is not available
+  description: The Transparent Inter-Process Communication (TIPC) protocol is designed to provide communication
+    between cluster nodes.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.3_2_6.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.3_2_6.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.3_2_6.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.3_2_6.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 3.2.6
+      url: https://workbench.cisecurity.org/sections/4177248/recommendations/7047521
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1068
+      - T1068.000
+      - T1210
+      - T1210.000
+      mitre_tactics:
+      - TA0008
+      mitre_mitigations:
+      - M1042
+    parent: CIS _3_Configure Network Kernel Modules Main | 1.1.6-Ensure tipc kernel module is not available
+    rationale: Removing support for unneeded protocols reduces the local attack surface of the system.
+      If this protocol is not needed, disable it.
+    impact: ''
+    audit_guidance: "Verify the `tipc` kernel module is not available on the system or has been disabled.\r\
+      \n\r\n1. Run the following script to determine if the `tipc` kernel module is available on the system:\r\
+      \n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   l_mod_name=\"tipc\" l_mod_type=\"net\"\r\n   while\
+      \ IFS= read -r l_mod_path; do\r\n      if [ -d \"$l_mod_path/${l_mod_name//-/\\/}\" ] &&  \\\r\n\
+      \      [ -n \"$(ls -A \"$l_mod_path/${l_mod_name//-/\\/}\")\" ]; then\r\n         printf '%s\\n'\
+      \ \"$l_mod_name exists in $l_mod_path\"\r\n      fi\r\n   done < <(readlink -e /usr/lib/modules/**/kernel/$l_mod_type\
+      \ \\\r\n   || readlink -e /lib/modules/**/kernel/$l_mod_type)\r\n}\r\n```\r\n\r\nIf nothing is returned,\
+      \ the `tipc` kernel module is not available on the system and no further audit steps are required.\r\
+      \n\r\n**Note:** Some systems may include the `tipc` filesystem as part of the kernel opposed to\
+      \ being available as a kernel module. In this case, the above audit will not return anything. This\
+      \ is also considered a passing state.\r\n\r\n**If anything is returned by the above script:**\r\n\
+      \r\n2. verify the `tipc` kernel module is not loaded and not loadable by performing the following:\r\
+      \n\r\nRun the following command to verify the `tipc` kernel module is not loaded:\r\n\r\n```\r\n\
+      # lsmod | grep 'tipc'\r\n```\r\n\r\nNothing should be returned\r\n\r\nRun the following command\
+      \ to verify the `tipc` kernel module is not loadable:\r\n\r\n```\r\n# modprobe --showconfig | grep\
+      \ -P -- '\\b(install|blacklist)\\h+tipc\\b'\r\n```\r\n\r\nVerify the output includes:\r\n\r\n```\r\
+      \nblacklist tipc\r\n -AND-\r\ninstall tipc /bin/false\r\n -OR-\r\ninstall tipc /bin/true\r\n```\r\
+      \n\r\n_Example output:_\r\n\r\n```\r\nblacklist tipc\r\ninstall tipc /bin/false\r\n```"
+    remediation_guidance: "Unload and disable the `tipc` kernel module.\r\n\r\n1. Run the following commands\
+      \ to unload the `tipc` kernel module:\r\n\r\n```\r\n# modprobe -r tipc 2>/dev/null\r\n# rmmod tipc\
+      \ 2>/dev/null\r\n```\r\n\r\n2. Perform the following to disable the `tipc` kernel module:\r\n\r\n\
+      Create a file ending in `.conf` with `install tipc /bin/false` in the `/etc/modprobe.d/` directory\r\
+      \n\r\n_Example:_\r\n\r\n```\r\n# printf '\\n%s\\n' \"install tipc /bin/false\" >> /etc/modprobe.d/60-tipc.conf\r\
+      \n```\r\n\r\nCreate a file ending in `.conf` with `blacklist tipc` in the `/etc/modprobe.d/` directory\r\
+      \n\r\n_Example:_\r\n\r\n```\r\n# printf '\\n%s\\n' \"blacklist tipc\" >> /etc/modprobe.d/60-tipc.conf\r\
+      \n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

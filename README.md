@@ -265,6 +265,44 @@ well-understood controls before expanding coverage.
 Security automation should prioritize predictable behavior and evidence over
 maximum benchmark coverage.
 
+## CIS Ubuntu 24.04 v2.0.0 content
+
+The project-local CIS WorkBench CSV export is imported into an exact-version
+content package at:
+
+```text
+benchmarks/cis/ubuntu/24.04/2.0.0/
+```
+
+The package contains all 332 recommendations from the supplied export. The
+benchmark index at `benchmarks/index.yml` is the authoritative selector; do
+not select a benchmark by taking the newest directory implicitly.
+
+Regenerate the package after replacing the source CSV with another export of
+the same benchmark version:
+
+```text
+python tools/import_cis_ubuntu_2404_v200.py
+```
+
+The importer preserves audit and remediation guidance as data. It does not
+turn prose into executable shell commands. New controls default to
+`investigate`, `guidance_only`, and `rollback_capability: unsupported` until a
+reviewed implementation supplies audit, precheck, rollback-state capture,
+remediation, independent verification, and rollback operations.
+
+`CIS-1.1.1.1` (cramfs) is the first reviewed implementation. Its Ansible
+playbooks live under `ansible/playbooks/cis_ubuntu_24_04_v2_0_0/`. Production
+execution must use `RemediationEngine(require_rollback_data=True)` with a
+durable `TransactionStore` and `ProductionRemediationWorkflow`; this captures
+rollback state before remediation and rolls back when verification fails.
+
+List registered benchmark versions with:
+
+```text
+securebench benchmark list
+```
+
 ### Python Version
 
 SecureBench targets:

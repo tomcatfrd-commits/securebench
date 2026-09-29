@@ -1,0 +1,98 @@
+control:
+  id: CIS-1.7.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure GDM automount is configured
+  description: "By default GNOME automatically mounts removable media when inserted as a convenience to\
+    \ the user.\r\n\r\nBy using the lockdown mode in dconf, you can prevent users from changing specific\
+    \ settings."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_7_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_7_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_7_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_7_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.7.4
+      url: https://workbench.cisecurity.org/sections/4177290/recommendations/7047771
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - IA-3
+      cis_v8:
+      - '10.3'
+      cis_v7:
+      - '8.5'
+      mitre_techniques:
+      - T1091
+      - T1091.000
+      mitre_tactics:
+      - TA0001
+      - TA0008
+      mitre_mitigations:
+      - M1042
+    parent: CIS _1_Configure GNOME Display Manager Main | 1.1.4-Ensure GDM automount is configured
+    rationale: "With automounting enabled anyone with physical access could attach a USB drive or disc\
+      \ and have its contents available in system even if they lacked permissions to mount it themselves.\r\
+      \n\r\nWithout locking down the system settings, user settings take precedence over the system settings.\r\
+      \n\r\nSatisfies: SRG-OS-000114-GPOS-00059, SRG-OS-000378-GPOS-00163, SRG-OS-000480-GPOS-00227"
+    impact: The use of portable hard drives is very common for workstation users. If your organization
+      allows the use of portable storage or media on workstations and physical access controls to workstations
+      is considered adequate there is little value add in turning off automounting.
+    audit_guidance: "1. Run the following commands to verify automount settings are locked:\r\n\r\nRun\
+      \ the following command to verify `automount` is locked:\r\n\r\n```\r\n# gsettings writable org.gnome.desktop.media-handling\
+      \ automount\r\n\r\nfalse\r\n```\r\n\r\nRun the following command to verify `automount-open` is locked:\r\
+      \n\r\n```\r\n# gsettings writable org.gnome.desktop.media-handling automount-open\r\n\r\nfalse\r\
+      \n```\r\n\r\n2. Run the following commands to verify the automount settings are disabled:\r\n\r\n\
+      Run the following command to verify `automount` is disabled:\r\n\r\n```\r\n# gsettings get org.gnome.desktop.media-handling\
+      \ automount\r\n\r\nfalse\r\n```\r\n\r\nRun the following command to verify `automount-open` is disabled:\r\
+      \n\r\n```\r\n# gsettings get org.gnome.desktop.media-handling automount-open\r\n\r\nfalse\r\n```"
+    remediation_guidance: "1. Create or edit the file `/etc/dconf/profile/user` and add the following\
+      \ lines if they do not exist:\r\n\r\n```\r\nuser-db:user\r\nsystem-db:local\r\n```\r\n\r\n_Example:_\r\
+      \n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   l_dir=\"/etc/dconf/profile/\"\r\n   [ ! -d \"$l_dir\"\
+      \ ] && mkdir /etc/dconf/profile/\r\n   ! grep -Psq '^\\h*user-db:user\\b' \"$l_dir/user\" && \\\r\
+      \n   printf '%s\\n' \"\" \"user-db:user\" >> \"$l_dir/user\"\r\n   ! grep -Psq '^\\h*system-db:local\\\
+      b' \"$l_dir/user\" && \\\r\n   sed -ri '/^\\s*user-db:user/a system-db:local' \"$l_dir/user\"\r\n\
+      }\r\n```\r\n\r\n2. Run the following command to create the `/etc/dconf/db/local.d/` and `/etc/dconf/db/local.d/locks/`\
+      \ directories if either does not exist:\r\n\r\n```\r\n# [ ! -d \"/etc/dconf/db/local.d/locks/\"\
+      \ ] && mkdir -p /etc/dconf/db/local.d/locks/\r\n```\r\n\r\n3. Create or edit a file in `/etc/dconf/db/local.d/locks/`\
+      \ and add the following lines:\r\n\r\n```\r\n/org/gnome/desktop/media-handling/automount\r\n/org/gnome/desktop/media-handling/automount-open\r\
+      \n```\r\n\r\n_Example:_\r\n\r\n```\r\n# printf '%s\\n' \"\" \"/org/gnome/desktop/media-handling/automount\"\
+      \ \\\r\n\"/org/gnome/desktop/media-handling/automount-open\" >> \\\r\n/etc/dconf/db/local.d/locks/60-media-automount\r\
+      \n```\r\n\r\n4. Run the following script to comment out any incorrect settings in a local system-wide\
+      \ database keyfile:\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   f_key_file_fix()\r\n   {\r\n\
+      \      while IFS= read -r -d $'\\0' l_file; do\r\n         grep -Psiq -- \"^\\h*$l_parameter$l_value(\\\
+      b|\\h*$)\" \"$l_file\" && \\\r\n         sed -ri '/^\\s*'\"$l_parameter\"'/s/^/# /g' \"$l_file\"\
+      \r\n      done < <(find /etc/dconf/db -mindepth 2 -maxdepth 2 -type f -print0)\r\n   }\r\n   l_parameter=\"\
+      automount=\" l_value=\"true\"; f_key_file_fix\r\n   l_parameter=\"automount-open=\" l_value=\"true\"\
+      ; f_key_file_fix\r\n}\r\n```\r\n\r\n5. Create or edit a local keyfile for machine-wide settings\
+      \ in '/etc/dconf/db/local.d/` with the following lines:\r\n\r\n```\r\n[org/gnome/desktop/media-handling]\r\
+      \nautomount=false\r\nautomount-open=false\r\n```\r\n\r\n_Example script:_\r\n\r\n```\r\n#!/usr/bin/env\
+      \ bash\r\n\r\n{\r\n   l_file=\"/etc/dconf/db/local.d/60-media-automount\"\r\n   a_keyfile=(\"[org/gnome/desktop/media-handling]\"\
+      \ \"automount=false\" \"automount-open=false\")\r\n   if grep -Psq -- '^\\h*\\[org\\/gnome\\/desktop\\\
+      /media-handling\\]' \"$l_file\"; then\r\n      ! grep -Psiq -- '^\\h*automount-open=false\\b' \"\
+      $l_file\" && \\\r\n      sed -ri '/^\\s*\\[org\\/gnome\\/desktop\\/media-handling\\]/a automount-open=false'\
+      \ \"$l_file\"\r\n      ! grep -Psiq -- '^\\h*automount=false\\b' \"$l_file\" && \\\r\n      sed\
+      \ -ri '/^\\s*\\[org\\/gnome\\/desktop\\/media-handling\\]/a automount=false' \"$l_file\"\r\n   \
+      \   grep -Psiq -- '^\\h*automount=true\\b' \"$l_file\" && \\\r\n      sed -ri 's/^\\s*(automount=)(true).*$/\\\
+      1fales/' \"$l_file\"\r\n      grep -Psiq -- '^\\h*automount-open=true\\b' \"$l_file\" && \\\r\n\
+      \      sed -ri 's/^\\s*(automount-open=)(true).*$/\\1fales/' \"$l_file\"\r\n   else\r\n      printf\
+      \ '%s\\n' \"\" \"${a_keyfile[@]}\" >> \"$l_file\"\r\n   fi\r\n}\r\n```\r\n\r\n6. Run the following\
+      \ command to update the dconf databases:\r\n\r\n```\r\n# dconf update\r\n```\r\n\r\n**Note:** Users\
+      \ must log out and back in again before the system-wide settings take effect."
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 6
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,58 @@
+control:
+  id: CIS-1.2.1.6
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to files in the /etc/apt/auth.conf.d/ directory is configured
+  description: Files in the `/etc/apt/auth.conf.d` directory contains `.conf` files with configured credentials
+    for private APT repositories or proxy.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_2_1_6.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_2_1_6.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_2_1_6.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_2_1_6.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.2.1.6
+      url: https://workbench.cisecurity.org/sections/4177267/recommendations/7047648
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      - MP-2
+      - SC-5 (2)
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _1_Package Management Main | 2.2.6-Ensure access to files in the /etc/apt/auth.conf.d/
+      directory is configured
+    rationale: Access to the `.conf` files in the `/etc/apt/auth.conf.d` directory should be restricted
+      to prevent secrets leakage of Login information needed to connect to a proxy or to download data
+      from a repository.
+    impact: ''
+    audit_guidance: "Run the following command and verify all `.conf` files in the `/etc/apt/auth.conf.d/`\
+      \ directory `Uid` and `Gid` are both `0/root` and mode `0640` or more restrictive:\r\n\r\nRun the\
+      \ following command:\r\n\r\n```\r\n# stat -Lc 'Access: (%a/%A) Uid: ( %u/ %U) Gid: ( %g/ %G)' /etc/apt/auth.conf.d/*\
+      \ 2>/dev/null\r\n```\r\n\r\nNo output should be returned."
+    remediation_guidance: "Run the following commands to set all `.conf` files in the `/etc/apt/auth.conf.d/`\
+      \ directory `Uid` and `Gid` both to`0/root` and mode `0640`:\r\n\r\n```\r\n# chown root:root /etc/apt/auth.conf.d/*\r\
+      \n# chmod u-x,g-wx,o-rwx /etc/apt/auth.conf.d/*\r\n```"
+    additional_information: ''
+    default_value: The `/etc/apt/auth.conf.d/` directory is empty
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

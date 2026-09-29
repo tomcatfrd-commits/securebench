@@ -50,6 +50,14 @@ def make_profile(
     require_approval: bool = False,
     allow_best_effort_rollback: bool = False,
 ) -> Profile:
+    if classification in {
+        SafetyClassification.INVESTIGATE,
+        SafetyClassification.PROHIBITED,
+    }:
+        enabled = False
+    elif classification is SafetyClassification.APPROVAL_REQUIRED:
+        require_approval = True
+
     return Profile(
         profile_id="test-profile",
         name="Test Profile",
@@ -304,7 +312,7 @@ class TestPolicyEngine:
         assert evaluation.allowed is True
         assert evaluation.requires_precheck is True
         assert evaluation.requires_approval is False
-        assert evaluation.can_execute_without_approval is True
+        assert evaluation.can_execute_without_approval is False
 
     def test_approval_required_blocks_execution_without_approval(self) -> None:
         control = make_control(

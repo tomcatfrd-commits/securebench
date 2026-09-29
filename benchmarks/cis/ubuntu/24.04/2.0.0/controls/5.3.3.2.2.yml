@@ -1,0 +1,94 @@
+control:
+  id: CIS-5.3.3.2.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure password length is configured
+  description: "The minimum password length setting determines the lowers number of characters that make\
+    \ up a password for a user account. There are many different theories about how to determine the best\
+    \ password length for an organization, but perhaps \"passphrase\" is a better term than \"password\"\
+    .\r\n\r\nThe `minlen` option sets the minimum acceptable size for the new password (plus one if credits\
+    \ are not disabled which is the default). Cannot be set to lower value than 6."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_3_2_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_3_2_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_3_2_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_3_2_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.3.2.2
+      url: https://workbench.cisecurity.org/sections/4177285/recommendations/7047724
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - IA-5(1)
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques:
+      - T1110
+      - T1110.001
+      - T1110.002
+      - T1110.003
+      - T1178.001
+      - T1178.002
+      - T1178.003
+      - T1178.004
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1027
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.4.2.2-Ensure password length is configured
+    rationale: Strong passwords help protect systems from password attacks. Types of password attacks
+      include dictionary attacks, which attempt to use common words and phrases, and brute force attacks,
+      which try every possible combination of characters. Also attackers may try to obtain the account
+      database so they can use tools to discover the accounts and passwords.
+    impact: "In general, it is true that longer passwords are better (harder to crack), but it is also\
+      \ true that forced password length requirements can cause user behavior that is predictable and\
+      \ undesirable. For example, requiring users to have a minimum 16-character password may cause them\
+      \ to choose repeating patterns like fourfourfourfour or passwordpassword that meet the requirement\
+      \ but aren’t hard to guess. Additionally, length requirements increase the chances that users will\
+      \ adopt other insecure practices, like writing them down, re-using them or storing them unencrypted\
+      \ in their documents.\r\n\r\nHaving a reasonable minimum length with no maximum character limit\
+      \ increases the resulting\r\naverage password length used (and therefore the strength).6"
+    audit_guidance: "Run the following command to verify that password length is `14` or more characters,\
+      \ and conforms to local site policy:\r\n\r\n```\r\n# grep -Psi -- '^\\h*minlen\\h*=\\h*(1[4-9]|[2-9][0-9]|[1-9][0-9]{2,})\\\
+      b' /etc/security/pwquality.conf /etc/security/pwquality.conf.d/*.conf\r\n```\r\n\r\n_Example output:_\r\
+      \n\r\n```\r\n/etc/security/pwquality.conf.d/50-pwlength.conf:minlen = 14\r\n```\r\n\r\nVerify returned\
+      \ value(s) are no less than `14` characters and meet local site policy\r\n\r\nRun the following\
+      \ command to verify that `minlen` is not set, or is `14` or more characters, and conforms to local\
+      \ site policy:\r\n\r\n```\r\n# grep -Psi -- '^\\h*password\\h+(requisite|required|sufficient)\\\
+      h+pam_pwquality\\.so\\h+([^#\\n\\r]+\\h+)?minlen\\h*=\\h*([0-9]|1[0-3])\\b' /etc/pam.d/common-password\r\
+      \n```\r\n\r\nNothing should be returned\r\n\r\n**Note:** \r\n- settings should be configured in\
+      \ only **one** location for clarity\r\n- Settings observe an order of precedence:\r\n  - module\
+      \ arguments override the settings in the `/etc/security/pwquality.conf` configuration file\r\n \
+      \ - settings in the `/etc/security/pwquality.conf` configuration file override settings in a `.conf`\
+      \ file in the `/etc/security/pwquality.conf.d/` directory\r\n  - settings in a `.conf` file in the\
+      \ `/etc/security/pwquality.conf.d/` directory are read in canonical order, with last read file containing\
+      \ the setting taking precedence\r\n- It is recommended that settings be configured in a `.conf`\
+      \ file in the `/etc/security/pwquality.conf.d/` directory for clarity, convenience, and durability."
+    remediation_guidance: "Create or modify a file ending in `.conf` in the `/etc/security/pwquality.conf.d/`\
+      \ directory or the file `/etc/security/pwquality.conf` and add or modify the following line to set\
+      \ password length of `14` or more characters. Ensure that password length conforms to local site\
+      \ policy: \r\n\r\n_Example:_\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   sed -ri 's/^\\s*minlen\\\
+      s*=/# &/' /etc/security/pwquality.conf\r\n   [ ! -d /etc/security/pwquality.conf.d/ ] && mkdir /etc/security/pwquality.conf.d/\r\
+      \n   printf '\\n%s' \"minlen = 14\" > /etc/security/pwquality.conf.d/50-pwlength.conf\r\n}\r\n```\r\
+      \n\r\nRun the following command:\r\n\r\n```\r\n# grep -Pl -- '\\bpam_pwquality\\.so\\h+([^#\\n\\\
+      r]+\\h+)?minlen\\b' /usr/share/pam-configs/*\r\n```\r\n\r\nEdit any returned files and remove the\
+      \ `minlen` argument from the `pam_pwquality.so` line(s):"
+    additional_information: ''
+    default_value: minlen = 8
+    artifacts_count: 5
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -221,7 +221,7 @@ def test_missing_control_fails_closed() -> None:
     assert result.success is False
     assert transaction.status is TransactionStatus.ROLLBACK_REQUIRED
     assert provider.calls == []
-    assert change.status is ChangeStatus.SUCCESS
+    assert change.status is ChangeStatus.ROLLBACK_REQUIRED
 
 
 def test_empty_transaction_can_be_rolled_back() -> None:

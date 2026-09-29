@@ -21,7 +21,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from securebench.core import Control, Profile
+from securebench.core import Control, PolicyError, Profile
+
 from .classifier import ClassificationResult, ControlClassifier
 from .rules import (
     ClassificationPolicyRule,
@@ -121,6 +122,17 @@ class PolicyEngine:
 
         No remote calls, Ansible execution, or system modifications occur.
         """
+
+        if profile.benchmark_id not in {None, control.benchmark_id}:
+            raise PolicyError(
+                f"profile '{profile.profile_id}' targets benchmark "
+                f"'{profile.benchmark_id}', not '{control.benchmark_id}'"
+            )
+        if profile.benchmark_version not in {None, control.benchmark_version}:
+            raise PolicyError(
+                f"profile '{profile.profile_id}' targets benchmark version "
+                f"'{profile.benchmark_version}', not '{control.benchmark_version}'"
+            )
 
         classification = self._classifier.classify(
             control=control,

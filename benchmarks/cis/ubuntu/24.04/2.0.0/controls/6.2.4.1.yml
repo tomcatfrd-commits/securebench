@@ -1,0 +1,73 @@
+control:
+  id: CIS-6.2.4.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure the audit log file directory mode is configured
+  description: The audit log directory contains audit log files.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_2_4_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_2_4_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_2_4_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_2_4_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.2.4.1
+      url: https://workbench.cisecurity.org/sections/4177289/recommendations/7047753
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - AU-3
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1070
+      - T1070.002
+      - T1083
+      - T1083.000
+      mitre_tactics:
+      - TA0007
+      mitre_mitigations:
+      - M1022
+    parent: CIS _6_System Auditing Main | 2.2.4.1-Ensure the audit log file directory mode is configured
+    rationale: 'Audit information includes all information including: audit records, audit settings and
+      audit reports. This information is needed to successfully audit system activity. This information
+      must be protected from unauthorized modification or deletion. If this information were to be compromised,
+      forensic analysis and discovery of the true source of potentially malicious system activity is impossible
+      to achieve.'
+    impact: ''
+    audit_guidance: "Run the following script to verify the audit log directory is mode 0750 or more restrictive:\r\
+      \n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   l_perm_mask=\"0027\"\r\n   if [ -e \"/etc/audit/auditd.conf\"\
+      \ ]; then\r\n      l_audit_log_directory=\"$(dirname \"$(awk -F= '/^\\s*log_file\\s*/{print $2}'\
+      \ /etc/audit/auditd.conf | xargs)\")\"\r\n      if [ -d \"$l_audit_log_directory\" ]; then\r\n \
+      \        l_maxperm=\"$(printf '%o' $(( 0777 & ~$l_perm_mask )) )\"\r\n         l_directory_mode=\"\
+      $(stat -Lc '%#a' \"$l_audit_log_directory\")\"\r\n         if [ $(( $l_directory_mode & $l_perm_mask\
+      \ )) -gt 0 ]; then\r\n            echo -e \"\\n- Audit Result:\\n  ** FAIL **\\n  - Directory: \\\
+      \"$l_audit_log_directory\\\" is mode: \\\"$l_directory_mode\\\"\\n     (should be mode: \\\"$l_maxperm\\\
+      \" or more restrictive)\\n\"\r\n         else\r\n            echo -e \"\\n- Audit Result:\\n  **\
+      \ PASS **\\n  - Directory: \\\"$l_audit_log_directory\\\" is mode: \\\"$l_directory_mode\\\"\\n\
+      \     (should be mode: \\\"$l_maxperm\\\" or more restrictive)\\n\"\r\n         fi        \r\n \
+      \     else\r\n         echo -e \"\\n- Audit Result:\\n  ** FAIL **\\n  - Log file directory not\
+      \ set in \\\"/etc/audit/auditd.conf\\\" please set log file directory\"\r\n      fi\r\n   else\r\
+      \n      echo -e \"\\n- Audit Result:\\n  ** FAIL **\\n  - File: \\\"/etc/audit/auditd.conf\\\" not\
+      \ found\\n  - ** Verify auditd is installed **\"\r\n   fi\r\n}\r\n```"
+    remediation_guidance: "Run the following command to configure the audit log directory to have a mode\
+      \ of \"0750\" or less permissive: \r\n\r\n```\r\n# chmod g-w,o-rwx \"$(dirname \"$(awk -F= '/^\\\
+      s*log_file\\s*/{print $2}' /etc/audit/auditd.conf | xargs)\")\"\r\n```"
+    additional_information: ''
+    default_value: '750'
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

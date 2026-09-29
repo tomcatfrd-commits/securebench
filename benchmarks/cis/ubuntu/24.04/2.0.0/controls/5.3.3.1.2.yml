@@ -1,0 +1,76 @@
+control:
+  id: CIS-5.3.3.1.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure password unlock time is configured
+  description: "`unlock_time= ` - The access will be re-enabled after _ _ seconds after the lock out.\
+    \ The value `0` has the same meaning as value never - the access will not be re-enabled without resetting\
+    \ the faillock entries by the faillock(8) command.\r\n\r\n**Note:**\r\n- The default directory that\
+    \ pam_faillock uses is usually cleared on system boot so the access will be also re-enabled after\
+    \ system reboot. If that is undesirable a different tally directory must be set with the dir option.\r\
+    \n- It is usually undesirable to permanently lock out users as they can become easily a target of\
+    \ denial of service attack unless the usernames are random and kept secret to potential attackers.\r\
+    \n- The maximum configurable value for `unlock_time` is `604800`"
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_3_1_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_3_1_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_3_1_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_3_1_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.3.1.2
+      url: https://workbench.cisecurity.org/sections/4177284/recommendations/7047708
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '6.2'
+      cis_v7:
+      - '16.7'
+      mitre_techniques:
+      - T1110
+      - T1110.001
+      - T1110.003
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1027
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.4.1.2-Ensure password unlock time is configured
+    rationale: Locking out user IDs after _n_ unsuccessful consecutive login attempts mitigates brute
+      force password attacks against your systems.
+    impact: Use of `unlock_time=0` may allow an attacker to cause denial of service to legitimate users.
+      This will also require a systems administrator with elevated privileges to unlock the account.
+    audit_guidance: "Run the following command to verify that the time in seconds before the account is\
+      \ unlocked is either `0` (never) or `900` (15 minutes) or more and meets local site policy:\r\n\r\
+      \n```\r\n# grep -Pi -- '^\\h*unlock_time\\h*=\\h*(0|9[0-9][0-9]|[1-9][0-9]{3,})\\b' /etc/security/faillock.conf\r\
+      \n\r\nunlock_time = 900\r\n```\r\n\r\nRun the following command to verify that the `unlock_time`\
+      \ argument has not been set, or is either `0` (never) or `900` (15 minutes) or more and meets local\
+      \ site policy:\r\n\r\n```\r\n# grep -Pi -- '^\\h*auth\\h+(requisite|required|sufficient)\\h+pam_faillock\\\
+      .so\\h+([^#\\n\\r]+\\h+)?unlock_time\\h*=\\h*([1-9]|[1-9][0-9]|[1-8][0-9][0-9])\\b' /etc/pam.d/common-auth\r\
+      \n```\r\n\r\nNothing should be returned"
+    remediation_guidance: "Set password unlock time to conform to site policy. `unlock_time` should be\
+      \ `0` (never), or `900` seconds or greater.\r\n\r\nEdit `/etc/security/faillock.conf` and update\
+      \ or add the following line:\r\n\r\n```\r\nunlock_time = 900\r\n```\r\n\r\nRun the following command:\
+      \ remove the `unlock_time` argument from the `pam_faillock.so` module in the PAM files:\r\n\r\n\
+      ```\r\n# grep -Pl -- '\\bpam_faillock\\.so\\h+([^#\\n\\r]+\\h+)?unlock_time\\b' /usr/share/pam-configs/*\r\
+      \n```\r\n\r\nEdit any returned files and remove the `unlock_time= ` argument from the `pam_faillock.so`\
+      \ line(s):"
+    additional_information: If a user has been locked out because they have reached the maximum consecutive
+      failure count defined by `deny=` in the `pam_faillock.so` module, the user can be unlocked by issuing
+      the command `faillock --user --reset`. This command sets the failed count to 0, effectively unlocking
+      the user.
+    default_value: unlock_time = 600
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

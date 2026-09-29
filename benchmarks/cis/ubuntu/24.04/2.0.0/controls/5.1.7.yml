@@ -1,0 +1,98 @@
+control:
+  id: CIS-5.1.7
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure sshd ClientAliveInterval and ClientAliveCountMax are configured
+  description: ">**Note:** To clarify, the two settings described below are only meant for idle connections\
+    \ from a protocol perspective and are not meant to check if the user is active or not. An idle user\
+    \ does not mean an idle connection. SSH does not and never had, intentionally, the capability to drop\
+    \ idle users. In SSH versions before `8.2p1` there was a bug that caused these values to behave in\
+    \ such a manner that they were abused to disconnect idle users. This bug has been resolved in `8.2p1`\
+    \ and thus it can no longer be abused disconnect idle users.\r\n\r\nThe two options `ClientAliveInterval`\
+    \ and `ClientAliveCountMax` control the timeout of SSH sessions. Taken directly from `man 5 sshd_config`:\r\
+    \n\r\n- `ClientAliveInterval` Sets a timeout interval in seconds after which if no data has been received\
+    \ from the client, sshd(8) will send a message through the encrypted channel to request a response\
+    \ from the client. The default is 0, indicating that these messages will not be sent to the client.\r\
+    \n\r\n- `ClientAliveCountMax` Sets the number of client alive messages which may be sent without sshd(8)\
+    \ receiving any messages back from the client. If this threshold is reached while client alive messages\
+    \ are being sent, sshd will disconnect the client, terminating the session.  It is important to note\
+    \ that the use of client alive messages is very different from TCPKeepAlive. The client alive messages\
+    \ are sent through the encrypted channel and therefore will not be spoofable. The TCP keepalive option\
+    \ en‐abled by TCPKeepAlive is spoofable. The client alive mechanism is valuable when the client or\
+    \ server depend on knowing when a connection has become unresponsive.\r\nThe default value is 3. If\
+    \ ClientAliveInterval is set to 15, and ClientAliveCountMax is left at the default, unresponsive SSH\
+    \ clients will be disconnected after approximately 45 seconds. Setting a zero ClientAliveCountMax\
+    \ disables connection termination.\r\n\r\nMore information about the openSSH server configuration\
+    \ is available in the \"Configure SSH Server\" section overview."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_1_7.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_1_7.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_1_7.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_1_7.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.1.7
+      url: https://workbench.cisecurity.org/sections/4177236/recommendations/7047515
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-1
+      - CM-2
+      - CM-6
+      - CM-7
+      - IA-5
+      cis_v8:
+      - '0'
+      cis_v7:
+      - '0'
+      mitre_techniques:
+      - T1078
+      - T1078.001
+      - T1078.002
+      - T1078.003
+      mitre_tactics:
+      - TA0001
+      mitre_mitigations:
+      - M1026
+    parent: CIS _5_Configure SSH Server Main | 2.2.8-Ensure sshd ClientAliveInterval and ClientAliveCountMax
+      are configured
+    rationale: "In order to prevent resource exhaustion, appropriate values should be set for both `ClientAliveInterval`\
+      \ and `ClientAliveCountMax`. Specifically, looking at the source code, `ClientAliveCountMax` must\
+      \ be greater than zero in order to utilize the ability of SSH to drop idle connections. If connections\
+      \ are allowed to stay open indefinitely, this can potentially be used as a DDOS attack or simple\
+      \ resource exhaustion could occur over unreliable networks.\r\n\r\nThe example set here is a 45\
+      \ second timeout. Consult your site policy for network timeouts and apply as appropriate."
+    impact: ''
+    audit_guidance: "Run the following command and verify `ClientAliveInterval` and `ClientAliveCountMax`\
+      \ are greater than zero:\r\n\r\n```\r\n# sshd -T | grep -Pi -- '(clientaliveinterval|clientalivecountmax)'\r\
+      \n```\r\n\r\n_Example Output:_\r\n\r\n```\r\nclientaliveinterval 15\r\nclientalivecountmax 3\r\n\
+      ```\r\n\r\n**- IF -** `Match` set statements are used in your environment, specify the connection\
+      \ parameters to use for the `-T` extended test mode and run the audit to verify the setting is not\
+      \ incorrectly configured in a match block\r\n\r\n_Example additional audit needed for a match block\
+      \ for the user `sshuser`:_\r\n\r\n```\r\n# sshd -T -C user=sshuser | grep -Pi -- '(clientaliveinterval|clientalivecountmax)'\r\
+      \n```\r\n\r\n**Note:** If provided, any Match directives in the configuration file that would apply\
+      \ are applied before the configuration is written to standard output. The connection parameters\
+      \ are supplied as keyword=value pairs and may be supplied in any order, either with multiple `-C`\
+      \ options or as a comma-separated list. The keywords are `addr` (source address), `user` (user),\
+      \ `host` (resolved source host name), `laddr` (local address), `lport` (local port number), and\
+      \ `rdomain` (routing domain)."
+    remediation_guidance: "Create or edit a `*.conf` file in the `/etc/ssh/sshd_config.d/` and set the\
+      \ `ClientAliveInterval` and `ClientAliveCountMax` parameters above any `Include` and `Match` entries\
+      \ according to site policy. \r\n\r\n_Example:_\r\n\r\n```\r\nClientAliveInterval 15\r\nClientAliveCountMax\
+      \ 3\r\n```"
+    additional_information: "https://bugzilla.redhat.com/show_bug.cgi?id=1873547\r\n\r\nhttps://github.com/openssh/openssh-portable/blob/V_8_9/serverloop.c#L137"
+    default_value: "ClientAliveInterval 0\r\n\r\nClientAliveCountMax 3"
+    artifacts_count: 5
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

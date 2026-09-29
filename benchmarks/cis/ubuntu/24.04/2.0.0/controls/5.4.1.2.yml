@@ -1,0 +1,81 @@
+control:
+  id: CIS-5.4.1.2
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure minimum password days is configured
+  description: '`PASS_MIN_DAYS` <_N_> - The minimum number of days allowed between password changes. Any
+    password changes attempted sooner than this will be rejected. If not specified, 0 will be assumed
+    (which disables the restriction).'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_4_1_2.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_4_1_2.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_4_1_2.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_4_1_2.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.4.1.2
+      url: https://workbench.cisecurity.org/sections/4177295/recommendations/7047784
+    assessment_status: manual
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - IA-5 (1)
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques:
+      - T1078
+      - T1078.001
+      - T1078.002
+      - T1078.003
+      - T1078.004
+      - T1110
+      - T1110.004
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1027
+    parent: CIS _5_Configure shadow password suite parameters Main | 1.1.1.2-Ensure minimum password days
+      is configured
+    rationale: "Users may have favorite passwords that they like to use because they are easy to remember\
+      \ and they believe that their password choice is secure from compromise. Unfortunately, passwords\
+      \ are compromised and if an attacker is targeting a specific individual user account, with foreknowledge\
+      \ of data about that user, reuse of old, potentially compromised passwords, may cause a security\
+      \ breach.\r\n\r\nBy restricting the frequency of password changes, an administrator can prevent\
+      \ users from repeatedly changing their password in an attempt to circumvent password reuse controls"
+    impact: "If a users password is set by other personnel as a procedure in dealing with a lost or expired\
+      \ password, the user should be forced to update this \"set\" password with their own password. e.g.\
+      \ force \"change at next logon\".\r\n\r\nIf it is not possible to have a user set their own password\
+      \ immediately, and this recommendation or local site procedure may cause a user to continue using\
+      \ a third party generated password, `PASS_MIN_DAYS` for the effected user should be temporally changed\
+      \ to `0`via `chage --mindays `, to allow a user to change their password immediately.\r\n\r\nFor\
+      \ applications where the user is not using the password at console, the ability to \"change at next\
+      \ logon\" may be limited. This may cause a user to continue to use a password created by other personnel."
+    audit_guidance: "Run the following command to verify that `PASS_MIN_DAYS` is set to a value greater\
+      \ than `0` and follows local site policy:\r\n\r\n```\r\n# grep -Pi -- '^\\h*PASS_MIN_DAYS\\h+\\\
+      d+\\b' /etc/login.defs\r\n```\r\n\r\n_Example output:_\r\n\r\n```\r\nPASS_MIN_DAYS   1\r\n```\r\n\
+      \r\nRun the following command to verify all passwords have a `PASS_MIN_DAYS` greater than `0`:\r\
+      \n\r\n```\r\n# awk -F: '($2~/^\\$.+\\$/) {if($4 < 1)print \"User: \" $1 \" PASS_MIN_DAYS: \" $4}'\
+      \ /etc/shadow\r\n```\r\n\r\nNothing should be returned"
+    remediation_guidance: "Edit `/etc/login.defs` and set `PASS_MIN_DAYS` to a value greater than `0`\
+      \ that follows local site policy:\r\n\r\n_Example:_\r\n\r\n```\r\nPASS_MIN_DAYS 1\r\n```\r\n\r\n\
+      Run the following command to modify user parameters for all users with a password set to a minimum\
+      \ days greater than zero that follows local site policy:\r\n\r\n```\r\n# chage --mindays ```\r\n\
+      \r\n_Example:_\r\n\r\n```\r\n# awk -F: '($2~/^\\$.+\\$/) {if($4 < 1)system (\"chage --mindays 1\
+      \ \" $1)}' /etc/shadow\r\n```"
+    additional_information: ''
+    default_value: PASS_MIN_DAYS 0
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

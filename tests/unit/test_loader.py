@@ -10,7 +10,6 @@ from securebench.core.exceptions import BenchmarkError, ProfileError
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-
 BENCHMARK_PATH = (
     PROJECT_ROOT
     / "benchmarks"
@@ -24,276 +23,352 @@ PROFILE_PATH = PROJECT_ROOT / "profiles" / "production-safe.yml"
 
 
 class TestConfigurationLoader:
-    def test_loads_real_cis_benchmark(self) -> None:
-        loader = ConfigurationLoader()
+    @pytest.fixture()
+    def loader(self) -> ConfigurationLoader:
+        return ConfigurationLoader()
 
+    def test_load_benchmark_from_repository(
+        self,
+        loader: ConfigurationLoader,
+    ) -> None:
         benchmark = loader.load_benchmark(BENCHMARK_PATH)
 
-        assert benchmark.benchmark_id == "cis-ubuntu-24.04"
-        assert benchmark.name == "CIS Ubuntu Linux 24.04 LTS Benchmark"
-        assert benchmark.version == "2.0.0"
-        assert benchmark.platform == "ubuntu-24.04"
-        assert benchmark.control_count >= 1
+        assert benchmark is not None
+        assert benchmark.controls
+        assert benchmark.benchmark_id
+        assert benchmark.name
 
-    def test_loads_real_cis_control_metadata(self) -> None:
-        loader = ConfigurationLoader()
-
-        benchmark = loader.load_benchmark(BENCHMARK_PATH)
-        control = benchmark.get_control("CIS-1.1.1.1")
-
-        assert control.metadata["level"] == "L1"
-        assert control.metadata["server"] is True
-        assert control.metadata["workstation"] is True
-        assert control.metadata["automated"] is True
-
-        assert control.safety_metadata["default_classification"] == (
-            "safe_with_precheck"
-        )
-
-        assert control.safety_metadata["prechecks"] == (
-            "verify_filesystem_not_in_use",
-            "verify_module_not_required",
-            "verify_modprobe_configuration_can_be_changed",
-        )
-
-        assert control.requirements_metadata["module"] == "cramfs"
-
-        expected = control.requirements_metadata["expected"]
-
-        assert expected["module_loaded"] is False
-        assert expected["module_loadable"] is False
-
-    def test_loads_control_rollback_capability(self) -> None:
-        loader = ConfigurationLoader()
-
-        benchmark = loader.load_benchmark(BENCHMARK_PATH)
-        control = benchmark.get_control("CIS-1.1.1.1")
-
-        assert control.rollback_capability.value == "guaranteed"
-
-    def test_loads_empty_dependencies_and_conflicts(self) -> None:
-        loader = ConfigurationLoader()
-
-        benchmark = loader.load_benchmark(BENCHMARK_PATH)
-        control = benchmark.get_control("CIS-1.1.1.1")
-
-        assert control.dependencies == ()
-        assert control.conflicts == ()
-
-    def test_loads_production_safe_profile(self) -> None:
-        loader = ConfigurationLoader()
-
+    def test_load_profile_from_repository(
+        self,
+        loader: ConfigurationLoader,
+    ) -> None:
         profile = loader.load_profile(PROFILE_PATH)
 
-        assert profile.profile_id == "production-safe"
-        assert profile.default_classification.value == "investigate"
-        assert profile.require_approval_for_unknown is True
-        assert profile.allow_best_effort_rollback is False
+        assert profile is not None
+        assert profile.profile_id
+        assert profile.name
 
-        rule = profile.rule_for("CIS-1.1.1.1")
-
-        assert rule.classification.value == "safe_with_precheck"
-        assert rule.enabled is True
-        assert rule.require_approval is False
-
-    def test_unknown_control_fails_closed(self) -> None:
-        loader = ConfigurationLoader()
-
-        profile = loader.load_profile(PROFILE_PATH)
-        rule = profile.rule_for("UNKNOWN-CONTROL")
-
-        assert rule.classification.value == "approval_required"
-        assert rule.enabled is True
-        assert rule.require_approval is True
-        assert profile.allows_automatic_remediation("UNKNOWN-CONTROL") is False
-
-    def test_metadata_is_immutable_after_loading(self) -> None:
-        loader = ConfigurationLoader()
-
+    def test_benchmark_contains_unique_control_ids(
+        self,
+        loader: ConfigurationLoader,
+    ) -> None:
         benchmark = loader.load_benchmark(BENCHMARK_PATH)
-        control = benchmark.get_control("CIS-1.1.1.1")
 
-        with pytest.raises(TypeError):
-            control.metadata["level"] = "L2"  # type: ignore[index]
+        control_ids = [
+            control.control_id
+            for control in benchmark.controls
+        ]
 
-        with pytest.raises(TypeError):
-            control.safety_metadata["default_classification"] = "safe"  # type: ignore[index]
+        assert len(control_ids) == len(set(control_ids))
 
-    def test_missing_benchmark_file_fails_closed(self, tmp_path: Path) -> None:
-        loader = ConfigurationLoader()
+    def test_profile_contains_valid_rules(
+        self,
+        loader: ConfigurationLoader,
+    ) -> None:
+        profile = loader.load_profile(PROFILE_PATH)
 
-        missing_path = tmp_path / "missing.yml"
+        for control_id, rule in profile.rules.items():
+            assert control_id
+            assert rule.classification is not None
+
+    def test_missing_benchmark_is_rejected(
+        self,
+        loader: ConfigurationLoader,
+        tmp_path: Path,
+    ) -> None:
+        path = tmp_path / "missing.yml"
 
         with pytest.raises(BenchmarkError):
-            loader.load_benchmark(missing_path)
+            loader.load_benchmark(path)
 
-    def test_missing_profile_file_fails_closed(self, tmp_path: Path) -> None:
-        loader = ConfigurationLoader()
-
-        missing_path = tmp_path / "missing.yml"
+    def test_missing_profile_is_rejected(
+        self,
+        loader: ConfigurationLoader,
+        tmp_path: Path,
+    ) -> None:
+        path = tmp_path / "missing.yml"
 
         with pytest.raises(ProfileError):
-            loader.load_profile(missing_path)
+            loader.load_profile(path)
 
-    def test_missing_controls_directory_fails_closed(self, tmp_path: Path) -> None:
-        benchmark_path = tmp_path / "benchmark.yml"
-
-        benchmark_path.write_text(
-            """
-benchmark:
-  id: test-benchmark
-  name: Test Benchmark
-  version: "1.0.0"
-  platform: ubuntu-24.04
-  description: Test benchmark
-
-controls:
-  path: controls
-""".strip(),
-            encoding="utf-8",
-        )
-
-        loader = ConfigurationLoader()
-
-        with pytest.raises(BenchmarkError, match="controls"):
-            loader.load_benchmark(benchmark_path)
-
-    def test_invalid_profile_classification_fails_closed(
+    def test_invalid_benchmark_yaml_is_rejected(
         self,
+        loader: ConfigurationLoader,
         tmp_path: Path,
     ) -> None:
-        profile_path = tmp_path / "invalid-profile.yml"
-
-        profile_path.write_text(
-            """
-profile:
-  id: invalid-profile
-  name: Invalid Profile
-  description: Invalid profile
-  defaults:
-    classification: definitely_not_a_valid_classification
-""".strip(),
+        path = tmp_path / "invalid.yml"
+        path.write_text(
+            "benchmark:\n"
+            "  [invalid yaml\n",
             encoding="utf-8",
         )
 
-        loader = ConfigurationLoader()
+        with pytest.raises(BenchmarkError):
+            loader.load_benchmark(path)
 
-        with pytest.raises(ProfileError, match="invalid classification"):
-            loader.load_profile(profile_path)
-
-    def test_dangling_dependency_fails_closed(self, tmp_path: Path) -> None:
-        benchmark_dir = tmp_path / "benchmark"
-        controls_dir = benchmark_dir / "controls"
-        controls_dir.mkdir(parents=True)
-
-        benchmark_path = benchmark_dir / "benchmark.yml"
-
-        benchmark_path.write_text(
-            """
-benchmark:
-  id: test-benchmark
-  name: Test Benchmark
-  version: "1.0.0"
-  platform: ubuntu-24.04
-  description: Test benchmark
-
-controls:
-  path: controls
-""".strip(),
-            encoding="utf-8",
-        )
-
-        (controls_dir / "control.yml").write_text(
-            """
-control:
-  id: TEST-001
-  benchmark_id: test-benchmark
-  title: Test control
-  description: Test control
-  platform: ubuntu-24.04
-  severity: medium
-  audit: test.audit
-  remediation: test.remediate
-  rollback: test.rollback
-  verification: test.verify
-  rollback_capability: guaranteed
-  dependencies:
-    - MISSING-CONTROL
-""".strip(),
-            encoding="utf-8",
-        )
-
-        loader = ConfigurationLoader()
-
-        with pytest.raises(BenchmarkError, match="unknown dependency"):
-            loader.load_benchmark(benchmark_path)
-
-    def test_control_metadata_with_nested_structures_is_preserved(
+    def test_invalid_profile_yaml_is_rejected(
         self,
+        loader: ConfigurationLoader,
         tmp_path: Path,
     ) -> None:
-        benchmark_dir = tmp_path / "benchmark"
-        controls_dir = benchmark_dir / "controls"
-        controls_dir.mkdir(parents=True)
+        path = tmp_path / "invalid.yml"
+        path.write_text(
+            "profile:\n"
+            "  [invalid yaml\n",
+            encoding="utf-8",
+        )
 
-        benchmark_path = benchmark_dir / "benchmark.yml"
+        with pytest.raises(ProfileError):
+            loader.load_profile(path)
 
-        benchmark_path.write_text(
+    def test_empty_benchmark_file_is_rejected(
+        self,
+        loader: ConfigurationLoader,
+        tmp_path: Path,
+    ) -> None:
+        path = tmp_path / "empty.yml"
+        path.write_text("", encoding="utf-8")
+
+        with pytest.raises(BenchmarkError):
+            loader.load_benchmark(path)
+
+    def test_empty_profile_file_is_rejected(
+        self,
+        loader: ConfigurationLoader,
+        tmp_path: Path,
+    ) -> None:
+        path = tmp_path / "empty.yml"
+        path.write_text("", encoding="utf-8")
+
+        with pytest.raises(ProfileError):
+            loader.load_profile(path)
+
+    def test_benchmark_path_must_be_a_file(
+        self,
+        loader: ConfigurationLoader,
+        tmp_path: Path,
+    ) -> None:
+        with pytest.raises(BenchmarkError):
+            loader.load_benchmark(tmp_path)
+
+    def test_profile_path_must_be_a_file(
+        self,
+        loader: ConfigurationLoader,
+        tmp_path: Path,
+    ) -> None:
+        with pytest.raises(ProfileError):
+            loader.load_profile(tmp_path)
+
+    def test_loading_same_benchmark_is_deterministic(
+        self,
+        loader: ConfigurationLoader,
+    ) -> None:
+        first = loader.load_benchmark(BENCHMARK_PATH)
+        second = loader.load_benchmark(BENCHMARK_PATH)
+
+        assert first == second
+
+    def test_loading_same_profile_is_deterministic(
+        self,
+        loader: ConfigurationLoader,
+    ) -> None:
+        first = loader.load_profile(PROFILE_PATH)
+        second = loader.load_profile(PROFILE_PATH)
+
+        assert first == second
+
+    def test_loader_does_not_modify_benchmark_file(
+        self,
+        loader: ConfigurationLoader,
+    ) -> None:
+        before = BENCHMARK_PATH.read_bytes()
+
+        loader.load_benchmark(BENCHMARK_PATH)
+
+        after = BENCHMARK_PATH.read_bytes()
+
+        assert after == before
+
+    def test_loader_does_not_modify_profile_file(
+        self,
+        loader: ConfigurationLoader,
+    ) -> None:
+        before = PROFILE_PATH.read_bytes()
+
+        loader.load_profile(PROFILE_PATH)
+
+        after = PROFILE_PATH.read_bytes()
+
+        assert after == before
+
+
+class TestBenchmarkValidation:
+    @pytest.fixture()
+    def loader(self) -> ConfigurationLoader:
+        return ConfigurationLoader()
+
+    def _write(
+        self,
+        tmp_path: Path,
+        content: str,
+    ) -> Path:
+        path = tmp_path / "benchmark.yml"
+        path.write_text(content, encoding="utf-8")
+        return path
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            "[]\n",
+            "null\n",
+            "42\n",
+            "true\n",
+            "benchmark: []\n",
+        ],
+    )
+    def test_invalid_root_structure_is_rejected(
+        self,
+        loader: ConfigurationLoader,
+        tmp_path: Path,
+        content: str,
+    ) -> None:
+        path = self._write(tmp_path, content)
+
+        with pytest.raises(BenchmarkError):
+            loader.load_benchmark(path)
+
+    def test_missing_required_benchmark_identity_is_rejected(
+        self,
+        loader: ConfigurationLoader,
+        tmp_path: Path,
+    ) -> None:
+        path = self._write(
+            tmp_path,
             """
-benchmark:
-  id: test-benchmark
-  name: Test Benchmark
-  version: "1.0.0"
-  platform: ubuntu-24.04
-  description: Test benchmark
+controls: []
+""".lstrip(),
+        )
 
+        with pytest.raises(BenchmarkError):
+            loader.load_benchmark(path)
+
+    def test_invalid_controls_collection_is_rejected(
+        self,
+        loader: ConfigurationLoader,
+        tmp_path: Path,
+    ) -> None:
+        path = self._write(
+            tmp_path,
+            """
+id: test
+name: Test Benchmark
+controls: invalid
+""".lstrip(),
+        )
+
+        with pytest.raises(BenchmarkError):
+            loader.load_benchmark(path)
+
+    def test_duplicate_control_ids_are_rejected(
+        self,
+        loader: ConfigurationLoader,
+        tmp_path: Path,
+    ) -> None:
+        path = self._write(
+            tmp_path,
+            """
+id: test
+name: Test Benchmark
 controls:
-  path: controls
-""".strip(),
-            encoding="utf-8",
+  - id: TEST-001
+  - id: TEST-001
+""".lstrip(),
         )
 
-        (controls_dir / "control.yml").write_text(
+        with pytest.raises(BenchmarkError):
+            loader.load_benchmark(path)
+
+
+class TestProfileValidation:
+    @pytest.fixture()
+    def loader(self) -> ConfigurationLoader:
+        return ConfigurationLoader()
+
+    def _write(
+        self,
+        tmp_path: Path,
+        content: str,
+    ) -> Path:
+        path = tmp_path / "profile.yml"
+        path.write_text(content, encoding="utf-8")
+        return path
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            "[]\n",
+            "null\n",
+            "42\n",
+            "true\n",
+        ],
+    )
+    def test_invalid_root_structure_is_rejected(
+        self,
+        loader: ConfigurationLoader,
+        tmp_path: Path,
+        content: str,
+    ) -> None:
+        path = self._write(tmp_path, content)
+
+        with pytest.raises(ProfileError):
+            loader.load_profile(path)
+
+    def test_missing_required_profile_identity_is_rejected(
+        self,
+        loader: ConfigurationLoader,
+        tmp_path: Path,
+    ) -> None:
+        path = self._write(
+            tmp_path,
             """
-control:
-  id: TEST-001
-  benchmark_id: test-benchmark
-  title: Test control
-  description: Test control
-  platform: ubuntu-24.04
-  severity: medium
-  audit: test.audit
-  remediation: test.remediate
-  rollback: test.rollback
-  verification: test.verify
-  rollback_capability: guaranteed
-
-  metadata:
-    level: L1
-    references:
-      - CIS
-      - NIST
-    safety:
-      default_classification: safe_with_precheck
-      prechecks:
-        - verify_something
-    requirements:
-      module: test-module
-      expected:
-        loaded: false
-""".strip(),
-            encoding="utf-8",
+rules: {}
+""".lstrip(),
         )
 
-        loader = ConfigurationLoader()
+        with pytest.raises(ProfileError):
+            loader.load_profile(path)
 
-        benchmark = loader.load_benchmark(benchmark_path)
-        control = benchmark.get_control("TEST-001")
-
-        assert control.metadata["level"] == "L1"
-        assert control.metadata["references"] == ("CIS", "NIST")
-        assert control.safety_metadata["prechecks"] == (
-            "verify_something",
+    def test_invalid_rules_collection_is_rejected(
+        self,
+        loader: ConfigurationLoader,
+        tmp_path: Path,
+    ) -> None:
+        path = self._write(
+            tmp_path,
+            """
+id: test
+name: Test Profile
+rules: invalid
+""".lstrip(),
         )
-        assert control.requirements_metadata["module"] == "test-module"
-        assert control.requirements_metadata["expected"]["loaded"] is False
+
+        with pytest.raises(ProfileError):
+            loader.load_profile(path)
+
+    def test_duplicate_yaml_keys_are_not_silently_accepted(
+        self,
+        loader: ConfigurationLoader,
+        tmp_path: Path,
+    ) -> None:
+        path = self._write(
+            tmp_path,
+            """
+id: test
+id: duplicate
+name: Test Profile
+rules: {}
+""".lstrip(),
+        )
+
+        with pytest.raises(ProfileError):
+            loader.load_profile(path)

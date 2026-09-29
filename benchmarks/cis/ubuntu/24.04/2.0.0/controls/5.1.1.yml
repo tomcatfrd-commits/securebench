@@ -1,0 +1,75 @@
+control:
+  id: CIS-5.1.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to /etc/ssh/sshd_config is configured
+  description: "`/etc/ssh/sshd_config` is the main configuration file for the OpenSSH server daemon (sshd),\
+    \ which manages secure remote logins and other SSH services.\r\n\r\n`/etc/ssh/sshd_config` is the\
+    \ default location for drop-in configuration files used by sshd.\r\n\r\nMore information about the\
+    \ openSSH server configuration is available in the \"Configure SSH Server\" section overview."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_1_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_1_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_1_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_1_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.1.1
+      url: https://workbench.cisecurity.org/sections/4177236/recommendations/7047472
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1098
+      - T1098.004
+      - T1543
+      - T1543.002
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1022
+    parent: CIS _5_Configure SSH Server Main | 2.2.1-Ensure access to /etc/ssh/sshd_config is configured
+    rationale: Configuration specifications for `sshd` need to be protected from unauthorized changes
+      by non-privileged users.
+    impact: ''
+    audit_guidance: "Run the following command to verify access to `/etc/ssh/sshd_config` is configured:\r\
+      \n\r\n```\r\n# stat -Lc 'File: \"%n\" Mode: \"%#a\"  Owner: \"%U\" Group: \"%G\"' /etc/ssh/sshd_config\r\
+      \n```\r\n\r\nVerify mode is `0600` or more restrictive, owner is `root`, and group is `root`.\r\n\
+      \r\n_Example output:_\r\n\r\n```\r\nFile: \"/etc/ssh/sshd_config\" Mode: \"0600\"  Owner: \"root\"\
+      \ Group: \"root\"\r\n```\r\n\r\nRun the following script to verify files in `/etc/ssh/sshd_config.d/`\
+      \ ending in `.conf` are configured:\r\n - Mode `0600` or more restrictive\r\n - Owned by the `root`\
+      \ user\r\n - Group owned by the group `root`.\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   while\
+      \ IFS= read -r -d $'\\0' l_file; do\r\n      stat -Lc 'File: \"%n\" Mode: \"%#a\"  Owner: \"%U\"\
+      \ Group: \"%G\"' \"$l_file\"\r\n   done < <(find /etc/ssh/sshd_config.d/ -xdev -mount -type f -name\
+      \ '*.conf' \\\r\n   \\( -perm /077 -o ! -user root -o ! -group root \\) -print0 2>/dev/null)\r\n\
+      }\r\n```\r\n\r\nNothing should be returned\r\n\r\n>**Note:** If other locations are listed in an\
+      \ `Include` statement, `*.conf` files in these locations should also be checked."
+    remediation_guidance: "Run the following script to set ownership and permissions on `/etc/ssh/sshd_config`\
+      \ and files ending in `.conf` in the `/etc/ssh/sshd_config.d` directory:\r\n\r\n```\r\n#!/usr/bin/env\
+      \ bash\r\n\r\n{\r\n   chmod u-x,og-rwx /etc/ssh/sshd_config\r\n   chown root:root /etc/ssh/sshd_config\r\
+      \n   while IFS= read -r -d $'\\0' l_file; do\r\n      if [ -e \"$l_file\" ]; then\r\n         chmod\
+      \ u-x,og-rwx \"$l_file\"\r\n         chown root:root \"$l_file\"\r\n      fi\r\n   done < <(find\
+      \ /etc/ssh/sshd_config.d -type f -print0 2>/dev/null)\r\n}\r\n```\r\n\r\n>**Note:** If other locations\
+      \ are listed in an `Include` statement, `*.conf` files in these locations access should also be\
+      \ modified."
+    additional_information: ''
+    default_value: 'Access: (0600/-rw-------)  Uid: (    0/    root)   Gid: (    0/    root)'
+    artifacts_count: 7
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,93 @@
+control:
+  id: CIS-1.1.1.10
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure usb-storage kernel module is not available
+  description: USB storage provides a means to transfer and store files ensuring persistence and availability
+    of the files independent of network connection status.  Its popularity and utility has led to USB-based
+    malware being a simple and common means for network infiltration and a first step to establishing
+    a persistent threat within a networked environment.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_1_1_10.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_1_1_10.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_1_1_10.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_1_1_10.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.1.1.10
+      url: https://workbench.cisecurity.org/sections/4177239/recommendations/7047513
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - CM-7 (9)
+      - IA-3
+      cis_v8:
+      - '10.3'
+      cis_v7:
+      - '13.7'
+      mitre_techniques:
+      - T1052
+      - T1052.001
+      - T1091
+      - T1091.000
+      - T1200
+      - T1200.000
+      mitre_tactics:
+      - TA0001
+      - TA0010
+      mitre_mitigations:
+      - M1034
+    parent: CIS _1_Configure Filesystem Kernel Modules Main | 1.1.10-Ensure usb-storage kernel module
+      is not available
+    rationale: "Restricting USB access on the system will decrease the physical attack surface for a device\
+      \ and diminish the possible vectors to introduce malware.\r\n\r\nSatisfies: SRG-OS-000114-GPOS-00059,\
+      \ SRG-OS-000378-GPOS-00163"
+    impact: "Disabling the `usb-storage` module will disable any usage of USB storage devices.\r\n\r\n\
+      If requirements and local site policy allow the use of such devices, other solutions should be configured\
+      \ accordingly instead. One example of a commonly used solution is `USBGuard`."
+    audit_guidance: "Verify the `usb-storage` kernel module is not available on the system or has been\
+      \ disabled.\r\n\r\n1. Run the following script to determine if the `usb-storage` kernel module is\
+      \ available on the system:\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   l_mod_name=\"usb-storage\"\
+      \ l_mod_type=\"drivers\"\r\n   while IFS= read -r l_mod_path; do\r\n      if [ -d \"$l_mod_path/${l_mod_name//-/\\\
+      /}\" ] &&  \\\r\n      [ -n \"$(ls -A \"$l_mod_path/${l_mod_name//-/\\/}\")\" ]; then\r\n      \
+      \   printf '%s\\n' \"$l_mod_name exists in $l_mod_path\"\r\n      fi\r\n   done < <(readlink -e\
+      \ /usr/lib/modules/**/kernel/$l_mod_type \\\r\n   || readlink -e /lib/modules/**/kernel/$l_mod_type)\r\
+      \n}\r\n```\r\n\r\nIf nothing is returned, the `usb-storage` kernel module is not available on the\
+      \ system and no further audit steps are required.\r\n\r\n**Note:** Some systems may include the\
+      \ `usb-storage` filesystem as part of the kernel opposed to being available as a kernel module.\
+      \ In this case, the above audit will not return anything. This is also considered a passing state.\r\
+      \n\r\n**If anything is returned by the above script:**\r\n\r\n2. Verify the `usb-storage` kernel\
+      \ module is not loaded and not loadable by performing the following:\r\n\r\nRun the following command\
+      \ to verify the `usb-storage` kernel module is not loaded:\r\n\r\n```\r\n# lsmod | grep -P -- 'usb(_|-)storage'\r\
+      \n```\r\n\r\nNothing should be returned\r\n\r\nRun the following command to verify the `usb-storage`\
+      \ kernel module is not loadable:\r\n\r\n```\r\n# modprobe --showconfig | grep -P -- '\\b(install|blacklist)\\\
+      h+usb_storage\\b'\r\n```\r\n\r\nVerify the output includes:\r\n\r\n```\r\nblacklist usb_storage\r\
+      \n -AND-\r\ninstall usb_storage /bin/false\r\n -OR-\r\ninstall usb_storage /bin/true\r\n```\r\n\r\
+      \n_Example output:_\r\n\r\n```\r\nblacklist usb_storage\r\ninstall usb_storage /bin/false\r\n```"
+    remediation_guidance: "Unload and disable the `usb-storage` kernel module.\r\n\r\n1. Run the following\
+      \ commands to unload the `usb-storage` kernel module:\r\n\r\n```\r\n# modprobe -r usb-storage 2>/dev/null\r\
+      \n# rmmod usb-storage 2>/dev/null\r\n```\r\n\r\n2. Perform the following to disable the `usb-storage`\
+      \ kernel module:\r\n\r\nCreate a file ending in `.conf` with `install usb_storage /bin/false` in\
+      \ the `/etc/modprobe.d/` directory\r\n\r\n_Example:_\r\n\r\n```\r\n# printf '%s\\n' \"\" \"install\
+      \ usb_storage /bin/false\" >> /etc/modprobe.d/60-usb-storage.conf\r\n```\r\n\r\nCreate a file ending\
+      \ in `.conf` with `blacklist usb_storage` in the `/etc/modprobe.d/` directory\r\n\r\n_Example:_\r\
+      \n\r\n```\r\n# printf '%s\\n' \"\" \"blacklist usb_storage\" >> /etc/modprobe.d/60-usb-storage.conf\r\
+      \n```"
+    additional_information: "An alternative solution to disabling the usb-storage module may be found\
+      \ in USBGuard.\r\n\r\nUse of USBGuard and construction of USB device policies should be done in\
+      \ alignment with site policy."
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

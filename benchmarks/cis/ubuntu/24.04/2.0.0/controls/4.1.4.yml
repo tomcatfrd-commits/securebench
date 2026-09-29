@@ -1,0 +1,63 @@
+control:
+  id: CIS-4.1.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure ufw outgoing default is configured
+  description: The default policy for outgoing traffic determines if applications and services running
+    on your server can initiate connections to external networks without requiring specific `UFW` rules.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.4_1_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.4_1_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.4_1_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.4_1_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 4.1.4
+      url: https://workbench.cisecurity.org/sections/4177247/recommendations/7047516
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '4.4'
+      - '4.5'
+      cis_v7:
+      - '9.4'
+      mitre_techniques:
+      - T1562
+      - T1562.004
+      mitre_tactics:
+      - TA0011
+      mitre_mitigations:
+      - M1031
+      - M1037
+    parent: CIS _4_Host Based Firewall Main | 2.1.1.4-Ensure ufw outgoing default is configured
+    rationale: With a default deny outgoing policy the firewall will deny **ALL** outgoing traffic and
+      is a highly restrictive policy that requires the addition of specific allow rules.
+    impact: "Any port and protocol not explicitly allowed will be blocked. The following rules are an\
+      \ example of some outgoing allow rules that should be considered before applying this default deny.\
+      \ \r\n\r\n```\r\nufw allow out http\r\nufw allow out https\r\nufw allow out ntp # Network Time Protocol\r\
+      \nufw allow out to any port 53 # DNS\r\nufw allow out to any port 853 # DNS over TLS\r\nufw logging\
+      \ on\r\n```"
+    audit_guidance: "Run the following command and verify that the default policy for `outgoing` is `deny`\
+      \ or `reject`:\r\n\r\n```\r\n# ufw status verbose | awk -F',' '$1~/Default/ {print $2}'\r\n```\r\
+      \n\r\n_Example output:_\r\n\r\n```\r\n deny (outgoing)\r\n```"
+    remediation_guidance: "Run the following command to set the default for `outgoing` to `deny`:\r\n\r\
+      \n```\r\n# ufw default deny outgoing\r\n```\r\n\r\n**Warning:** Any port or protocol without a explicit\
+      \ allow before the default deny will be blocked."
+    additional_information: ''
+    default_value: allow (outgoing)
+    artifacts_count: 5
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

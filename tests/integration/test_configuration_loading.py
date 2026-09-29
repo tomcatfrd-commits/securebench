@@ -41,7 +41,7 @@ def test_real_cis_benchmark_loads(
     assert benchmark.name == "CIS Ubuntu Linux 24.04 LTS Benchmark"
     assert benchmark.version == "2.0.0"
     assert benchmark.platform == "ubuntu-24.04"
-    assert benchmark.control_count >= 1
+    assert benchmark.control_count == 332
 
 
 def test_real_cis_benchmark_contains_cramfs_control(

@@ -1,0 +1,57 @@
+control:
+  id: CIS-5.3.1.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure latest version of pam is installed
+  description: "Linux Pluggable Authentication Modules (PAM) is a suite of libraries that allow a Linux\
+    \ system administrator to configure methods to authenticate users. It provides a flexible and centralized\
+    \ way to switch authentication methods for secured applications by using configuration files instead\
+    \ of changing application code\r\n\r\nThe `libpam-runtime` provides the runtime support for the PAM\
+    \ library"
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_1_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_1_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_1_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_1_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.1.1
+      url: https://workbench.cisecurity.org/sections/4177274/recommendations/7047669
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '0'
+      cis_v7:
+      - '0'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.1.1-Ensure latest version of pam is installed
+    rationale: "Older versions of the `libpam-runtime` package may not include the latest security and\
+      \ feature patches and updates.\r\n\r\n**Note:** This Benchmark includes Recommendations that depend\
+      \ on newer `libpam-runtime` features."
+    impact: ''
+    audit_guidance: "Run the following command to verify `libpam-runtime` is installed:\r\n\r\n```\r\n\
+      # dpkg-query -s libpam-runtime &>/dev/null && echo \"libpam-runtime is installed\"\r\n\r\nlibpam-runtime\
+      \ is installed\r\n```\r\n\r\nRun the following command to verify `libpam-runtime` is the latest\
+      \ version:\r\n\r\n```\r\n# apt list --upgradable 2>&1 | grep -P '^libpam-runtime\\b'\r\n```\r\n\r\
+      \nNothing should be returned"
+    remediation_guidance: "Run the following command to install the latest version of `libpam-runtime`:\r\
+      \n\r\n```\r\n# apt install libpam-runtime\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

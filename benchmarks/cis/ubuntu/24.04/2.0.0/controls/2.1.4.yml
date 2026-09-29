@@ -1,0 +1,76 @@
+control:
+  id: CIS-2.1.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure only approved services are listening on a network interface
+  description: "A network port is identified by its number, the associated IP address, and the type of\
+    \ the communication protocol such as TCP or UDP.\r\n\r\nA listening port is a network port on which\
+    \ an application or process listens on, acting as a communication endpoint.\r\n\r\nEach listening\
+    \ port can be open or closed (filtered) using a firewall. In general terms, an open port is a network\
+    \ port that accepts incoming packets from remote locations."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_1_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_1_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_1_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_1_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.1.4
+      url: https://workbench.cisecurity.org/sections/4177245/recommendations/7047504
+    assessment_status: manual
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-7
+      cis_v8:
+      - '4.8'
+      cis_v7:
+      - '9.2'
+      mitre_techniques:
+      - T1203
+      - T1203.000
+      - T1210
+      - T1210.000
+      - T1543
+      - T1543.002
+      mitre_tactics:
+      - TA0008
+      mitre_mitigations:
+      - M1042
+    parent: CIS _2_Configure Server Services Main | 2.1.4-Ensure only approved services are listening
+      on a network interface
+    rationale: Services listening on the system pose a potential risk as an attack vector.  These services
+      should be reviewed, and if not required, the service should be stopped, and the package containing
+      the service should be removed.  If required packages have a dependency, the service should be stopped
+      and masked to reduce the attack surface of the system.
+    impact: "There may be packages that are dependent on the service's package.  If the service's package\
+      \ is removed, these dependent packages will be removed as well. Before removing the service's package,\
+      \ review any dependent packages to determine if they are required on the system.\r\n\r\n**- IF -**\
+      \ a dependent package is required: stop and mask the ` .socket` and ` .service`  leaving the service's\
+      \ package installed."
+    audit_guidance: "Run the following command:\r\n\r\n```\r\n# ss -plntu\r\n```\r\n\r\nReview the output\
+      \ to ensure:\r\n- All services listed are required on the system and approved by local site policy.\
+      \ \r\n- Both the port and interface the service is listening on are approved by local site policy.\r\
+      \n- If a listed service is not required:\r\n  - Remove the package containing the service\r\n  -\
+      \ **- IF -** the service's package is required for a dependency, stop and mask the service and/or\
+      \ socket"
+    remediation_guidance: "Run the following commands to stop the service and remove the package containing\
+      \ the service:\r\n\r\n```\r\n# systemctl stop .socket .service\r\n# apt purge ```\r\n\r\n**- OR\
+      \ -** If required packages have a dependency:\r\n\r\nRun the following commands to stop and mask\
+      \ the service and socket:\r\n\r\n```\r\n# systemctl stop .socket .service\r\n# systemctl mask .socket\
+      \ .service\r\n```\r\n\r\n**Note:** replace ` ` with the appropriate service name."
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 0
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

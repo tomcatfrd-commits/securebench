@@ -1,0 +1,74 @@
+control:
+  id: CIS-5.3.3.4.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure pam_unix does not include nullok
+  description: The `nullok` argument overrides the default action of `pam_unix.so` to not permit the user
+    access to a service if their official password is blank.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_3_4_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_3_4_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_3_4_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_3_4_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.3.4.1
+      url: https://workbench.cisecurity.org/sections/4177293/recommendations/7047775
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques:
+      - T1003
+      - T1003.008
+      - T1110
+      - T1110.002
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1041
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.4.5.1-Ensure pam_unix does not include
+      nullok
+    rationale: Using a strong password is essential to helping protect personal and sensitive information
+      from unauthorized access
+    impact: ''
+    audit_guidance: "Run the following command to verify that the nullok argument is not set on the pam_unix.so\
+      \ module:\r\n\r\n```\r\n# grep -PHs -- '^\\h*[^#\\n\\r]+\\h+pam_unix\\.so\\h+([^#\\n\\r]+\\h+)?nullok\\\
+      b' /etc/pam.d/common-{password,auth,account,session,session-noninteractive}\r\n```\r\n\r\nNothing\
+      \ should be returned"
+    remediation_guidance: "Run the following command:\r\n\r\n```\r\n# grep -PH -- '^\\h*([^#\\n\\r]+\\\
+      h+)?pam_unix\\.so\\h+([^#\\n\\r]+\\h+)?nullok\\b' /usr/share/pam-configs/*\r\n```\r\n\r\nEdit any\
+      \ files returned and remove the `nullok` argument for the `pam_unix` lines\r\n\r\n_Example File:_\r\
+      \n\r\n```\r\nName: Unix authentication\r\nDefault: yes\r\nPriority: 256\r\nAuth-Type: Primary\r\n\
+      Auth:\r\n        [success=end default=ignore]    pam_unix.so try_first_pass # <- **ensure line does\
+      \ not include nullok nullok**\r\nAuth-Initial:\r\n        [success=end default=ignore]    pam_unix.so\
+      \ # <- **ensure line does not include nullok nullok**\r\nAccount-Type: Primary\r\nAccount:\r\n \
+      \       [success=end new_authtok_reqd=done default=ignore]      pam_unix.so\r\nAccount-Initial:\r\
+      \n        [success=end new_authtok_reqd=done default=ignore]      pam_unix.so\r\nSession-Type: Additional\r\
+      \nSession:\r\n        required        pam_unix.so\r\nSession-Initial:\r\n        required      \
+      \  pam_unix.so\r\nPassword-Type: Primary\r\nPassword:\r\n        [success=end default=ignore]  \
+      \  pam_unix.so obscure use_authtok try_first_pass yescrypt\r\nPassword-Initial:\r\n        [success=end\
+      \ default=ignore]    pam_unix.so obscure yescrypt\r\n```\r\n\r\nRun the following command to update\
+      \ the files in the `/etc/pam.d/` directory:\r\n\r\n```\r\n# pam-auth-update --enable ```\r\n\r\n\
+      _Example:_\r\n\r\n```\r\n# pam-auth-update --enable unix\r\n```\r\n\r\n**Note:** If custom files\
+      \ are being used, the corresponding files in `/etc/pam.d/` would need to be edited directly, and\
+      \ the `pam-auth-update --enable ` command skipped"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

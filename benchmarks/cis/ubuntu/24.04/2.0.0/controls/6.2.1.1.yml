@@ -1,0 +1,61 @@
+control:
+  id: CIS-6.2.1.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure auditd packages are installed
+  description: auditd is the userspace component to the Linux Auditing System. It's responsible for writing
+    audit records to the disk
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_2_1_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_2_1_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_2_1_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_2_1_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.2.1.1
+      url: https://workbench.cisecurity.org/sections/4177262/recommendations/7047595
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - AU-12
+      - AU-2
+      - AU-3
+      - SI-5
+      cis_v8:
+      - '8.5'
+      cis_v7:
+      - '6.2'
+      mitre_techniques:
+      - T1562
+      - T1562.001
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1018
+    parent: CIS _6_System Auditing Main | 2.2.1.1-Ensure auditd packages are installed
+    rationale: The capturing of system events provides system administrators with information to allow
+      them to determine if unauthorized access to their system is occurring.
+    impact: ''
+    audit_guidance: "Run the following command and verify `auditd` is installed:\r\n\r\n```\r\n# dpkg-query\
+      \ -s auditd &>/dev/null && echo auditd is installed\r\n\r\nauditd is installed\r\n```\r\n\r\nRun\
+      \ the following command to verify `audispd-plugins` is installed:\r\n\r\n```\r\n# dpkg-query -s\
+      \ audispd-plugins &>/dev/null && echo audispd-plugins is installed\r\n\r\naudispd-plugins is installed\r\
+      \n```"
+    remediation_guidance: "Run the following command to Install `auditd` and `audispd-plugins`\r\n\r\n\
+      ```\r\n# apt install auditd audispd-plugins\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

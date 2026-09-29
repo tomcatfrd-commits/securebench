@@ -1,0 +1,80 @@
+control:
+  id: CIS-5.3.3.2.6
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure password dictionary check is enabled
+  description: The `pwquality` `dictcheck` option sets whether to check for the words from the `cracklib`
+    dictionary.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_3_2_6.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_3_2_6.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_3_2_6.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_3_2_6.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.3.2.6
+      url: https://workbench.cisecurity.org/sections/4177285/recommendations/7047752
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - IA-5
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques:
+      - T1110
+      - T1110.001
+      - T1110.002
+      - T1110.003
+      - T1178.001
+      - T1178.002
+      - T1178.003
+      - T1178.004
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1027
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.4.2.6-Ensure password dictionary check
+      is enabled
+    rationale: If the operating system allows the user to select passwords based on dictionary words,
+      this increases the chances of password compromise by increasing the opportunity for successful guesses,
+      and brute-force attacks.
+    impact: ''
+    audit_guidance: "Run the following command to verify that the `dictcheck` option is not set to `0`\
+      \ (disabled) in a pwquality configuration file:\r\n\r\n```\r\n# grep -Psi -- '^\\h*dictcheck\\h*=\\\
+      h*0\\b' /etc/security/pwquality.conf /etc/security/pwquality.conf.d/*.conf\r\n```\r\n\r\nNothing\
+      \ should be returned\r\n\r\nRun the following command to verify that the `dictcheck` option is not\
+      \ set to `0` (disabled) as a module argument in a PAM file:\r\n\r\n```\r\n# grep -Psi -- '^\\h*password\\\
+      h+(requisite|required|sufficient)\\h+pam_pwquality\\.so\\h+([^#\\n\\r]+\\h+)?dictcheck\\h*=\\h*0\\\
+      b' /etc/pam.d/common-password\r\n```\r\n\r\nNothing should be returned\r\n\r\n**Note:** \r\n- Settings\
+      \ observe an order of precedence:\r\n  - module arguments override the settings in the `/etc/security/pwquality.conf`\
+      \ configuration file\r\n  - settings in the `/etc/security/pwquality.conf` configuration file override\
+      \ settings in a `.conf` file in the `/etc/security/pwquality.conf.d/` directory\r\n  - settings\
+      \ in a `.conf` file in the `/etc/security/pwquality.conf.d/` directory are read in canonical order,\
+      \ with last read file containing the setting taking precedence\r\n- It is recommended that settings\
+      \ be configured in a `.conf` file in the `/etc/security/pwquality.conf.d/` directory for clarity,\
+      \ convenience, and durability."
+    remediation_guidance: "Edit any file ending in `.conf` in the `/etc/security/pwquality.conf.d/` directory\
+      \ and/or the file `/etc/security/pwquality.conf` and comment out or remove any instance of `dictcheck\
+      \ = 0`: \r\n\r\n_Example:_\r\n\r\n```\r\n# sed -ri 's/^\\s*dictcheck\\s*=/# &/' /etc/security/pwquality.conf\
+      \ /etc/security/pwquality.conf.d/*.conf\r\n```\r\n\r\nRun the following command:\r\n\r\n```\r\n\
+      # grep -Pl -- '\\bpam_pwquality\\.so\\h+([^#\\n\\r]+\\h+)?dictcheck\\b' /usr/share/pam-configs/*\r\
+      \n```\r\n\r\nEdit any returned files and remove the `dictcheck` argument from the `pam_pwquality.so`\
+      \ line(s)"
+    additional_information: ''
+    default_value: dictcheck = 1
+    artifacts_count: 3
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

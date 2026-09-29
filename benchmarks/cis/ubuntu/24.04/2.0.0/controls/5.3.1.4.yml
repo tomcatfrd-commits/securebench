@@ -1,0 +1,54 @@
+control:
+  id: CIS-5.3.1.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure latest version of cracklib-runtime is installed
+  description: '`cracklib-runtime` provides runtime support for password checker library cracklib2.'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_1_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_1_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_1_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_1_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.1.4
+      url: https://workbench.cisecurity.org/sections/4177274/recommendations/7047681
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '5.2'
+      cis_v7:
+      - '4.4'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.1.4-Ensure latest version of cracklib-runtime
+      is installed
+    rationale: "Strong passwords reduce the risk of systems being hacked through brute force methods.\r\
+      \n\r\nOlder versions of the `libpam-pwquality` package may not include the latest security and feature\
+      \ patches and updates."
+    impact: ''
+    audit_guidance: "Run the following command to verify `cracklib-runtime` is installed:\r\n\r\n```\r\
+      \n# dpkg-query -s cracklib-runtime&>/dev/null && echo \"cracklib-runtime is installed\"\r\n\r\n\
+      cracklib-runtime is installed\r\n```\r\n\r\nRun the following command to verify `cracklib-runtime`\
+      \ is the latest version:\r\n\r\n```\r\n# apt list --upgradable 2>&1 | grep -P '^cracklib-runtime\\\
+      b'\r\n```\r\n\r\nNothing should be returned"
+    remediation_guidance: "Run the following command to install the latest version of `cracklib-runtime`:\r\
+      \n\r\n```\r\n# apt install cracklib-runtime\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

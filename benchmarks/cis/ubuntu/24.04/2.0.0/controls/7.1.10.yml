@@ -1,0 +1,69 @@
+control:
+  id: CIS-7.1.10
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to /etc/security/opasswd is configured
+  description: '`/etc/security/opasswd` and it''s backup `/etc/security/opasswd.old` hold user''s previous
+    passwords if `pam_unix` or `pam_pwhistory` is in use on the system'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.7_1_10.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.7_1_10.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.7_1_10.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.7_1_10.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 7.1.10
+      url: https://workbench.cisecurity.org/sections/4177241/recommendations/7047560
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      - MP-2
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1003
+      - T1003.008
+      - T1222
+      - T1222.002
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1022
+    parent: CIS _7_System File Permissions Main | 2.1.10-Ensure access to /etc/security/opasswd is configured
+    rationale: It is critical to ensure that `/etc/security/opasswd` is protected from unauthorized access.
+      Although it is protected by default, the file permissions could be changed either inadvertently
+      or through malicious actions.
+    impact: ''
+    audit_guidance: "Run the following commands to verify `/etc/security/opasswd` and `/etc/security/opasswd.old`\
+      \ are mode 600 or more restrictive, `Uid` is `0/root` and `Gid` is `0/root` if they exist:\r\n\r\
+      \n```\r\n#  [ -e \"/etc/security/opasswd\" ] && stat -Lc '%n Access: (%#a/%A)  Uid: ( %u/ %U) Gid:\
+      \ ( %g/ %G)' /etc/security/opasswd\r\n\r\n/etc/security/opasswd Access: (0600/-rw-------)  Uid:\
+      \ ( 0/ root) Gid: ( 0/ root)\r\n -OR-\r\nNothing is returned\r\n```\r\n\r\n```\r\n#  [ -e \"/etc/security/opasswd.old\"\
+      \ ] && stat -Lc '%n Access: (%#a/%A)  Uid: ( %u/ %U) Gid: ( %g/ %G)' /etc/security/opasswd.old\r\
+      \n\r\n/etc/security/opasswd.old Access: (0600/-rw-------)  Uid: ( 0/ root) Gid: ( 0/ root)\r\n -OR-\r\
+      \nNothing is returned\r\n```"
+    remediation_guidance: "Run the following commands to remove excess permissions, set owner, and set\
+      \ group on `/etc/security/opasswd` and `/etc/security/opasswd.old` is they exist:\r\n\r\n```\r\n\
+      # [ -e \"/etc/security/opasswd\" ] && chmod u-x,go-rwx /etc/security/opasswd\r\n# [ -e \"/etc/security/opasswd\"\
+      \ ] && chown root:root /etc/security/opasswd\r\n# [ -e \"/etc/security/opasswd.old\" ] && chmod\
+      \ u-x,go-rwx /etc/security/opasswd.old\r\n# [ -e \"/etc/security/opasswd.old\" ] && chown root:root\
+      \ /etc/security/opasswd.old\r\n```"
+    additional_information: ''
+    default_value: '/etc/security/opasswd Access: (0600/-rw-------)  Uid: ( 0/ root) Gid: ( 0/ root)'
+    artifacts_count: 6
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,63 @@
+control:
+  id: CIS-2.4.1.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure cron daemon is enabled and active
+  description: The `cron` daemon is used to execute batch jobs on the system.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.2_4_1_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.2_4_1_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.2_4_1_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.2_4_1_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 2.4.1.1
+      url: https://workbench.cisecurity.org/sections/4177287/recommendations/7047719
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-1
+      - CM-2
+      - CM-6
+      - CM-7
+      - IA-5
+      cis_v8:
+      - '0'
+      cis_v7:
+      - '0'
+      mitre_techniques:
+      - T1562
+      - T1562.001
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1018
+    parent: CIS _2_Configure cron Main | 1.1.2.1-Ensure cron daemon is enabled and active
+    rationale: While there may not be user jobs that need to be run on the system, the system does have
+      maintenance jobs that may include security monitoring that have to run, and `cron` is used to execute
+      them.
+    impact: ''
+    audit_guidance: "**- IF -** cron is installed on the system:\r\n\r\nRun the following command to verify\
+      \ `cron` is enabled:\r\n\r\n```\r\n# systemctl list-unit-files | awk '$1~/^crond?\\.service/{print\
+      \ $2}'\r\n\r\nenabled\r\n```\r\n\r\nRun the following command to verify that `cron` is active:\r\
+      \n\r\n```\r\n# systemctl list-units | awk '$1~/^crond?\\.service/{print $3}'\r\n\r\nactive\r\n```"
+    remediation_guidance: "**- IF -** cron is installed on the system:\r\n\r\nRun the following commands\
+      \ to unmask, enable, and start `cron`:\r\n\r\n```\r\n# systemctl unmask \"$(systemctl list-unit-files\
+      \ | awk '$1~/^crond?\\.service/{print $1}')\"\r\n# systemctl --now enable \"$(systemctl list-unit-files\
+      \ | awk '$1~/^crond?\\.service/{print $1}')\"\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 6
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

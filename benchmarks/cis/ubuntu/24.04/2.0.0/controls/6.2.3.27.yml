@@ -1,0 +1,82 @@
+control:
+  id: CIS-6.2.3.27
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure successful and unsuccessful attempts to use the usermod command are collected
+  description: The operating system must generate audit records for successful/unsuccessful uses of the
+    `usermod` command.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_2_3_27.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_2_3_27.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_2_3_27.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_2_3_27.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.2.3.27
+      url: https://workbench.cisecurity.org/sections/4203192/recommendations/7091574
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - AU-12
+      - AU-2
+      - SI-5
+      cis_v8:
+      - '8.2'
+      cis_v7:
+      - '6.2'
+      mitre_techniques:
+      - T1562
+      - T1562.006
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1022
+    parent: CIS _6_System Auditing Main | 2.2.3.27-Ensure successful and unsuccessful attempts to use
+      the usermod command are collected
+    rationale: "The `usermod` command modifies the system account files to reflect the changes that are\
+      \ specified on the command line. Without generating audit records that are specific to the security\
+      \ and mission needs of the organization, it would be difficult to establish, correlate, and investigate\
+      \ the events relating to an incident or identify those responsible for one. \r\n\r\nAudit records\
+      \ can be generated from various components within the information system (e.g., module or policy\
+      \ filter)."
+    impact: ''
+    audit_guidance: "**On disk configuration**\r\n\r\nRun the following command to check the on disk rules:\r\
+      \n\r\n```\r\n# {\r\n UID_MIN=$(awk '/^\\s*UID_MIN/{print $2}' /etc/login.defs)\r\n [ -n \"${UID_MIN}\"\
+      \ ] && awk \"/^ *-a *always,exit/ \\\r\n &&(/ -F *auid!=unset/||/ -F *auid!=-1/||/ -F *auid!=4294967295/)\
+      \ \\\r\n &&/ -F *auid>=${UID_MIN}/ \\\r\n &&/ -F *perm=x/ \\\r\n &&/ -F *path=\\/usr\\/sbin\\/usermod/\
+      \ \\\r\n &&(/ key= *[!-~]* *$/||/ -k *[!-~]* *$/)\" /etc/audit/rules.d/*.rules \\\r\n || printf\
+      \ \"ERROR: Variable 'UID_MIN' is unset.\\n\"\r\n}\r\n```\r\n\r\nVerify the output matches:\r\n\r\
+      \n```\r\n-a always,exit -F path=/usr/sbin/usermod -F perm=x -F auid>=1000 -F auid!=unset -k usermod\r\
+      \n```\r\n\r\n**Running configuration**\r\n\r\nRun the following command to check loaded rules:\r\
+      \n\r\n```\r\n# {\r\n UID_MIN=$(awk '/^\\s*UID_MIN/{print $2}' /etc/login.defs)\r\n [ -n \"${UID_MIN}\"\
+      \ ] && auditctl -l | awk \"/^ *-a *always,exit/ \\\r\n &&(/ -F *auid!=unset/||/ -F *auid!=-1/||/\
+      \ -F *auid!=4294967295/) \\\r\n &&/ -F *auid>=${UID_MIN}/ \\\r\n &&/ -F *perm=x/ \\\r\n &&/ -F *path=\\\
+      /usr\\/sbin\\/usermod/ \\\r\n &&(/ key= *[!-~]* *$/||/ -k *[!-~]* *$/)\" \\\r\n || printf \"ERROR:\
+      \ Variable 'UID_MIN' is unset.\\n\"\r\n}\r\n```\r\n\r\nVerify the output matches:\r\n\r\n```\r\n\
+      -a always,exit -S all -F path=/usr/sbin/usermod -F perm=x -F auid>=1000 -F auid!=-1 -F key=usermod\r\
+      \n```"
+    remediation_guidance: "**Create audit rules**\r\n\r\nEdit or create a file in the `/etc/audit/rules.d/`\
+      \ directory, ending in `.rules` extension, with the relevant rules to monitor successful and unsuccessful\
+      \ attempts to use the `usermod` command.\r\n\r\n_Example:_\r\n\r\n```\r\n# {\r\n UID_MIN=$(awk '/^\\\
+      s*UID_MIN/{print $2}' /etc/login.defs)\r\n [ -n \"${UID_MIN}\" ] && printf \"\r\n-a always,exit\
+      \ -F path=/usr/sbin/usermod -F perm=x -F auid>=${UID_MIN} -F auid!=unset -k usermod\r\n\" >> /etc/audit/rules.d/50-usermod.rules\
+      \ || printf \"ERROR: Variable 'UID_MIN' is unset.\\n\"\r\n}\r\n```\r\n\r\n**Load audit rules**\r\
+      \n\r\nMerge and load the rules into active configuration:\r\n\r\n```\r\n# augenrules --load\r\n\
+      ```\r\n\r\nCheck if reboot is required.\r\n\r\n```\r\n# if [[ $(auditctl -s | grep \"enabled\")\
+      \ =~ \"2\" ]]; then printf \"Reboot required to load rules\\n\"; fi\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -4,10 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from securebench.core.control import SafetyClassification
+from securebench.core.control import RollbackCapability, SafetyClassification
 from securebench.core.loader import ConfigurationLoader
 from securebench.core.profile import Profile
-
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 BENCHMARK_PATH = (
@@ -33,15 +32,16 @@ def test_production_safe_profile_loads(loader: ConfigurationLoader) -> None:
     assert profile.profile_id == "production-safe"
 
 
-def test_production_safe_profile_requires_investigation_by_default(
+def test_production_safe_profile_requires_approval_by_default(
     loader: ConfigurationLoader,
 ) -> None:
     profile = loader.load_profile(PROFILE_PATH)
 
     rule = profile.rule_for("CONTROL-NOT-EXPLICITLY-ENABLED")
 
-    assert rule.classification is SafetyClassification.INVESTIGATE
+    assert rule.classification is SafetyClassification.APPROVAL_REQUIRED
     assert rule.enabled is False
+    assert rule.require_approval is True
 
 
 def test_production_safe_profile_explicitly_allows_only_known_control(
@@ -82,7 +82,34 @@ def test_benchmark_loads_successfully(loader: ConfigurationLoader) -> None:
 
     assert benchmark.benchmark_id == "cis-ubuntu-24.04"
     assert benchmark.platform == "ubuntu-24.04"
-    assert benchmark.control_count >= 1
+    assert benchmark.control_count == 332
+
+
+def test_only_reviewed_control_claims_rollback_support(
+    loader: ConfigurationLoader,
+) -> None:
+    benchmark = loader.load_benchmark(BENCHMARK_PATH)
+
+    supported = [
+        control.control_id
+        for control in benchmark.controls
+        if control.rollback_capability is not RollbackCapability.UNSUPPORTED
+    ]
+
+    assert supported == ["CIS-1.1.1.1"]
+
+
+def test_imported_guidance_controls_fail_closed(
+    loader: ConfigurationLoader,
+) -> None:
+    benchmark = loader.load_benchmark(BENCHMARK_PATH)
+
+    for control in benchmark.controls:
+        assert control.metadata["source"]["benchmark_version"] == "v2.0.0"
+        if control.control_id != "CIS-1.1.1.1":
+            assert control.rollback_capability is RollbackCapability.UNSUPPORTED
+            assert control.safety_metadata["default"] == "investigate"
+            assert control.safety_metadata["implementation_status"] == "guidance_only"
 
 
 def test_production_safe_control_belongs_to_expected_benchmark(

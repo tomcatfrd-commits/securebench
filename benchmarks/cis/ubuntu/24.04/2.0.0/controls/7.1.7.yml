@@ -1,0 +1,66 @@
+control:
+  id: CIS-7.1.7
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure access to /etc/gshadow is configured
+  description: The `/etc/gshadow` file is used to store the information about groups that is critical
+    to the security of those accounts, such as the hashed password and other security information.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.7_1_7.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.7_1_7.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.7_1_7.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.7_1_7.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 7.1.7
+      url: https://workbench.cisecurity.org/sections/4177241/recommendations/7047535
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - AC-3
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1003
+      - T1003.008
+      - T1222
+      - T1222.002
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1022
+    parent: CIS _7_System File Permissions Main | 2.1.7-Ensure access to /etc/gshadow is configured
+    rationale: If attackers can gain read access to the `/etc/gshadow` file, they can easily run a password
+      cracking program against the hashed password to break it. Other security information that is stored
+      in the `/etc/gshadow` file (such as group administrators) could also be useful to subvert the group.
+    impact: ''
+    audit_guidance: "Run the following command to verify `/etc/gshadow` is mode 640 or more restrictive,\
+      \ `Uid` is `0/root` and `Gid` is `0/root` or `{GID}/shadow`:\r\n\r\n```\r\n# stat -Lc 'Access: (%#a/%A)\
+      \  Uid: ( %u/ %U) Gid: ( %g/ %G)'  /etc/gshadow\r\n```\r\n\r\n_Example:_\r\n```\r\nAccess: (0640/-rw-r-----)\
+      \  Uid: ( 0/ root) Gid: ( 42/ shadow)\r\n```\r\n\r\n**Note:** `/etc/gshadow` may not exist by default.\
+      \ Security best practice recommends creating `/etc/gshadow` to ensure hashed group passwords are\
+      \ not stored in `/etc/group`"
+    remediation_guidance: "**- IF -** `/etc/gshadow` does not exist run the following command to convert\
+      \ group entries and create `/etc/gshadow` if needed:\r\n```\r\n# grpconv\r\n```\r\n\r\nRun **one**\
+      \ of the following commands to set ownership of `/etc/gshadow` to `root` and group to either `root`\
+      \ or `shadow`:\r\n```\r\n# chown root:shadow /etc/gshadow\r\n  -OR-\r\n# chown root:root /etc/gshadow\r\
+      \n```\r\n\r\nRun the following command to remove excess permissions form `/etc/gshadow`:\r\n```\r\
+      \n# chmod u-x,g-wx,o-rwx /etc/gshadow\r\n```"
+    additional_information: ''
+    default_value: 'Access: (0640/-rw-r-----)  Uid: ( 0/ root) Gid: ( 42/ shadow)'
+    artifacts_count: 4
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,70 @@
+control:
+  id: CIS-5.3.3.3.3
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure pam_pwhistory includes use_authtok
+  description: '`use_authtok` - When password changing enforce the module to set the new password to the
+    one provided by a previously stacked password module'
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_3_3_3_3.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_3_3_3_3.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_3_3_3_3.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_3_3_3_3.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.3.3.3.3
+      url: https://workbench.cisecurity.org/sections/4177291/recommendations/7047773
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - IA-5
+      cis_v8:
+      - '3.11'
+      cis_v7:
+      - '16.4'
+      mitre_techniques:
+      - T1003
+      - T1003.008
+      - T1110
+      - T1110.002
+      mitre_tactics:
+      - TA0006
+      mitre_mitigations:
+      - M1041
+    parent: CIS _5_Pluggable Authentication Modules Main | 2.1.4.3.3-Ensure pam_pwhistory includes use_authtok
+    rationale: '`use_authtok` allows multiple pam modules to confirm a new password before it is accepted.'
+    impact: ''
+    audit_guidance: "Run the following command to verify that the `use_authtok` argument exists on the\
+      \ `pwhistory` line in `/etc/pam.d/common-password`:\r\n\r\n```\r\n# grep -Psi -- '^\\h*password\\\
+      h+[^#\\n\\r]+\\h+pam_pwhistory\\.so\\h+([^#\\n\\r]+\\h+)?use_authtok\\b' /etc/pam.d/common-password\r\
+      \n```\r\n\r\nOutput should be similar to:\r\n\r\n```\r\npassword   requisite   pam_pwhistory.so\
+      \ remember=24 enforce_for_root use_authtok\r\n```\r\n\r\n**- OR/IF -** `pwhistory.conf` exists:\r\
+      \n\r\nRun the following command to verify that the `use_authtok` option is enabled in `/etc/security/pwhistory.conf`:\r\
+      \n```\r\n# grep -Pi -- '^\\h*use_authtok\\b' /etc/security/pwhistory.conf\r\n\r\nuse_authtok\r\n\
+      ```"
+    remediation_guidance: "Run the following command:\r\n\r\n```\r\n# awk '/Password-Type:/{ f = 1;next\
+      \ } /-Type:/{ f = 0 } f {if (/pam_pwhistory\\.so/) print FILENAME}' /usr/share/pam-configs/*\r\n\
+      ```\r\n\r\nEdit any returned files and add the `use_authtok` argument to the `pam_pwhistory` line\
+      \ in the `Password` section:\r\n\r\n_Example File:_\r\n\r\n```\r\nName: pwhistory password history\
+      \ checking\r\nDefault: yes\r\nPriority: 1024\r\nPassword-Type: Primary\r\nPassword:\r\n   requisite\
+      \   pam_pwhistory.so remember=24 enforce_for_root use_authtok # <- **ensure line includes use_authtok**\r\
+      \n```\r\n\r\nRun the following command to update the files in the `/etc/pam.d/` directory:\r\n\r\
+      \n```\r\n# pam-auth-update --enable ```\r\n\r\n_Example:_\r\n\r\n```\r\n# pam-auth-update --enable\
+      \ pwhistory\r\n```\r\n\r\n**- OR/IF -** `pwhistory.conf` exists:\r\n\r\nEdit or add the following\
+      \ line in `/etc/security/pwhistory.conf`:\r\n```\r\nuse_authtok\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,106 @@
+control:
+  id: CIS-6.2.3.28
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure kernel module loading unloading and modification is collected
+  description: "Monitor the loading and unloading of kernel modules. All the loading / listing / dependency\
+    \ checking of modules is done by `kmod` via symbolic links.\r\n\r\nThe following system calls control\
+    \ loading and unloading of modules:\r\n- `init_module` - load a module\r\n- `finit_module` - load\
+    \ a module (used when the overhead of using cryptographically signed modules to determine the authenticity\
+    \ of a module can be avoided)\r\n- `delete_module` - delete a module\r\n- `create_module` - create\
+    \ a loadable module entry\r\n- `query_module` - query the kernel for various bits pertaining to modules\r\
+    \n\r\nAny execution of the loading and unloading module programs and system calls will trigger an\
+    \ audit record with an identifier of `modules`."
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_2_3_28.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_2_3_28.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_2_3_28.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_2_3_28.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.2.3.28
+      url: https://workbench.cisecurity.org/sections/4203192/recommendations/7091575
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - AU-3
+      - CM-6
+      cis_v8:
+      - '8.5'
+      cis_v7:
+      - '6.2'
+      mitre_techniques:
+      - T1562
+      - T1562.006
+      mitre_tactics:
+      - TA0004
+      mitre_mitigations:
+      - M1047
+    parent: CIS _6_System Auditing Main | 2.2.3.28-Ensure kernel module loading unloading and modification
+      is collected
+    rationale: Monitoring the use of all the various ways to manipulate kernel modules could provide system
+      administrators with evidence that an unauthorized change was made to a kernel module, possibly compromising
+      the security of the system.
+    impact: ''
+    audit_guidance: "**On disk configuration**\r\n\r\nRun the following script to check the on disk rules:\r\
+      \n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n  awk '/^ *-a *always,exit/ \\\r\n  &&/ -F *arch=b(32|64)/\
+      \ \\\r\n  &&(/ -F auid!=unset/||/ -F auid!=-1/||/ -F auid!=4294967295/) \\\r\n  &&/ -S/ \\\r\n \
+      \ &&(/init_module/ \\\r\n    ||/finit_module/ \\\r\n    ||/delete_module/ \\\r\n    ||/create_module/\
+      \ \\\r\n    ||/query_module/) \\\r\n  &&(/ key= *[!-~]* *$/||/ -k *[!-~]* *$/)' /etc/audit/rules.d/*.rules\r\
+      \n\r\n  UID_MIN=$(awk '/^\\s*UID_MIN/{print $2}' /etc/login.defs)\r\n  [ -n \"${UID_MIN}\" ] &&\
+      \ awk \"/^ *-a *always,exit/ \\\r\n  &&(/ -F *auid!=unset/||/ -F *auid!=-1/||/ -F *auid!=4294967295/)\
+      \ \\\r\n  &&/ -F *auid>=${UID_MIN}/ \\\r\n  &&/ -F *perm=x/ \\\r\n  &&/ -F *path=\\/usr\\/bin\\\
+      /kmod/ \\\r\n  &&(/ key= *[!-~]* *$/||/ -k *[!-~]* *$/)\" /etc/audit/rules.d/*.rules \\\r\n  ||\
+      \ printf \"ERROR: Variable 'UID_MIN' is unset.\\n\"\r\n}\r\n```\r\n\r\nVerify the output matches:\r\
+      \n\r\n```\r\n-a always,exit -F arch=b32 -S init_module,finit_module,delete_module,create_module,query_module\
+      \ -F auid>=1000 -F auid!=unset -k kernel_modules\r\n-a always,exit -F arch=b64 -S init_module,finit_module,delete_module,create_module,query_module\
+      \ -F auid>=1000 -F auid!=unset -k kernel_modules\r\n-a always,exit -F path=/usr/bin/kmod -F perm=x\
+      \ -F auid>=1000 -F auid!=unset -k kernel_modules\r\n```\r\n\r\n**Running configuration**\r\n\r\n\
+      Run the following script to check loaded rules:\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n \
+      \ auditctl -l | awk '/^ *-a *always,exit/ \\\r\n  &&/ -F *arch=b(32|64)/ \\\r\n  &&(/ -F auid!=unset/||/\
+      \ -F auid!=-1/||/ -F auid!=4294967295/) \\\r\n  &&/ -S/ \\\r\n  &&(/init_module/ \\\r\n    ||/finit_module/\
+      \ \\\r\n    ||/delete_module/ \\\r\n    ||/create_module/ \\\r\n    ||/query_module/) \\\r\n  &&(/\
+      \ key= *[!-~]* *$/||/ -k *[!-~]* *$/)'\r\n\r\n  UID_MIN=$(awk '/^\\s*UID_MIN/{print $2}' /etc/login.defs)\r\
+      \n  [ -n \"${UID_MIN}\" ] && auditctl -l | awk \"/^ *-a *always,exit/ \\\r\n  &&(/ -F *auid!=unset/||/\
+      \ -F *auid!=-1/||/ -F *auid!=4294967295/) \\\r\n  &&/ -F *auid>=${UID_MIN}/ \\\r\n  &&/ -F *perm=x/\
+      \ \\\r\n  &&/ -F *path=\\/usr\\/bin\\/kmod/ \\\r\n  &&(/ key= *[!-~]* *$/||/ -k *[!-~]* *$/)\" \\\
+      \r\n  || printf \"ERROR: Variable 'UID_MIN' is unset.\\n\"\r\n}\r\n```\r\n\r\nVerify the output\
+      \ includes:\r\n\r\n```\r\n-a always,exit -F arch=b64 -S create_module,init_module,delete_module,query_module,finit_module\
+      \ -F auid>=1000 -F auid!=-1 -F key=kernel_modules\r\n-a always,exit -S all -F path=/usr/bin/kmod\
+      \ -F perm=x -F auid>=1000 -F auid!=-1 -F key=kernel_modules\r\n```\r\n\r\n**Symlink audit**\r\n\r\
+      \nRun the following script to audit if the symlinks `kmod` accepts are indeed pointing at it:\r\n\
+      \r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n   a_files=(\"/usr/sbin/lsmod\" \"/usr/sbin/rmmod\" \"\
+      /usr/sbin/insmod\" \"/usr/sbin/modinfo\" \"/usr/sbin/modprobe\" \"/usr/sbin/depmod\")\r\n   for\
+      \ l_file in \"${a_files[@]}\"; do\r\n      if [ \"$(readlink -f \"$l_file\")\" = \"$(readlink -f\
+      \ /bin/kmod)\" ]; then\r\n         printf \"OK: \\\"$l_file\\\"\\n\"\r\n      else\r\n         printf\
+      \ \"Issue with symlink for file: \\\"$l_file\\\"\\n\"\r\n      fi\r\n   done\r\n}\r\n```\r\n\r\n\
+      Verify the output states `OK`. If there is a symlink pointing to a different location it should\
+      \ be investigated"
+    remediation_guidance: "**Create audit rules**\r\n\r\nEdit or create a file in the `/etc/audit/rules.d/`\
+      \ directory, ending in `.rules` extension, with the relevant rules to monitor kernel module modification.\r\
+      \n\r\n_Example:_\r\n\r\n```\r\n#!/usr/bin/env bash\r\n\r\n{\r\n  UID_MIN=$(awk '/^\\s*UID_MIN/{print\
+      \ $2}' /etc/login.defs)\r\n  [ -n \"${UID_MIN}\" ] && printf \"\r\n  -a always,exit -F arch=b32\
+      \ -S init_module,finit_module,delete_module,create_module,query_module -F auid>=${UID_MIN} -F auid!=unset\
+      \ -k kernel_modules\r\n  -a always,exit -F arch=b64 -S init_module,finit_module,delete_module,create_module,query_module\
+      \ -F auid>=${UID_MIN} -F auid!=unset -k kernel_modules\r\n  -a always,exit -F path=/usr/bin/kmod\
+      \ -F perm=x -F auid>=${UID_MIN} -F auid!=unset -k kernel_modules\r\n  \" >> /etc/audit/rules.d/50-kernel_modules.rules\
+      \ || printf \"ERROR: Variable 'UID_MIN' is unset.\\n\"\r\n}\r\n```\r\n\r\n**Load audit rules**\r\
+      \n\r\nMerge and load the rules into active configuration:\r\n\r\n```\r\n# augenrules --load\r\n\
+      ```\r\n\r\nCheck if reboot is required.\r\n\r\n```\r\n# if [[ $(auditctl -s | grep \"enabled\")\
+      \ =~ \"2\" ]]; then printf \"Reboot required to load rules\\n\"; fi\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

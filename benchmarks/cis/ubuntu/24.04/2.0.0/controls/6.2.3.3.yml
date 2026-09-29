@@ -1,0 +1,75 @@
+control:
+  id: CIS-6.2.3.3
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure events that modify the sudo log file are collected
+  description: Monitor the `sudo` log file. If the system has been properly configured to disable the
+    use of the `su` command and force all administrators to have to log in first and then use `sudo` to
+    execute privileged commands, then all administrator commands will be logged to `/var/log/sudo.log`
+    . Any time a command is executed, an audit event will be triggered as the `/var/log/sudo.log` file
+    will be opened for write and the executed administration command will be written to the log.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_2_3_3.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_2_3_3.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_2_3_3.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_2_3_3.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.2.3.3
+      url: https://workbench.cisecurity.org/sections/4203192/recommendations/7091550
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '8.5'
+      cis_v7:
+      - '4.9'
+      mitre_techniques:
+      - T1562
+      - T1562.006
+      mitre_tactics:
+      - TA0004
+      mitre_mitigations: []
+    parent: CIS _6_System Auditing Main | 2.2.3.3-Ensure events that modify the sudo log file are collected
+    rationale: Changes in `/var/log/sudo.log` indicate that an administrator has executed a command or
+      the log file itself has been tampered with. Administrators will want to correlate the events written
+      to the audit trail with the records written to `/var/log/sudo.log` to verify if unauthorized commands
+      have been executed.
+    impact: ''
+    audit_guidance: "**Note:** This recommendation requires that the sudo logfile is configured.  See\
+      \ guidance provided in the recommendation \"Ensure sudo log file exists\"\r\n\r\n1. Run the following\
+      \ command to verify that sudo has a custom log file configured:\r\n```\r\n# grep -rPsi \"^\\h*Defaults\\\
+      h+([^#]+,\\h*)?logfile\\h*=\\h*(\\\"|\\')?\\H+(\\\"|\\')?(,\\h*\\H+\\h*)*\\h*(#.*)?$\" /etc/sudoers*\r\
+      \n```\r\n\r\n_Example output:_\r\n```\r\nDefaults logfile=\"/var/log/sudo.log\"\r\n```\r\n\r\n2.\
+      \ Run the following command to verify a rule exists in the running configuration:\r\n\r\n```\r\n\
+      # auditctl -l | grep -Ps -- 'sudo.log'\r\n```\r\n\r\nVerify the output includes:\r\n\r\n```\r\n\
+      -w /var/log/sudo.log -p wa -k sudo_log_file\r\n```\r\n\r\n3. Run the following command to verify\
+      \ a rule exists in a rules file:\r\n\r\n```\r\n# grep -Ps -- 'sudo.log' /etc/audit/rules.d/*.rules\r\
+      \n```\r\n\r\n_Example Output_\r\n```\r\n/etc/audit/rules.d/50-sudo.rules:-w /var/log/sudo.log -p\
+      \ wa -k sudo_log_file\r\n```"
+    remediation_guidance: "**Note:** This recommendation requires that the sudo logfile is configured.\
+      \  See guidance provided in the recommendation \"Ensure sudo log file exists\"\r\n\r\n1. Edit the\
+      \ file `/etc/sudoers` or a file in `/etc/sudoers.d/` with `visudo -f ` and add the following line:\r\
+      \n```\r\nDefaults logfile=\" \"\r\n```\r\n\r\n_Example:_\r\n```\r\nDefaults logfile=\"/var/log/sudo.log\"\
+      \r\n```\r\n\r\n2. Edit or create a file in the `/etc/audit/rules.d/` directory, ending in `.rules`\
+      \ extension, with the relevant rules to monitor events that modify the sudo log file.\r\n\r\n_Example:_\r\
+      \n\r\n```\r\n# printf \"\r\n-w /var/log/sudo.log -p wa -k sudo_log_file\r\n\" >> /etc/audit/rules.d/50-sudo.rules\r\
+      \n```\r\n\r\n\r\n3. Merge and load the rules into active configuration:\r\n\r\n```\r\n# augenrules\
+      \ --load\r\n```\r\n\r\nCheck if reboot is required.\r\n\r\n```\r\n# if [[ $(auditctl -s | grep \"\
+      enabled\") =~ \"2\" ]]; then printf \"Reboot required to load rules\\n\"; fi\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

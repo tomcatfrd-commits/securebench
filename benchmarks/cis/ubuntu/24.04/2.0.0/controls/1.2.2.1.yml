@@ -1,0 +1,83 @@
+control:
+  id: CIS-1.2.2.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure updates, patches, and additional security software are installed
+  description: Periodically patches are released for included software either due to security flaws or
+    to include additional functionality.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.1_2_2_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.1_2_2_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.1_2_2_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.1_2_2_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 1.2.2.1
+      url: https://workbench.cisecurity.org/sections/4177270/recommendations/7047666
+    assessment_status: manual
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - SI-2
+      cis_v8:
+      - '7.3'
+      - '7.4'
+      cis_v7:
+      - '3.4'
+      - '3.5'
+      mitre_techniques:
+      - T1195
+      - T1195.001
+      mitre_tactics:
+      - TA0005
+      mitre_mitigations:
+      - M1051
+    parent: CIS _1_Package Management Main | 2.3.1-Ensure updates, patches, and additional security software
+      are installed
+    rationale: Newer patches may contain security enhancements that would not be available through the
+      latest full update. As a result, it is recommended that the latest software patches be used to take
+      advantage of the latest functionality. As with any software installation, organizations need to
+      determine if a given update meets their requirements and verify the compatibility and supportability
+      of any additional software against the update revision that is selected.
+    impact: ''
+    audit_guidance: "Verify there are no updates or patches to install:\r\n\r\n```\r\n# apt update\r\n\
+      # apt -s upgrade\r\n```\r\n\r\nCheck to make sure no system reboot is required:\r\n\r\n```\r\n#\
+      \ if [ -f /var/run/reboot-required ]; then\r\n     cat /var/run/reboot-required\r\n  fi\r\n```"
+    remediation_guidance: "Run the following commands to update all packages following local site policy\
+      \ guidance on applying updates and patches:\r\n\r\nRun the following command to update the system\
+      \ with the available patches and updates:\r\n\r\n```\r\n# apt update\r\n```\r\n\r\nRun one of the\
+      \ following commands to apply the updates and patches:\r\n\r\n```\r\n# apt upgrade\r\n```\r\n  **-\
+      \ OR -**\r\n```\r\n# apt dist-upgrade\r\n```\r\n**Note:** When running the command `apt dist-upgrade`\
+      \ that apt has a \"smart\" conflict resolution system, and it will attempt to upgrade the most important\
+      \ packages at the expense of less important ones if necessary. So, `dist-upgrade` command may remove\
+      \ some packages.\r\n\r\nOnce the update process is complete, verify if a reboot is required to load\
+      \ changes: \r\n```\r\n# if [ -f /var/run/reboot-required ]; then\r\n     cat /var/run/reboot-required\r\
+      \n  fi\r\n```"
+    additional_information: "Site policy may mandate a testing period before installation onto production\
+      \ systems for available updates.\r\n\r\n- upgrade - is used to install the newest versions of all\
+      \ packages currently installed on the system from the sources enumerated     in /etc/apt/sources.list.\
+      \ Packages currently installed with new versions available are retrieved and upgraded; under no\
+      \  circumstances are currently installed packages removed, or packages not already installed retrieved\
+      \ and installed. New versions of currently installed packages that cannot be upgraded without changing\
+      \ the install status of another package will be left at     their current version. An update must\
+      \ be performed first so that apt knows that new versions of packages are available.\r\n- dist-upgrade\
+      \ - in addition to performing the function of upgrade, also intelligently handles changing dependencies\
+      \ with new versions of packages; apt has a \"smart\" conflict resolution system, and it will attempt\
+      \ to upgrade the most important packages at the expense of less important ones if necessary. So,\
+      \ dist-upgrade command may remove some packages. The /etc/apt/sources.list file contains a list\
+      \ of locations from which to retrieve desired package files. See also apt_preferences(5) for a mechanism\
+      \ for overriding the general settings for individual packages."
+    default_value: ''
+    artifacts_count: 0
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

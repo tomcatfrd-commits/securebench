@@ -1,0 +1,61 @@
+control:
+  id: CIS-5.4.2.1
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure root is the only UID 0 account
+  description: Any account with UID 0 has superuser privileges on the system.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_4_2_1.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_4_2_1.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_4_2_1.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_4_2_1.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.4.2.1
+      url: https://workbench.cisecurity.org/sections/4177297/recommendations/7047792
+    assessment_status: automated
+    profiles:
+    - Level 1 - Server
+    - Level 1 - Workstation
+    mappings:
+      nist:
+      - CM-1
+      - CM-2
+      - CM-6
+      - CM-7
+      - IA-5
+      cis_v8:
+      - '3.3'
+      cis_v7:
+      - '14.6'
+      mitre_techniques:
+      - T1548
+      - T1548.000
+      mitre_tactics:
+      - TA0001
+      mitre_mitigations:
+      - M1026
+    parent: CIS _5_Configure root and system accounts and environment Main | 1.1.2.1-Ensure root is the
+      only UID 0 account
+    rationale: This access must be limited to only the default `root` account and only from the system
+      console. Administrative access must be through an unprivileged account using an approved mechanism
+      as noted in the Recommendation "Ensure access to the su command is restricted".
+    impact: ''
+    audit_guidance: "Run the following command and verify that only \"root\" is returned:\r\n\r\n\r\n\
+      ```\r\n# awk -F: '($3 == 0) { print $1 }' /etc/passwd\r\n\r\nroot\r\n```"
+    remediation_guidance: "Run the following command to change the `root` account UID to `0`:\r\n\r\n\
+      ```\r\n# usermod -u 0 root\r\n```\r\n\r\nModify any users other than `root` with UID `0` and assign\
+      \ them a new UID."
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 1
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

@@ -1,0 +1,59 @@
+control:
+  id: CIS-5.2.4
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure users must provide password for escalation
+  description: The operating system must be configured so that users must provide a password for privilege
+    escalation.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.5_2_4.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.5_2_4.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.5_2_4.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.5_2_4.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 5.2.4
+      url: https://workbench.cisecurity.org/sections/4177269/recommendations/7047655
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist:
+      - AC-6
+      cis_v8:
+      - '5.4'
+      cis_v7:
+      - '4.3'
+      mitre_techniques:
+      - T1548
+      mitre_tactics:
+      - TA0004
+      mitre_mitigations:
+      - M1026
+    parent: CIS _5_Configure privilege escalation Main | 2.1.4-Ensure users must provide password for
+      escalation
+    rationale: "Without (re-)authentication, users may access resources or perform tasks for which they\
+      \ do not have authorization. \r\n\r\nWhen operating systems provide the capability to escalate a\
+      \ functional capability, it is critical the user (re-)authenticate."
+    impact: This will prevent automated processes from being able to elevate privileges.
+    audit_guidance: "**Note:** If passwords are not being used for authentication, this is not applicable.\r\
+      \n\r\nVerify the operating system requires users to supply a password for privilege escalation.\r\
+      \n\r\nCheck the configuration of the `/etc/sudoers` and `/etc/sudoers.d/*` files with the following\
+      \ command:\r\n\r\n```\r\n# grep -r \"^[^#].*NOPASSWD\" /etc/sudoers*\r\n```\r\n\r\nIf any line is\
+      \ found refer to the remediation procedure below."
+    remediation_guidance: "Based on the outcome of the audit procedure, use `visudo -f ` to edit the relevant\
+      \ sudoers file.\r\n\r\nRemove any line with occurrences of `NOPASSWD` tags in the file."
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 2
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []

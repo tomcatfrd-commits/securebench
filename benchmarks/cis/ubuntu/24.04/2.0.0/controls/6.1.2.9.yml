@@ -1,0 +1,55 @@
+control:
+  id: CIS-6.1.2.9
+  benchmark_id: cis-ubuntu-24.04
+  title: Ensure rsyslog forwarding uses gtls
+  description: Network stream drivers are a layer between various parts of `rsyslogd` (e.g. the imtcp
+    module) and the transport layer. They provide sequenced delivery, authentication and confidentiality
+    to the upper layers. Drivers implement different capabilities.
+  platform: ubuntu-24.04
+  severity: unspecified
+  audit: cis.ubuntu.24.04.v2_0_0.6_1_2_9.audit
+  remediation: cis.ubuntu.24.04.v2_0_0.6_1_2_9.remediate
+  rollback: cis.ubuntu.24.04.v2_0_0.6_1_2_9.rollback
+  verification: cis.ubuntu.24.04.v2_0_0.6_1_2_9.verify
+  rollback_capability: unsupported
+  metadata:
+    source:
+      benchmark_id: '26891'
+      benchmark_version: v2.0.0
+      reference: 6.1.2.9
+      url: https://workbench.cisecurity.org/sections/4177249/recommendations/7047571
+    assessment_status: automated
+    profiles:
+    - Level 2 - Server
+    - Level 2 - Workstation
+    mappings:
+      nist: []
+      cis_v8:
+      - '3.1'
+      cis_v7:
+      - '14.4'
+      mitre_techniques: []
+      mitre_tactics: []
+      mitre_mitigations: []
+    parent: CIS _6_System Logging Main | 2.2.2.9-Ensure rsyslog forwarding uses gtls
+    rationale: '`StreamDriver` must be set to `gtls` to enable TLS for encrypting syslog traffic.'
+    impact: Users need to know about netstream drivers because they need to configure the proper driver,
+      and proper driver properties, to achieve desired results.
+    audit_guidance: "Run the following command and verify \r\n```\r\n#  grep -Psi -- '^\\h*StreamDriver=\\\
+      \"gtls\\\"' /etc/rsyslog.conf /etc/rsyslog.d/*.conf\r\n```\r\n_Example Output_\r\n```\r\n/etc/rsyslog.d/40-forward.conf:\
+      \ StreamDriver=\"gtls\" StreamDriverMode=\"1\" StreamDriverAuthMode=\"anon\")\r\n```"
+    remediation_guidance: "Edit `rsyslog.conf` or a `.conf` file in `/etc/rsyslog.d/` to use `gtls`:\r\
+      \n\r\n_Example /etc/rsyslog.d/40-forward.conf_\r\n```\r\n# certificate files - just CA for a client\r\
+      \nglobal(DefaultNetstreamDriverCAFile=\"/path/to/contrib/gnutls/ca.pem\")\r\n\r\n# set up the action\
+      \ for all messages\r\naction(type=\"omfwd\" protocol=\"tcp\" target=\"s.example.net\" port=\"6514\"\
+      \r\n       StreamDriver=\"gtls\" StreamDriverMode=\"1\" StreamDriverAuthMode=\"anon\")\r\n```"
+    additional_information: ''
+    default_value: ''
+    artifacts_count: 5
+    requirements: {}
+    safety:
+      default: investigate
+      implementation_status: guidance_only
+      reason: Imported CIS guidance has not yet been promoted to a reviewed SecureBench implementation.
+  dependencies: []
+  conflicts: []
